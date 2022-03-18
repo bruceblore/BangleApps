@@ -15,8 +15,8 @@
             "url": "app.js"
         },
         {
-            "name": "timer.img",
-            "url": "app-icon.js",
+            "name": "shortcut.img",
+            "url": "icon.js",
             "evaluate": "true"
         }
     ]
