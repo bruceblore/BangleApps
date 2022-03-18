@@ -10,6 +10,39 @@ Bangle.js App Loader (and Apps)
 submitting code to this repository you confirm that you are happy with it being MIT licensed,
 and that it is not licensed in another way that would make this impossible.
 
+## My modifications
+
+* Created my own custom version of Anton Clock called Bruce Clock
+  * Display Gadgetbridge weather and step count
+  * When tapped, load an app with some shortcuts.
+
+### To do
+
+* Anton Clock
+  * (Low priority) Monospace
+* Stopwatch
+  * Run in background
+  * (Low priority) Lap times with logging support
+* Pomodoro timer
+  * Run in background
+  * Easier to use UI
+* Timer (Most likely writing from scratch)
+  * Keypad to enter time
+  * Run in background
+* Calculator
+  * Fix touch areas
+  * Shrink display area
+  * Power
+  * RPN
+  * Condense operation pages
+  * Button for operation pages
+* (General) Fix button touch areas
+* (Low priority) Snake
+  * Use tapping instead of swiping
+  * Smaller field, bigger tiles
+* (Low priority) Make button consistently go back to clock everywhere
+* (Low priority) Make desktop launcher use up/down swipes
+
 ## How does it work?
 
 * A list of apps is in `apps.json` (this is auto-generated from all the `apps/yourapp/metadata.json` using Jekyll or `bin/create_apps_json.sh`)
@@ -174,7 +207,7 @@ The widget example is available in [`apps/_example_widget`](apps/_example_widget
 
 Widgets are just small bits of code that run whenever an app that supports them
 calls `Bangle.loadWidgets()`. If they want to display something in the 24px high
-widget bar at the top of the screen they can add themselves to the global 
+widget bar at the top of the screen they can add themselves to the global
 `WIDGETS` array with:
 
 ```
@@ -215,9 +248,9 @@ and which gives information about the app for the Launcher.
   "icon":"*myappid", // for Bangle.js menu
   "src":"-myappid", // source file
   "type":"widget/clock/app/bootloader", // optional, default "app"
-     // if this is 'widget' then it's not displayed in the menu  
+     // if this is 'widget' then it's not displayed in the menu
      // if it's 'clock' then it'll be loaded by default at boot time
-     // if this is 'bootloader' then it's code that is run at boot time, but is not in a menu  
+     // if this is 'bootloader' then it's code that is run at boot time, but is not in a menu
   "version":"1.23",
      // added by BangleApps loader on upload based on metadata.json
   "files:"file1,file2,file3",
@@ -241,7 +274,7 @@ and which gives information about the app for the Launcher.
   "description": "...",       // long description (can contain markdown)
   "icon": "icon.png",         // icon in apps/
   "screenshots" : [ { url:"screenshot.png" } ], // optional screenshot for app
-  "type":"...",               // optional(if app) -  
+  "type":"...",               // optional(if app) -
                               //   'app' - an application
                               //   'clock' - a clock - required for clocks to automatically start
                               //   'widget' - a widget
@@ -265,7 +298,7 @@ and which gives information about the app for the Launcher.
   "customConnect": true,      // if supplied, ensure we are connected to a device
                               // before the "custom.html" iframe is loaded. An
                               // onInit function in "custom.html" is then called
-                              // with info on the currently connected device.                 
+                              // with info on the currently connected device.
 
   "interface": "interface.html",   // if supplied, apps/interface.html is loaded in an
                               // iframe, and it may interact with the connected Bangle
@@ -293,9 +326,9 @@ and which gives information about the app for the Launcher.
     {"name":"appid.data.json",  // filename used in storage
      "storageFile":true       // if supplied, file is treated as storageFile
      "url":"",                // if supplied URL of file to load (currently relative to apps/)
-     "content":"...",         // if supplied, this content is loaded directly     
+     "content":"...",         // if supplied, this content is loaded directly
      "evaluate":true,         // if supplied, data isn't quoted into a String before upload
-                              // (eg it's evaluated as JS)     
+                              // (eg it's evaluated as JS)
     },
     {"wildcard":"appid.data.*" // wildcard of filenames used in storage
     },                         // this is mutually exclusive with using "name"
@@ -389,9 +422,9 @@ See [apps/gpsrec/interface.html](the GPS Recorder) for a full example.
 
 ### Adding configuration to the "Settings" menu
 
-Apps (or widgets) can add their own settings to the "Settings" menu under "App/widget settings".   
+Apps (or widgets) can add their own settings to the "Settings" menu under "App/widget settings".
 To do so, the app needs to include a `settings.js` file, containing a single function
-that handles configuring the app.   
+that handles configuring the app.
 When the app settings are opened, this function is called with one
 argument, `back`: a callback to return to the settings menu.
 
@@ -403,7 +436,7 @@ Example `settings.js`
 // make sure to enclose the function in parentheses
 (function(back) {
   let settings = require('Storage').readJSON('myappid.json',1)||{};
-  if (typeof settings.monkeys !== "number") settings.monkeys = 12; // default value 
+  if (typeof settings.monkeys !== "number") settings.monkeys = 12; // default value
   function save(key, value) {
     settings[key] = value;
     require('Storage').write('myappid.json', settings);
@@ -414,12 +447,12 @@ Example `settings.js`
     'Monkeys': {
       value: settings.monkeys,
       onchange: (m) => {save('monkeys', m)}
-    }   
+    }
   };
   E.showMenu(appMenu)
 })
 ```
-In this example the app needs to add `myappid.settings.js` to `storage` in `metadata.json`.   
+In this example the app needs to add `myappid.settings.js` to `storage` in `metadata.json`.
 It should also add `myappid.json` to `data`, to make sure it is cleaned up when the app is uninstalled.
 ```json
   { "id": "myappid",
