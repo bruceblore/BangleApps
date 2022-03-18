@@ -1,0 +1,24 @@
+{
+    "id": "scicalc",
+    "name": "Scientific calculator",
+    "shortName": "Calculator",
+    "icon": "icon.png",
+    "version": "0.01",
+    "description": "RPN scientific calculator with memory function.",
+    "tags": "",
+    "supports": [
+        "BANGLEJS2"
+    ],
+    "readme": "README.md",
+    "storage": [
+        {
+            "name": "scicalc.app.js",
+            "url": "app.js"
+        },
+        {
+            "name": "scicalc.img",
+            "url": "icon.js",
+            "evaluate": "true"
+        }
+    ]
+}

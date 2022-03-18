@@ -226,14 +226,13 @@ function updateBottomRow() {
   g.setColor(0, 0, 0);
   g.setFont("Vector", 10);
   weather = Weather.get();
-  steps = Bangle.getHealthStatus("day").steps;
   if (weather) {
     //Copy-pasted from weather app because I'm too lazy to figure this out myself
     temp = Locale.temp(weather.temp - 273.15).match(/^(\D*\d*)/)[0];
     description = weather.txt.charAt(0).toUpperCase() + (weather.txt || '').slice(1);
     g.drawString(`${Bangle.getHealthStatus("day").steps} steps, ${temp}', ${description}`, 0, 164);
   } else {
-    g.drawString(steps, 0, 164);
+    g.drawString(`${Bangle.getHealthStatus("day").steps} steps, weather unknown`, 0, 164);
   }
 }
 Weather.on("update", updateBottomRow);

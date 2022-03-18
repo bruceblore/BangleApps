@@ -12,9 +12,10 @@ and that it is not licensed in another way that would make this impossible.
 
 ## My modifications
 
-* Created my own custom version of Anton Clock called Bruce Clock
+* Created my own custom version of Anton Clock called Bruce Clock (bruceclk)
   * Display Gadgetbridge weather and step count
   * When tapped, load an app with some shortcuts.
+* Scientific RPN calculator (scicalc)
 
 ### To do
 
@@ -29,13 +30,8 @@ and that it is not licensed in another way that would make this impossible.
 * Timer (Most likely writing from scratch)
   * Keypad to enter time
   * Run in background
-* Calculator
-  * Fix touch areas
-  * Shrink display area
-  * Power
-  * RPN
-  * Condense operation pages
-  * Button for operation pages
+* scicalc
+  * (Low priority) Improve touch precision
 * (General) Fix button touch areas
 * (Low priority) Snake
   * Use tapping instead of swiping

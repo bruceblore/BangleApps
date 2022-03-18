@@ -1,10 +1,10 @@
 {
     "id": "shortcut",
-    "name": "4 shortcuts (for use with Bruce Clock",
+    "name": "4 shortcuts (for use with Bruce Clock)",
     "shortName": "shortcut",
     "icon": "icon.png",
     "version": "0.01",
-    "description": "4 shortcuts to stopwatch, timer, calculator, and main launcher. Intended to be opened by Bruce Clock rather than being used as your primary launcher.",
+    "description": "4 shortcuts to stopwatch, timer, scientific calculator, and main launcher. Intended to be opened by Bruce Clock rather than being used as your primary launcher.",
     "tags": "",
     "supports": [
         "BANGLEJS2"

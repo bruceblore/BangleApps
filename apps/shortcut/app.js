@@ -1,6 +1,6 @@
 //The apps to launch. Include only the ID. Executable and icon file names will be determined from that.
 //4 apps in the order of top left, top right, bottom left, bottom right
-const APPS = ["stopwatch", "qalarm", "calculator", "dtlaunch"];
+const APPS = ["stopwatch", "qalarm", "scicalc", "dtlaunch"];
 
 const Storage = require("Storage");
 
