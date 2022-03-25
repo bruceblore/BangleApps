@@ -1,10 +1,7 @@
-Bangle.js App Loader (and Apps)
-================================
+Bangle.js App Loader (and Apps) (Featuring Bruce's customizations)
+==================================================================
 
-[![Build Status](https://app.travis-ci.com/espruino/BangleApps.svg?branch=master)](https://app.travis-ci.com/github/espruino/BangleApps)
-
-* Try the **release version** at [banglejs.com/apps](https://banglejs.com/apps)
-* Try the **development version** at [espruino.github.io](https://espruino.github.io/BangleApps/)
+My modifications to the Bangle.js code. Apps that I don't use are not removed.
 
 **All software (including apps) in this repository is MIT Licensed - see [LICENSE](LICENSE)** By
 submitting code to this repository you confirm that you are happy with it being MIT licensed,
@@ -12,24 +9,28 @@ and that it is not licensed in another way that would make this impossible.
 
 ## My modifications
 
+* Changed the default apps to be the list of apps that I have installed. (Mainly for my own convenience.)
 * Created my own custom version of Anton Clock called Bruce Clock (bruceclk)
   * Display Gadgetbridge weather and step count
   * When tapped, load an app with some shortcuts.
-* Scientific RPN calculator (scicalc)
+  * When swiped, open notifications or change between steps and weather
+* Created a scientific RPN calculator (scicalc)
 
 ### To do
 
-* Anton Clock
-  * (Low priority) Monospace
-* Stopwatch
-  * Run in background
-  * (Low priority) Lap times with logging support
 * Pomodoro timer
   * Run in background
   * Easier to use UI
 * Timer (Most likely writing from scratch)
   * Keypad to enter time
   * Run in background
+* Quiet mode
+  * Option for display full off after timeout
+* Stopwatch
+  * Run in background
+  * (Low priority) Lap times with logging support
+* bruceclk
+  * (Low priority) Monospace
 * scicalc
   * (Low priority) Improve touch precision
 * (General) Fix button touch areas
@@ -38,6 +39,9 @@ and that it is not licensed in another way that would make this impossible.
   * Smaller field, bigger tiles
 * (Low priority) Make button consistently go back to clock everywhere
 * (Low priority) Make desktop launcher use up/down swipes
+* (Low priority) Fix music controls
+
+## The rest of the README is unmodified
 
 ## How does it work?
 

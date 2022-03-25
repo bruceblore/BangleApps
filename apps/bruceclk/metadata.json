@@ -1,7 +1,7 @@
 {
   "id": "bruceclk",
   "name": "Bruce Clock",
-  "version": "0.01",
+  "version": "0.02",
   "description": "Anton Clock with Bruce's enhancements",
   "readme": "README.md",
   "icon": "app.png",
@@ -24,6 +24,10 @@
     {
       "name": "bruceclk.settings.js",
       "url": "settings.js"
+    },
+    {
+      "name": "bruceclk-shrtct.app.js",
+      "url": "shortcut.js"
     },
     {
       "name": "bruceclk.img",

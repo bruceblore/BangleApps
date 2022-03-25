@@ -1,7 +1,8 @@
 // Clock with large digits using the "Anton" bold font
 
 const SETTINGSFILE = "antonclk.json";
-const SHORTCUT_LAUNCHER = "shortcut.app.js";
+const SHORTCUT_LAUNCHER = "bruceclk-shrtct.app.js";
+const NOTIFICATION_APP = "messages.app.js"
 const Storage = require("Storage");
 
 Graphics.prototype.setFontAnton = function (scale) {
@@ -217,23 +218,41 @@ g.clear();
 // Set dynamic state and perform initial drawing
 updateState();
 
-//TODO display gadgetbridge weather and step count
+//Display gadgetbridge weather and step count
 const Weather = require("weather");
 const Locale = require("locale");
+let displayingWeather = false;
+
+function getFontSize(length) {
+  let size = Math.floor(176 / length);  //Characters of width needed per pixel
+  size *= (20 / 12);  //Convert to height
+  // Clamp to between 6 and 24
+  if (size < 6) return 6;
+  else if (size > 20) return 24;
+  else return Math.floor(size);
+}
+
 function updateBottomRow() {
-  g.setFontAlign(-1, -1);
-  g.clearRect(0, 164, 175, 175);
+  g.setFontAlign(0, -1);
+  g.clearRect(0, 152, 175, 175);
   g.setColor(0, 0, 0);
-  g.setFont("Vector", 10);
-  weather = Weather.get();
-  if (weather) {
-    //Copy-pasted from weather app because I'm too lazy to figure this out myself
-    temp = Locale.temp(weather.temp - 273.15).match(/^(\D*\d*)/)[0];
-    description = weather.txt.charAt(0).toUpperCase() + (weather.txt || '').slice(1);
-    g.drawString(`${Bangle.getHealthStatus("day").steps} steps, ${temp}', ${description}`, 0, 164);
+  var string;
+
+  if (displayingWeather) {
+    weather = Weather.get();
+    if (weather) {
+      //Copy-pasted from weather app because I'm too lazy to figure this out myself
+      temp = Locale.temp(weather.temp - 273.15).match(/^(\D*\d*)/)[0];
+      description = weather.txt.charAt(0).toUpperCase() + (weather.txt || '').slice(1);
+      string = `${temp}', ${description}`;
+    } else {
+      string = 'Weather unknown!';
+    }
   } else {
-    g.drawString(`${Bangle.getHealthStatus("day").steps} steps, weather unknown`, 0, 164);
+    string = `${Bangle.getHealthStatus("day").steps} steps`;
   }
+  g.setFont("Vector", getFontSize(string.length));
+  g.drawString(string, 88, 152);
 }
 Weather.on("update", updateBottomRow);
 Bangle.on("step", updateBottomRow);
@@ -254,12 +273,17 @@ Bangle.drawWidgets();
 
 //Set up touch to launch mini launcher
 Bangle.on('touch', function (button, xy) {
-  if (Storage.read(SHORTCUT_LAUNCHER) !== undefined) {
-    load(SHORTCUT_LAUNCHER);
+  load(SHORTCUT_LAUNCHER);
+});
+
+//Set up swipe handler: Swipe up/down to open messages app if installed. If not installed or swipe left/right, change what's displayed in the bottom row
+Bangle.on('swipe', function (direction) {
+  if (direction == 0 && Storage.read(NOTIFICATION_APP) !== undefined) {
+    load(NOTIFICATION_APP);
   } else {
-    Bangle.buzz();
-    E.showMessage("shortcut app not installed!");
+    displayingWeather = !displayingWeather;
+    updateBottomRow();
   }
-})
+});
 
 // end of file

@@ -14,6 +14,14 @@ The basic time representation only shows hours and minutes of the current time. 
     * long local format: DEC 19 2021
 * Weekday can be shown (on seconds screen only instead of year)
 
+In this version, additional features have been added:
+
+* Tap the screen to load shortcuts to stopwatch, qalarm, scicalc, and dtlaunch.
+
+* Swipe up or down to open the messages app, if installed. (If not installed, same as a left/right swipe)
+
+* Swipe left and right to alternate between step count and weather display.
+
 ## Usage
 
 Install Anton clock through the Bangle.js app loader.
