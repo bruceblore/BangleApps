@@ -1,6 +1,6 @@
 {
   "id": "pomoplus",
-  "name": "Pomodoro",
+  "name": "Pomodoro Plus",
   "version": "0.01",
   "description": "A configurable pomodoro timer that runs in the background.",
   "icon": "pomodoro.png",
@@ -26,7 +26,7 @@
       "url": "boot.js"
     },
     {
-      "name": "pomplus-com.js",
+      "name": "pomoplus-com.js",
       "url": "common.js"
     }
   ]
