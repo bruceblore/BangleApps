@@ -57,6 +57,7 @@ function drawTimerAndMessage() {
     })(), g.getWidth() / 2, g.getHeight() / 2)
 
     //Draw the phase label
+    .setFont("Vector", 12);
     .drawString(((currentPhase, numShortBreaks) => {
       if (!common.state.wasRunning) return "Not started";
       else if (currentPhase == common.PHASE_LONG_BREAK) return "Long break!";

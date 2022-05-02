@@ -15,8 +15,8 @@ exports.BUTTON_ICONS = {
     skip: heatshrink.decompress(atob("jEYwMAwEIgHAhkA8EOgHwh8A/EPwH8h/A/0P8H/h/w/+P/H/5/8//v/3/AAoICBwQUCDQIgCEwQsCGQQ4CHwRECA"))
 };
 
-exports.settings = storage.readJSON(SETTINGS_PATH);
-if (exports.settings === undefined) {
+exports.settings = storage.readJSON(exports.SETTINGS_PATH);
+if (!exports.settings) {
     exports.settings = {
         workTime: 1500000,                  //Work for 25 minutes
         shortBreak: 300000,                 //5 minute short break
@@ -36,9 +36,9 @@ exports.STATE_DEFAULT = {
     pausedTime: 0,          //When the timer was last paused. Used for expiration and displaying timer while paused.
     elapsedTime: 0          //How much time the timer had spent running before the current start time. Update on pause or user skipping stages.
 };
-exports.state = storage.readJSON(STATE_PATH);
-if (exports.state === undefined) {
-    exports.state = STATE_DEFAULT;
+exports.state = storage.readJSON(exports.STATE_PATH);
+if (!exports.state) {
+    exports.state = exports.STATE_DEFAULT;
 }
 
 //Given a timer state, generate a snapshot, which contains all of the information one would normally expect in the state.
@@ -46,11 +46,11 @@ exports.getSnapshot = function (state) {
     //Calculate how long the timer has been running overall
     let totalRunningTime;
     if (state.running) totalRunningTime = (new Date()).getTime() - state.startTime + state.elapsedTime;
-    else totalRunningTime = pausedTime - state.startTime + state.elapsedTime;
+    else totalRunningTime = state.pausedTime - state.startTime + state.elapsedTime;
 
     //Calculate how long the timer has been running in the current cycle
     let settings = exports.settings;
-    let timeBeforeLongBreak = (settings.workTime + shortBreakTime) * settings.numShortBreaks;
+    let timeBeforeLongBreak = (settings.workTime + settings.shortBreakTime) * settings.numShortBreaks;
     let fullCycleTime = timeBeforeLongBreak + settings.longBreak;
     let timeInCycle = totalRunningTime % fullCycleTime;
     let nextChangeTime;
@@ -68,7 +68,7 @@ exports.getSnapshot = function (state) {
         else nextChangeTime = (settings.shortBreak - (timeInSubCycle - settings.workTime)) + (new Date()).getTime();
 
     } else {
-        nextChangeTime = (settimgs.longBreak - (timeInCycle - timeBeforeLongBreak)) + (new Date()).getTime();
+        nextChangeTime = (settings.longBreak - (timeInCycle - timeBeforeLongBreak)) + (new Date()).getTime();
         currentPhase = exports.PHASE_LONG_BREAK;
         numShortBreaks = settings.numShortBreaks;
     }
