@@ -21,7 +21,7 @@ and that it is not licensed in another way that would make this impossible.
 * Pomodoro timer
   * Run in background
   * Easier to use UI
-* Timer (Most likely writing from scratch)
+* Timer (Most likely writing from scratch or using touchtimer)
   * Keypad to enter time
   * Run in background
 * Quiet mode
@@ -40,6 +40,10 @@ and that it is not licensed in another way that would make this impossible.
 * (Low priority) Make button consistently go back to clock everywhere
 * (Low priority) Make desktop launcher use up/down swipes
 * (Low priority) Fix music controls
+* 2047pp: Save state
+* choozi: Better UI
+  * Buttons to select number should make sense
+  * Should be able to spin without physical button
 
 ## The rest of the README is unmodified
 
