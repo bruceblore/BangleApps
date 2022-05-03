@@ -14,7 +14,7 @@ and that it is not licensed in another way that would make this impossible.
   * Display Gadgetbridge weather and step count
   * When tapped, load an app with some shortcuts.
   * When swiped, open notifications or change between steps and weather
-* Created a scientific RPN calculator (scicalc)
+* Created a scientific RPN calculator (rpnsci)
 
 ### To do
 
@@ -31,7 +31,7 @@ and that it is not licensed in another way that would make this impossible.
   * (Low priority) Lap times with logging support
 * bruceclk
   * (Low priority) Monospace
-* scicalc
+* rpnsci
   * (Low priority) Improve touch precision
 * (General) Fix button touch areas
 * (Low priority) Snake
@@ -104,6 +104,18 @@ try and keep filenames short to avoid overflowing the buffer.
   ],
 },
 ```
+
+### Screenshots
+
+In the app `metadata.json` file you can add a list of screenshots with a line like: `"screenshots" : [ { "url":"screenshot.png" } ],`
+
+To get a screenshot you can:
+
+* Type `g.dump()` in the left-hand side of the Web IDE when connected to a Bangle.js 2 - you can then
+right-click and save the image shown in the terminal (this only works on Bangle.js 2 - Bangle.js 1 is
+unable to read data back from the LCD controller).
+* Run your code in the emulator and use the screenshot button in the bottom right of the window.
+
 
 ## Testing
 
@@ -251,6 +263,7 @@ and which gives information about the app for the Launcher.
      // if this is 'widget' then it's not displayed in the menu
      // if it's 'clock' then it'll be loaded by default at boot time
      // if this is 'bootloader' then it's code that is run at boot time, but is not in a menu
+     // see 'type' in 'metadata.json format' below for more options/info
   "version":"1.23",
      // added by BangleApps loader on upload based on metadata.json
   "files:"file1,file2,file3",
@@ -278,12 +291,18 @@ and which gives information about the app for the Launcher.
                               //   'app' - an application
                               //   'clock' - a clock - required for clocks to automatically start
                               //   'widget' - a widget
-                              //   'launch' - replacement launcher app
-                              //   'bootloader' - code that runs at startup only
+                              //   'bootloader' - an app that at startup (app.boot.js) but doesn't have a launcher entry for 'app.js'
                               //   'RAM' - code that runs and doesn't upload anything to storage
+                              //   'launch' - replacement 'Launcher'
+                              //   'textinput' - provides a 'textinput' library that allows text to be input on the Bangle
+                              //   'scheduler' - provides 'sched' library and boot code for scheduling alarms/timers
+                              //                 (currently only 'sched' app)
+                              //   'notify' - provides 'notify' library for showing notifications
+                              //   'locale' - provides 'locale' library for language-specific date/distance/etc
+                              //              (a version of 'locale' is included in the firmware)
   "tags": "",                 // comma separated tag list for searching
   "supports": ["BANGLEJS2"],  // List of device IDs supported, either BANGLEJS or BANGLEJS2
-  "dependencies" : { "notify":"type" } // optional, app 'types' we depend on
+  "dependencies" : { "notify":"type" } // optional, app 'types' we depend on (see "type" above)
   "dependencies" : { "messages":"app" } // optional, depend on a specific app ID
                               // for instance this will use notify/notifyfs is they exist, or will pull in 'notify'
   "readme": "README.md",      // if supplied, a link to a markdown-style text file
