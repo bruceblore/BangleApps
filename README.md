@@ -44,6 +44,8 @@ and that it is not licensed in another way that would make this impossible.
 * choozi: Better UI
   * Buttons to select number should make sense
   * Should be able to spin without physical button
+* Bluetooth widget: Vibrate on disconnect
+* Torch: Max brightness on open
 
 ## The rest of the README is unmodified
 
