@@ -1,4 +1,4 @@
-const MEMORY_FILE = "scicalc.mem.json";
+const MEMORY_FILE = "rpnsci.mem.json";
 const Storage = require("Storage");
 
 class NumberButton {

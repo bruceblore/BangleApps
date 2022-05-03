@@ -1,9 +1,9 @@
 {
-    "id": "scicalc",
-    "name": "Scientific calculator",
+    "id": "rpnsci",
+    "name": "RPN Scientific Calculator",
     "shortName": "Calculator",
     "icon": "icon.png",
-    "version": "0.01",
+    "version": "0.02",
     "description": "RPN scientific calculator with memory function.",
     "tags": "",
     "supports": [
@@ -12,11 +12,11 @@
     "readme": "README.md",
     "storage": [
         {
-            "name": "scicalc.app.js",
+            "name": "rpnsci.app.js",
             "url": "app.js"
         },
         {
-            "name": "scicalc.img",
+            "name": "rpnsci.img",
             "url": "icon.js",
             "evaluate": "true"
         }
