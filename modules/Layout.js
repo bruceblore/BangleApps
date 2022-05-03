@@ -59,6 +59,7 @@ options is an object containing:
   * `label` - the text on the button
   * `cb` - a callback function
   * `cbl` - a callback function for long presses
+* `back` - a callback function, passed as `back` into Bangle.setUI
 
 If automatic lazy rendering is enabled, calls to `layout.render()` will attempt to automatically
 determine what objects have changed or moved, clear their previous locations, and re-render just those objects.
@@ -89,7 +90,7 @@ function Layout(layout, options) {
   options = options || {};
   this.lazy = options.lazy || false;
 
-  var btnList;
+  var btnList, uiSet;
   Bangle.setUI(); // remove all existing input handlers
   if (process.env.HWVERSION!=2) {
     // no touchscreen, find any buttons in 'layout'
@@ -104,7 +105,7 @@ function Layout(layout, options) {
       this.physBtns = 0;
       this.buttons = btnList;
       this.selectedButton = -1;
-      Bangle.setUI("updown", dir=>{
+      Bangle.setUI({mode:"updown", back:options.back}, dir=>{
         var s = this.selectedButton, l=this.buttons.length;
         if (dir===undefined && this.buttons[s])
           return this.buttons[s].cb();
@@ -119,8 +120,10 @@ function Layout(layout, options) {
         }
         this.selectedButton = s;
       });
+      uiSet = true;
     }
   }
+  if (options.back && !uiSet) Bangle.setUI({mode: "custom", back: options.back});
 
   if (options.btns) {
     var buttons = options.btns;
@@ -135,15 +138,15 @@ function Layout(layout, options) {
       }
       // enough physical buttons
       let btnHeight = Math.floor(Bangle.appRect.h / this.physBtns);
-      if (Bangle.btnWatch) Bangle.btnWatch.forEach(clearWatch);
-      Bangle.btnWatch = [];
+      if (Bangle.btnWatches) Bangle.btnWatches.forEach(clearWatch);
+      Bangle.btnWatches = [];
       if (this.physBtns > 2 && buttons.length==1)
         buttons.unshift({label:""}); // pad so if we have a button in the middle
       while (this.physBtns > buttons.length)
         buttons.push({label:""});
-      if (buttons[0]) Bangle.btnWatch.push(setWatch(pressHandler.bind(this,0), BTN1, {repeat:true,edge:-1}));
-      if (buttons[1]) Bangle.btnWatch.push(setWatch(pressHandler.bind(this,1), BTN2, {repeat:true,edge:-1}));
-      if (buttons[2]) Bangle.btnWatch.push(setWatch(pressHandler.bind(this,2), BTN3, {repeat:true,edge:-1}));
+      if (buttons[0]) Bangle.btnWatches.push(setWatch(pressHandler.bind(this,0), BTN1, {repeat:true,edge:-1}));
+      if (buttons[1]) Bangle.btnWatches.push(setWatch(pressHandler.bind(this,1), BTN2, {repeat:true,edge:-1}));
+      if (buttons[2]) Bangle.btnWatches.push(setWatch(pressHandler.bind(this,2), BTN3, {repeat:true,edge:-1}));
       this._l.width = g.getWidth()-8; // text width
       this._l = {type:"h", filly:1, c: [
         this._l,
@@ -187,9 +190,9 @@ function Layout(layout, options) {
 }
 
 Layout.prototype.remove = function (l) {
-  if (Bangle.btnWatch) {
-    Bangle.btnWatch.forEach(clearWatch);
-    delete Bangle.btnWatch;
+  if (Bangle.btnWatches) {
+    Bangle.btnWatches.forEach(clearWatch);
+    delete Bangle.btnWatches;
   }
   if (Bangle.touchHandler) {
     Bangle.removeListener("touch",Bangle.touchHandler);

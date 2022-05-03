@@ -22,10 +22,14 @@ function bangleDownload() {
     var promise = Promise.resolve();
     // Normal files
     normalFiles.forEach((filename,n) => {
+      if (filename==".firmware") {
+        console.log("Ignoring .firmware file");
+        return;
+      }
       promise = promise.then(() => {
         Progress.hide({sticky: true});
         var percent = n/fileCount;
-        Progress.show({title:`Download ${filename}`,sticky:true,min:percent,max:percent,percent:0});
+        Progress.show({title:`Download ${filename}`,sticky:true,min:percent,max:percent+(1/fileCount),percent:0});
         return Comms.readFile(filename).then(data => zip.file(filename,data));
       });
     });
@@ -36,7 +40,7 @@ function bangleDownload() {
         promise = promise.then(() => {
           Progress.hide({sticky: true});
           var percent = (normalFiles.length+n)/fileCount;
-          Progress.show({title:`Download ${filename}`,sticky:true,min:percent,max:percent,percent:0});
+          Progress.show({title:`Download ${filename}`,sticky:true,min:percent,max:percent+(1/fileCount),percent:0});
           return Comms.readStorageFile(filename).then(data => zipStorageFiles.file(filename,data));
         });
       });
@@ -75,7 +79,9 @@ function bangleUpload() {
         .then(() => file.async("string"))
         .then(data => {
           console.log("decoded", path);
-          if (path.startsWith(BACKUP_STORAGEFILE_DIR)) {
+          if (data.length==0) { // https://github.com/espruino/BangleApps/issues/1593
+            console.log("Can't restore files of length 0, ignoring "+path);
+          } else if (path.startsWith(BACKUP_STORAGEFILE_DIR)) {
             path = path.substr(BACKUP_STORAGEFILE_DIR.length+1);
             cmds += AppInfo.getStorageFileUploadCommands(path, data)+"\n";
           } else if (!path.includes("/")) {
