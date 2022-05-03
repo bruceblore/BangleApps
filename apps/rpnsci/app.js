@@ -76,9 +76,9 @@ class OperationButton {
             return;
         }
         let result = this.getResult();
-        z = t;
-        y = z;
         x = '' + result;
+        y = z;
+        z = t;
         entryTerminated = true;
         liftOnNumberPress = true;
         feedback(true);
