@@ -46,6 +46,7 @@ and that it is not licensed in another way that would make this impossible.
   * Should be able to spin without physical button
 * Bluetooth widget: Vibrate on disconnect
 * Torch: Max brightness on open
+* Power manager: Low battery alerts
 
 ## The rest of the README is unmodified
 

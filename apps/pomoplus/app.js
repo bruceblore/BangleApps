@@ -33,42 +33,34 @@ function drawButtons() {
 }
 
 function drawTimerAndMessage() {
-  let timeLeft;
-  if (!common.state.wasRunning) {
-    timeLeft = common.settings.workTime;
-  } else if (common.state.running) {
-    timeLeft = snapshot.nextChangeTime - (new Date()).getTime();
-  } else {
-    timeLeft = snapshot.nextChangeTime - common.state.pausedTime;
-  }
-
   g.setColor(0, 0, 0)
     .setFontAlign(0, 0)
     .setFont("Vector", 36)
 
     //Draw the timer
     .drawString((() => {
+      let timeLeft = common.getTimeLeft();
       let hours = timeLeft / 3600000;
       let minutes = (timeLeft % 3600000) / 60000;
       let seconds = (timeLeft % 60000) / 1000;
 
-      if (hours > 0) return `${parseInt(hours)}:${parseInt(minutes)}:${parseInt(seconds)}`;
-      else return `${parseInt(minutes)}:${parseInt(seconds)}`;
+      if (hours > 0) return `${parseInt(hours)}:${parseInt(minutes).padStart(2, '0')}:${parseInt(seconds).padStart(2, '0')
+        }`;
+      else return `${parseInt(minutes)}:${parseInt(seconds).padStart(2, '0')}`;
     })(), g.getWidth() / 2, g.getHeight() / 2)
 
     //Draw the phase label
-    .setFont("Vector", 12);
+    .setFont("Vector", 12)
     .drawString(((currentPhase, numShortBreaks) => {
       if (!common.state.wasRunning) return "Not started";
       else if (currentPhase == common.PHASE_LONG_BREAK) return "Long break!";
       else return `${currentPhase == common.PHASE_WORKING ? "Work" : "Short break"} ${numShortBreaks + 1}/${common.settings.numShortBreaks}`;
-    })(snapshot.currentPhase, snapshot.numShortBreaks),
+    })(common.state.currentPhase, common.state.numShortBreaks),
       g.getWidth() / 2, g.getHeight() / 2 + 18);
 
-  //Perform vibrations and update the snapshot if needed
+  //Update phase with vibation if needed
   if (timeLeft <= 0) {
-    common.vibrate(snapshot);
-    snapshot = common.getSnapshot(common.state);
+    common.nextPhase(true);
   }
 }
 
@@ -80,10 +72,18 @@ Bangle.on("touch", (button, xy) => {
 
   if (!common.state.wasRunning) {
     //If we were never running, there is only one button: the start button
-    common.state.wasRunning = true;
-    common.state.running = true;
-    snapshot = common.getSnapshot();
+    let now = (new Date).getTime();
+    common.state = {
+      wasRunning: true,
+      running: true,
+      startTime: now,
+      pausedTime: now,
+      elapsedTime: 0,
+      phase: common.PHASE_WORKING,
+      numShortBreaks: 0
+    };
     setupTimerInterval();
+
   } else if (common.state.running) {
     //If we are running, there are two buttons: pause and skip
     if (button == 1) {
@@ -94,19 +94,14 @@ Bangle.on("touch", (button, xy) => {
 
       //Stop the timer
       common.state.running = false;
-      snapshot = common.getSnapshot(common.state);
       clearInterval(timerInterval);
       timerInterval = undefined;
       drawTimerAndMessage();
+
     } else {
-      //Skip ahead by figuring out how much time until the next phase transition, then add that to the elpsed time
-      let now = (new Date()).getTime();
-      let timeLeft = snapshot.nextChangeTime - now;
-      common.state.elapsedTime += timeLeft;
-      snapshot = common.getSnapshot(common.state);
-      drawTimerAndMessage();
-      setupTimerInterval();
+      common.nextPhase(false);
     }
+
   } else {
     //If we are stopped, there are two buttons: Reset and continue
     if (button == 1) {
@@ -115,18 +110,19 @@ Bangle.on("touch", (button, xy) => {
       drawTimerAndMessage();
       clearInterval(timerInterval);
       timerInterval = undefined;
+
     } else {
       //Start the timer and record when we started
-      common.state.startTime = (new Date()).getTime();
+      let now = (new Date()).getTime();
+      common.state.startTime = now;
+      common.state.elapsedTime += now - common.state.pausedTime;
       common.state.running = true;
-      snapshot = common.getSnapshot(common.state);
       drawTimerAndMessage();
       setupTimerInterval();
     }
   }
 });
 
-let snapshot = common.getSnapshot(common.state);
 let timerInterval;
 
 function setupTimerInterval() {
@@ -136,9 +132,13 @@ function setupTimerInterval() {
   setTimeout(() => {
     timerInterval = setInterval(drawTimerAndMessage, 1000);
     drawTimerAndMessage();
-  }, 1000 - ((snapshot.nextChangeTimer - (new Date()).getTime()) % 1000));
+  }, common.timeLeft % 1000);
 }
+
 drawTimerAndMessage();
+if (common.state.running) {
+  setupTimerInterval();
+}
 
 //Save our state when the app is closed
 E.on('kill', () => {

@@ -30,60 +30,83 @@ if (!exports.settings) {
 //Store the minimal amount of information to be able to reconstruct the state of the timer at any given time.
 //This is necessary because it is necessary to write to flash to let the timer run in the background, so minimizing the writes is necessary.
 exports.STATE_DEFAULT = {
-    wasRunning: false,      //If the timer ever was running. Used to determine whether to display a reset button
-    running: false,         //Whether the timer is currently running
-    startTime: 0,           //When the timer was last started. Difference between this and now is how long timer has run continuously.
-    pausedTime: 0,          //When the timer was last paused. Used for expiration and displaying timer while paused.
-    elapsedTime: 0          //How much time the timer had spent running before the current start time. Update on pause or user skipping stages.
+    wasRunning: false,              //If the timer ever was running. Used to determine whether to display a reset button
+    running: false,                 //Whether the timer is currently running
+    startTime: 0,                   //When the timer was last started. Difference between this and now is how long timer has run continuously.
+    pausedTime: 0,                  //When the timer was last paused. Used for expiration and displaying timer while paused.
+    elapsedTime: 0,                 //How much time the timer had spent running before the current start time. Update on pause or user skipping stages.
+    phase: exports.PHASE_WORKING,   //What phase the timer is currently in
+    numShortBreaks: 0               //Number of short breaks that have occured so far
 };
 exports.state = storage.readJSON(exports.STATE_PATH);
 if (!exports.state) {
     exports.state = exports.STATE_DEFAULT;
 }
 
-//Given a timer state, generate a snapshot, which contains all of the information one would normally expect in the state.
-exports.getSnapshot = function (state) {
-    //Calculate how long the timer has been running overall
-    let totalRunningTime;
-    if (state.running) totalRunningTime = (new Date()).getTime() - state.startTime + state.elapsedTime;
-    else totalRunningTime = state.pausedTime - state.startTime + state.elapsedTime;
-
-    //Calculate how long the timer has been running in the current cycle
-    let settings = exports.settings;
-    let timeBeforeLongBreak = (settings.workTime + settings.shortBreakTime) * settings.numShortBreaks;
-    let fullCycleTime = timeBeforeLongBreak + settings.longBreak;
-    let timeInCycle = totalRunningTime % fullCycleTime;
-    let nextChangeTime;
-    let currentPhase;
-    let numShortBreaks;
-
-    if (timeInCycle < timeBeforeLongBreak) {
-        //I have decided to call the work / short break cycles "subcycles", while the overall cycle involves some number of subcycles and a long break.
-        let timeInSubCycle = timeInCycle % settings.numShortBreaks;
-        currentPhase = timeInSubCycle < settings.workTime ? exports.PHASE_WORKING : exports.PHASE_SHORT_BREAK;
-        numShortBreaks = timeInCycle / settings.numShortBreaks;
-
-        //The change time is the amount of time left plus the current time.
-        if (currentPhase == exports.PHASE_WORKING) nextChangeTime = (settings.workTime - timeInSubCycle) + (new Date()).getTime();
-        else nextChangeTime = (settings.shortBreak - (timeInSubCycle - settings.workTime)) + (new Date()).getTime();
-
+//Get the number of milliseconds until the next phase change
+exports.getTimeLeft = function () {
+    if (!exports.state.wasRunning) {
+        //If the timer never ran, the time left is just the amount of work time.
+        return exports.settings.workTime;
+    } else if (exports.state.running) {
+        //If the timer is running, the time left is current time - start time + preexisting time
+        var runningTime = (new Date()).getTime() - exports.state.startTime + exports.state.elapsedTime;
     } else {
-        nextChangeTime = (settings.longBreak - (timeInCycle - timeBeforeLongBreak)) + (new Date()).getTime();
-        currentPhase = exports.PHASE_LONG_BREAK;
-        numShortBreaks = settings.numShortBreaks;
+        //If the timer is not running, the same as above but use when the timer was paused instead of now.
+        var runningTime = exports.state.pausedTime - exports.state.startTime + exports.state.elapsedTime;
     }
 
-    return {
-        nextChangeTime: nextChangeTime, //Epoch time of when the phase will change next
-        currentPhase: currentPhase,     //What phase we are in now: work, short break, or long break
-        numShortBreaks: numShortBreaks  //How many short breaks have we had since the last long break?
-    };
-};
+    if (exports.state.phase == exports.PHASE_WORKING) {
+        return exports.settings.workTime - runningTime;
+    } else if (exports.state.phase == exports.PHASE_SHORT_BREAK) {
+        return exports.settings.shortBreak - runningTime;
+    } else {
+        return exports.settings.longBreak - runningTime;
+    }
+}
 
-exports.vibrate = function (snapshot) {
-    //Vibrate for the next phase.
-    if (snapshot.currentPhase == PHASE_WORKING) {
-        if (snapshot.numShortBreaks < exports.settings.numShortBreaks) {
+//Get the next phase to change to
+exports.getNextPhase = function () {
+    if (exports.state.phase == exports.PHASE_WORKING) {
+        if (exports.state.numShortBreaks < exports.settings.numShortBreaks) {
+            return exports.PHASE_SHORT_BREAK;
+        } else {
+            return exports.PHASE_LONG_BREAK;
+        }
+    } else {
+        return exports.PHASE_SHORT_BREAK;
+    }
+}
+
+//Change to the next phase and update numShortBreaks, and optionally vibrate. DOES NOT WRITE STATE CHANGE TO STORAGE!
+exports.nextPhase = function (vibrate) {
+    a = {
+        startTime: 0,                   //When the timer was last started. Difference between this and now is how long timer has run continuously.
+        pausedTime: 0,                  //When the timer was last paused. Used for expiration and displaying timer while paused.
+        elapsedTime: 0,                 //How much time the timer had spent running before the current start time. Update on pause or user skipping stages.
+        phase: exports.PHASE_WORKING,   //What phase the timer is currently in
+        numShortBreaks: 0               //Number of short breaks that have occured so far
+    }
+    let now = (new Date()).getTime();
+    exports.state.startTime = now;  //The timer is being reset, so say it starts now.
+    exports.state.pausedTime = now; //This prevents a paused timer from having the start time moved to the future and therefore having been run for negative time.
+    exports.state.elapsedTime = 0;  //Because we are resetting the timer, we no longer need to care about whether it was paused previously.
+
+    let oldPhase = exports.state.phase; //Cache the old phase because we need to remember it when counting the number of short breaks
+    exports.state.phase = getNextPhase();
+
+    if (oldPhase == exports.PHASE_SHORT_BREAK) {
+        //If we just left a short break, increase the number of short breaks
+        exports.state.numShortBreaks++;
+    } else if (oldPhase == exports.PHASE_LONG_BREAK) {
+        //If we just left a long break, set the number of short breaks to zero
+        exports.state.numShortBreaks = 0;
+    }
+
+    if (vibrate) {
+        if (exports.state.phase == exports.PHASE_WORKING) {
+            Bangle.buzz(750, 1);
+        } else if (exports.state.phase == exports.PHASE_SHORT_BREAK) {
             Bangle.buzz();
             setTimeout(Bangle.buzz, 400);
         } else {
@@ -91,5 +114,5 @@ exports.vibrate = function (snapshot) {
             setTimeout(Bangle.buzz, 400);
             setTimeout(Bangle.buzz, 600);
         }
-    } else Bangle.buzz(750, 1);
-};
+    }
+}
