@@ -1,6 +1,6 @@
 // Settings menu for the enhanced Anton clock
 
-(function(back) {
+(function (back) {
   var FILE = "antonclk.json";
   // Load settings
   var settings = Object.assign({

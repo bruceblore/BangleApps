@@ -5,8 +5,9 @@ const common = require("pomoplus-com.js");
 
 //Expire the state if necessary
 if (
+  common.settings.pausedTimerExpireTime != 0 &&
   !common.state.running &&
-  (new Date()).getTime() - common.state.pausedTime > common.settings.pausedTimerExpireTime * 1000
+  (new Date()).getTime() - common.state.pausedTime > common.settings.pausedTimerExpireTime
 ) {
   common.state = common.STATE_DEFAULT;
 }
@@ -50,7 +51,7 @@ function drawTimerAndMessage() {
         return ('00' + parseInt(number)).slice(-2);
       }
 
-      if (hours > 0) return `${parseInt(hours)}:${pad(minutes)}:${pad(seconds)}`;
+      if (hours >= 1) return `${parseInt(hours)}:${pad(minutes)}:${pad(seconds)}`;
       else return `${parseInt(minutes)}:${pad(seconds)}`;
     })(), g.getWidth() / 2, g.getHeight() / 2)
 
@@ -58,9 +59,10 @@ function drawTimerAndMessage() {
     .setFont("Vector", 12)
     .drawString(((currentPhase, numShortBreaks) => {
       if (!common.state.wasRunning) return "Not started";
-      else if (currentPhase == common.PHASE_LONG_BREAK) return "Long break!";
-      else return `${currentPhase == common.PHASE_WORKING ? "Work" : "Short break"} ${numShortBreaks + 1}/${common.settings.numShortBreaks}`;
-    })(common.state.currentPhase, common.state.numShortBreaks),
+      else if (currentPhase == common.PHASE_WORKING) return `Work ${numShortBreaks + 1}/${common.settings.numShortBreaks + 1}`
+      else if (currentPhase == common.PHASE_SHORT_BREAK) return `Short break ${numShortBreaks + 1}/${common.settings.numShortBreaks}`;
+      else return "Long break!";
+    })(common.state.phase, common.state.numShortBreaks),
       g.getWidth() / 2, g.getHeight() / 2 + 18);
 
   //Update phase with vibation if needed
@@ -115,8 +117,6 @@ Bangle.on("touch", (button, xy) => {
       //Reset the timer
       common.state = common.STATE_DEFAULT;
       drawTimerAndMessage();
-      clearInterval(timerInterval);
-      timerInterval = undefined;
       drawButtons();
 
     } else {
