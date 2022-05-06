@@ -15,6 +15,7 @@ function drawButtons() {
   //Draw the backdrop
   const BAR_TOP = g.getHeight() - 24;
   g.setColor(0, 0, 1).setFontAlign(0, -1)
+    .clearRect(0, BAR_TOP, g.getWidth(), g.getHeight())
     .fillRect(0, BAR_TOP, g.getWidth(), g.getHeight())
     .setColor(1, 1, 1);
 
@@ -36,6 +37,7 @@ function drawTimerAndMessage() {
   g.setColor(0, 0, 0)
     .setFontAlign(0, 0)
     .setFont("Vector", 36)
+    .clearRect(0, 24, 176, 152)
 
     //Draw the timer
     .drawString((() => {
@@ -44,9 +46,12 @@ function drawTimerAndMessage() {
       let minutes = (timeLeft % 3600000) / 60000;
       let seconds = (timeLeft % 60000) / 1000;
 
-      if (hours > 0) return `${parseInt(hours)}:${parseInt(minutes).padStart(2, '0')}:${parseInt(seconds).padStart(2, '0')
-        }`;
-      else return `${parseInt(minutes)}:${parseInt(seconds).padStart(2, '0')}`;
+      function pad(number) {
+        return ('00' + parseInt(number)).slice(-2);
+      }
+
+      if (hours > 0) return `${parseInt(hours)}:${pad(minutes)}:${pad(seconds)}`;
+      else return `${parseInt(minutes)}:${pad(seconds)}`;
     })(), g.getWidth() / 2, g.getHeight() / 2)
 
     //Draw the phase label
@@ -59,7 +64,7 @@ function drawTimerAndMessage() {
       g.getWidth() / 2, g.getHeight() / 2 + 18);
 
   //Update phase with vibation if needed
-  if (timeLeft <= 0) {
+  if (common.getTimeLeft() <= 0) {
     common.nextPhase(true);
   }
 }
@@ -72,7 +77,7 @@ Bangle.on("touch", (button, xy) => {
 
   if (!common.state.wasRunning) {
     //If we were never running, there is only one button: the start button
-    let now = (new Date).getTime();
+    let now = (new Date()).getTime();
     common.state = {
       wasRunning: true,
       running: true,
@@ -83,6 +88,7 @@ Bangle.on("touch", (button, xy) => {
       numShortBreaks: 0
     };
     setupTimerInterval();
+    drawButtons();
 
   } else if (common.state.running) {
     //If we are running, there are two buttons: pause and skip
@@ -97,6 +103,7 @@ Bangle.on("touch", (button, xy) => {
       clearInterval(timerInterval);
       timerInterval = undefined;
       drawTimerAndMessage();
+      drawButtons();
 
     } else {
       common.nextPhase(false);
@@ -110,6 +117,7 @@ Bangle.on("touch", (button, xy) => {
       drawTimerAndMessage();
       clearInterval(timerInterval);
       timerInterval = undefined;
+      drawButtons();
 
     } else {
       //Start the timer and record when we started
@@ -119,6 +127,7 @@ Bangle.on("touch", (button, xy) => {
       common.state.running = true;
       drawTimerAndMessage();
       setupTimerInterval();
+      drawButtons();
     }
   }
 });
@@ -144,3 +153,6 @@ if (common.state.running) {
 E.on('kill', () => {
   storage.writeJSON(common.STATE_PATH, common.state);
 });
+
+Bangle.loadWidgets();
+Bangle.drawWidgets();

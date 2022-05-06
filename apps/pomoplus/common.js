@@ -74,7 +74,7 @@ exports.getNextPhase = function () {
             return exports.PHASE_LONG_BREAK;
         }
     } else {
-        return exports.PHASE_SHORT_BREAK;
+        return exports.PHASE_WORKING;
     }
 }
 
@@ -93,7 +93,7 @@ exports.nextPhase = function (vibrate) {
     exports.state.elapsedTime = 0;  //Because we are resetting the timer, we no longer need to care about whether it was paused previously.
 
     let oldPhase = exports.state.phase; //Cache the old phase because we need to remember it when counting the number of short breaks
-    exports.state.phase = getNextPhase();
+    exports.state.phase = exports.getNextPhase();
 
     if (oldPhase == exports.PHASE_SHORT_BREAK) {
         //If we just left a short break, increase the number of short breaks
