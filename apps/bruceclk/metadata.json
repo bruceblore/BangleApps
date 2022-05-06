@@ -1,7 +1,7 @@
 {
   "id": "bruceclk",
   "name": "Bruce Clock",
-  "version": "0.02",
+  "version": "0.03",
   "description": "Anton Clock with Bruce's enhancements",
   "readme": "README.md",
   "icon": "app.png",
@@ -39,5 +39,11 @@
     {
       "name": "antonclk.json"
     }
-  ]
+  ],
+  "dependencies": {
+    "stlap": "app",
+    "alarm": "app",
+    "rpnsci": "app",
+    "dtlaunch": "app"
+  }
 }

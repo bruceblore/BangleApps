@@ -15,31 +15,27 @@ and that it is not licensed in another way that would make this impossible.
   * When tapped, load an app with some shortcuts.
   * When swiped, open notifications or change between steps and weather
 * Created a scientific RPN calculator (rpnsci)
+* Stopwatch (stlap)
+  * Now preserves data when closed
+  * Supports keeping track of laps
 
 ### To do
 
-* Pomodoro timer
-  * Run in background
-  * Easier to use UI
 * Timer (Most likely writing from scratch or using touchtimer)
   * Keypad to enter time
   * Run in background
 * Quiet mode
   * Option for display full off after timeout
-* Stopwatch
-  * Run in background
-  * (Low priority) Lap times with logging support
+* stlap
+  * Gesture mode
 * bruceclk
   * (Low priority) Monospace
 * rpnsci
   * (Low priority) Improve touch precision
-* (General) Fix button touch areas
 * (Low priority) Snake
   * Use tapping instead of swiping
   * Smaller field, bigger tiles
-* (Low priority) Make button consistently go back to clock everywhere
 * (Low priority) Make desktop launcher use up/down swipes
-* (Low priority) Fix music controls
 * 2047pp: Save state
 * choozi: Better UI
   * Buttons to select number should make sense
