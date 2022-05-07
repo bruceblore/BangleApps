@@ -95,10 +95,9 @@ Bangle.on("touch", (button, xy) => {
   } else if (common.state.running) {
     //If we are running, there are two buttons: pause and skip
     if (button == 1) {
-      //Record the exact moment that we paused, and the current elapsed time
+      //Record the exact moment that we paused
       let now = (new Date()).getTime();
       common.state.pausedTime = now;
-      common.state.elapsedTime += now - common.state.startTime;
 
       //Stop the timer
       common.state.running = false;
@@ -120,10 +119,10 @@ Bangle.on("touch", (button, xy) => {
       drawButtons();
 
     } else {
-      //Start the timer and record when we started
+      //Start the timer and record old elapsed time and when we started
       let now = (new Date()).getTime();
+      common.state.elapsedTime += common.state.pausedTime - common.state.startTime;
       common.state.startTime = now;
-      common.state.elapsedTime += now - common.state.pausedTime;
       common.state.running = true;
       drawTimerAndMessage();
       setupTimerInterval();
