@@ -42,7 +42,7 @@
   ],
   "dependencies": {
     "stlap": "app",
-    "alarm": "app",
+    "bgtimer": "app",
     "rpnsci": "app",
     "dtlaunch": "app"
   }

@@ -19,17 +19,17 @@ and that it is not licensed in another way that would make this impossible.
   * Now preserves data when closed
   * Supports keeping track of laps
 * torch: Max brightness on open
+* bgtimer
+  * Keypad to enter time
+  * Run in background
 
 ### To do
 
-* Timer (Most likely writing from scratch or using touchtimer)
-  * Keypad to enter time
-  * Run in background
 * Quiet mode
   * Option for display full off after timeout
 * stlap
   * Gesture mode
-  * Button to open stlapview if
+  * Button to open stlapview if installed
 * (Low priority) Snake
   * Use tapping instead of swiping
   * Smaller field, bigger tiles
