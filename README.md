@@ -18,6 +18,7 @@ and that it is not licensed in another way that would make this impossible.
 * Stopwatch (stlap)
   * Now preserves data when closed
   * Supports keeping track of laps
+* torch: Max brightness on open
 
 ### To do
 
@@ -28,10 +29,7 @@ and that it is not licensed in another way that would make this impossible.
   * Option for display full off after timeout
 * stlap
   * Gesture mode
-* bruceclk
-  * (Low priority) Monospace
-* rpnsci
-  * (Low priority) Improve touch precision
+  * Button to open stlapview if
 * (Low priority) Snake
   * Use tapping instead of swiping
   * Smaller field, bigger tiles
@@ -40,8 +38,6 @@ and that it is not licensed in another way that would make this impossible.
 * choozi: Better UI
   * Buttons to select number should make sense
   * Should be able to spin without physical button
-* Bluetooth widget: Vibrate on disconnect
-* Torch: Max brightness on open
 * Power manager: Low battery alerts
 
 ## The rest of the README is unmodified
