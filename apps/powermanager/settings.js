@@ -1,4 +1,4 @@
-(function(back) {
+(function (back) {
   var systemsettings = require("Storage").readJSON("setting.json") || {};
 
   function writeSettings(key, value) {
@@ -38,10 +38,13 @@
         writeSettings("forceMonoVoltage", v);
       }
     },
-    'Charge warning': function() {
+    'Charge warning': function () {
       E.showMenu(submenu_chargewarn);
     },
-    'Calibrate': function() {
+    'Discharge warning': function () {
+      E.showMenu(submenu_dischargewarn);
+    },
+    'Calibrate': function () {
       E.showMenu(submenu_calibrate);
     }
   };
@@ -67,7 +70,7 @@
     '': {
       title: "Calibrate"
     },
-    '< Back': function() {
+    '< Back': function () {
       E.showMenu(mainmenu);
     },
     'Offset': {
@@ -75,14 +78,14 @@
       max: 0.05,
       step: stepsize,
       value: getInitialCalibrationOffset(),
-      format: v => roundToDigits(v, stepsize).toFixed((""+stepsize).length - 2),
+      format: v => roundToDigits(v, stepsize).toFixed(("" + stepsize).length - 2),
       onchange: v => {
         print(typeof v);
         systemsettings.batFullVoltage = v + full;
         require("Storage").writeJSON("setting.json", systemsettings);
       }
     },
-    'Auto': function() {
+    'Auto': function () {
       var newVoltage = getCurrentVoltageDirect();
       E.showAlert("Please charge fully before auto setting").then(() => {
         E.showPrompt("Set current charge as full").then((r) => {
@@ -96,7 +99,7 @@
         });
       });
     },
-    'Clear': function() {
+    'Clear': function () {
       E.showPrompt("Clear charging offset?").then((r) => {
         if (r) {
           delete systemsettings.batFullVoltage;
@@ -113,27 +116,53 @@
     '': {
       title: "Charge warning"
     },
-    '< Back': function() {
+    '< Back': function () {
       E.showMenu(mainmenu);
     },
     'Enabled': {
-      value: !!settings.warnEnabled,
-      format: v => settings.warnEnabled ? "On" : "Off",
+      value: !!settings.warnHighEnabled,
+      format: v => settings.warnHighEnabled ? "On" : "Off",
       onchange: v => {
-        writeSettings("warnEnabled", v);
+        writeSettings("warnHighEnabled", v);
       }
     },
     'Percentage': {
-      min: 80,
+      min: 60,
       max: 100,
       step: 2,
-      value: settings.warn,
+      value: settings.warnHigh,
       format: v => v + "%",
       onchange: v => {
-        writeSettings("warn", v);
+        writeSettings("warnHigh", v);
+      }
+    }
+  };
+
+  var submenu_dischargewarn = {
+    '': {
+      title: "Discharge warning"
+    },
+    '< Back': function () {
+      E.showMenu(mainmenu);
+    },
+    'Enabled': {
+      value: !!settings.warnLowEnabled,
+      format: v => settings.warnLowEnabled ? "On" : "Off",
+      onchange: v => {
+        writeSettings("warnLowEnabled", v);
+      }
+    },
+    'Percentage': {
+      min: 0,
+      max: 50,
+      step: 2,
+      value: settings.warnLow,
+      format: v => v + "%",
+      onchange: v => {
+        writeSettings("warnLow", v);
       }
     }
   };
 
   E.showMenu(mainmenu);
-})
+});

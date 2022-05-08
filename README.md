@@ -22,11 +22,13 @@ and that it is not licensed in another way that would make this impossible.
 * bgtimer
   * Keypad to enter time
   * Run in background
+* powermanager
+  * low battery alerts
+  * Alerts now use or-equal to enable a warning at 100%
+  * Monotonic percentage is rounded for better compatibility
 
 ### To do
 
-* Quiet mode
-  * Option for display full off after timeout
 * stlap
   * Gesture mode
   * Button to open stlapview if installed
@@ -38,7 +40,6 @@ and that it is not licensed in another way that would make this impossible.
 * choozi: Better UI
   * Buttons to select number should make sense
   * Should be able to spin without physical button
-* Power manager: Low battery alerts
 
 ## The rest of the README is unmodified
 

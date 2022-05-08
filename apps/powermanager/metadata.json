@@ -2,16 +2,27 @@
   "id": "powermanager",
   "name": "Power Manager",
   "shortName": "Power Manager",
-  "version": "0.02",
+  "version": "0.03",
   "description": "Allow configuration of warnings and thresholds for battery charging and display.",
   "icon": "app.png",
   "type": "bootloader",
   "tags": "tool",
-  "supports": ["BANGLEJS2"],
+  "supports": [
+    "BANGLEJS2"
+  ],
   "readme": "README.md",
   "storage": [
-    {"name":"powermanager.boot.js","url":"boot.js"},
-    {"name":"powermanager.settings.js","url":"settings.js"},
-    {"name":"powermanager.default.json","url":"default.json"}
+    {
+      "name": "powermanager.boot.js",
+      "url": "boot.js"
+    },
+    {
+      "name": "powermanager.settings.js",
+      "url": "settings.js"
+    },
+    {
+      "name": "powermanager.default.json",
+      "url": "default.json"
+    }
   ]
 }

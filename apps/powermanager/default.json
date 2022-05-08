@@ -1,6 +1,8 @@
 {
-  "warnEnabled": false,
-  "warn": 96,
+  "warnHighEnabled": false,
+  "warnHigh": 96,
+  "warnLowEnabled": false,
+  "warnLow": 30,
   "forceMonoVoltage": false,
   "forceMonoPercentage": false
 }
