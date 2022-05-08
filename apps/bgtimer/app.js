@@ -1,5 +1,6 @@
 Bangle.BGTIMER_ACTIVE = true;
 const common = require("bgtimer-com.js");
+const storage = require("Storage");
 
 const keypad = require("bgtimer-keys.js");
 const timerView = require("bgtimer-tview.js");
@@ -18,9 +19,9 @@ Bangle.on('touch', (button, xy) => {
   else keypad.touch(button, xy);
 });
 
-Bangle.on('swipe'), dir => {
+Bangle.on('swipe', dir => {
   if (!common.state.wasRunning) keypad.swipe(dir);
-}
+});
 
 if (common.state.wasRunning) timerView.show(common);
 else keypad.show(common);

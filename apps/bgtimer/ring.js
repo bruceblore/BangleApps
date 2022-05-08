@@ -3,7 +3,16 @@ const common = require('bgtimer-com.js');
 Bangle.loadWidgets()
 Bangle.drawWidgets()
 
-setInterval(() => { Bangle.buzz(200) }, 400);
+Bangle.setLocked(false);
+Bangle.setLCDPower(true);
+
+let brightness = 0;
+
+setInterval(() => {
+    Bangle.buzz(200);
+    Bangle.setLCDBrightness(1 - brightness);
+    brightness = 1 - brightness;
+}, 400);
 Bangle.buzz(200);
 
 function stopTimer() {

@@ -63,12 +63,24 @@ exports.show = function (callerCommon) {
     }
 }
 
+function clearTimerInterval() {
+    if (timerInterval !== undefined) {
+        clearInterval(timerInterval);
+        timerInterval = undefined;
+    }
+}
+
 exports.touch = (button, xy) => {
+    if (xy.y < 152) return;
+
     if (button == 1) {
         //Reset the timer
         let setTime = common.state.setTime;
+        let inputString = common.state.inputString;
         common.state = common.STATE_DEFAULT;
         common.state.setTime = setTime;
+        common.state.inputString = inputString;
+        clearTimerInterval();
         require('bgtimer-keys.js').show(common);
     } else {
         if (common.state.running) {
@@ -78,14 +90,13 @@ exports.touch = (button, xy) => {
 
             //Stop the timer
             common.state.running = false;
-            clearInterval(timerInterval);
-            timerInterval = undefined;
+            clearTimerInterval();
             drawTimer();
             drawButtons();
         } else {
             //Start the timer and record when we started
             let now = (new Date()).getTime();
-            common.state.elapsedTime += common.state.pausedTime - common.state.elapsedTime;
+            common.state.elapsedTime += common.state.pausedTime - common.state.startTime;
             common.state.startTime = now;
             common.state.running = true;
             drawTimer();

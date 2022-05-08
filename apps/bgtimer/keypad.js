@@ -80,7 +80,7 @@ function drawButtons() {
     }
     for (let row = 0; row < 3; row++) {
         for (let col = 0; col < 4; col++) {
-            g.drawString(BUTTONS[mode][row][col].label, 22 + 44 * col, 66 + 44 * row);
+            g.drawString(BUTTONS[row][col].label, 22 + 44 * col, 66 + 44 * row);
         }
     }
 }
@@ -96,7 +96,7 @@ function getFontSize(length) {
 
 function updateDisplay() {
     let displayString = inputStringToDisplayString(common.state.inputString);
-    g.clearRect(0, 24, 175, 43).setColor(0, 0, 1).setFontAlign(1, -1).setFont("Vector", getFontSize(displayString)).drawString(displayString, 176, 24);
+    g.clearRect(0, 24, 175, 43).setColor(0, 0, 1).setFontAlign(1, -1).setFont("Vector", getFontSize(displayString.length)).drawString(displayString, 176, 24);
 }
 
 exports.show = function (callerCommon) {
@@ -109,7 +109,7 @@ exports.show = function (callerCommon) {
 exports.touch = function (button, xy) {
     let row = Math.floor((xy.y - 44) / 44);
     let col = Math.floor(xy.x / 44);
-    if (row < 0) row = 0;
+    if (row < 0) return;
     if (row > 2) row = 2;
     if (col < 0) col = 0;
     if (col > 3) col = 3;
