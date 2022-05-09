@@ -28,14 +28,10 @@ and that it is not licensed in another way that would make this impossible.
   * low battery alerts
   * Alerts now use or-equal to enable a warning at 100%
   * Monotonic percentage is rounded for better compatibility
+* 2047pp: Save state on close
 
 ### To do
 
-* (Low priority) Snake
-  * Use tapping instead of swiping
-  * Smaller field, bigger tiles
-* (Low priority) Make desktop launcher use up/down swipes
-* 2047pp: Save state
 * choozi: Better UI
   * Buttons to select number should make sense
   * Should be able to spin without physical button
