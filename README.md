@@ -18,6 +18,8 @@ and that it is not licensed in another way that would make this impossible.
 * Stopwatch (stlap)
   * Now preserves data when closed
   * Supports keeping track of laps
+  * Gesture mode
+  * Button to open stlapview if installed
 * torch: Max brightness on open
 * bgtimer
   * Keypad to enter time
@@ -29,9 +31,6 @@ and that it is not licensed in another way that would make this impossible.
 
 ### To do
 
-* stlap
-  * Gesture mode
-  * Button to open stlapview if installed
 * (Low priority) Snake
   * Use tapping instead of swiping
   * Smaller field, bigger tiles

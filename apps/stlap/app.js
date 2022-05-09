@@ -1,7 +1,7 @@
 const storage = require("Storage");
 const heatshrink = require("heatshrink");
 const STATE_PATH = "stlap.state.json";
-g.setFont("Vector", 24)
+g.setFont("Vector", 24);
 const BUTTON_ICONS = {
   play: heatshrink.decompress(atob("jEYwMAkAGBnACBnwCBn+AAQPgAQPwAQP8AQP/AQXAAQPwAQP8AQP+AQgICBwQUCEAn4FggyBHAQ+CIgQ")),
   pause: heatshrink.decompress(atob("jEYwMA/4BBAX4CEA")),
@@ -18,26 +18,24 @@ const STATE_DEFAULT = {
   elapsedTime: 0                  //How much time was spent running before the current start time. Update on pause.
 };
 if (!state) {
-  state = STATE_DEFAULT
+  state = STATE_DEFAULT;
 }
 
 let lapFile;
 let lapHistory;
 if (state.wasRunning) {
   lapFile = 'stlap-' + state.sessionStart + '.json';
-  lapHistory = storage.readJSON(lapFile)
-  if (!lapHistory) {
+  lapHistory = storage.readJSON(lapFile);
+  if (!lapHistory)
     lapHistory = {
       final: false, //Whether the stopwatch has been reset. It is expected that the stopwatch app will create a final split when reset. If this is false, it is expected that this hasn't been done, and that the current time should be used as the "final split"
       splits: []  //List of times when the Lap button was pressed
-    }
-  }
-} else {
+    };
+} else
   lapHistory = {
     final: false, //Whether the stopwatch has been reset. It is expected that the stopwatch app will create a final split when reset. If this is false, it is expected that this hasn't been done, and that the current time should be used as the "final split"
     splits: []  //List of times when the Lap button was pressed
-  }
-}
+  };
 
 //Get the number of milliseconds that stopwatch has run for
 function getTime() {
@@ -58,22 +56,38 @@ let gestureMode = false;
 function drawButtons() {
   //Draw the backdrop
   const BAR_TOP = g.getHeight() - 48;
+  const BUTTON_Y = BAR_TOP + 12;
+  const BUTTON_LEFT = g.getWidth() / 4 - 12;    //For the buttons, we have to subtract 12 because images do not obey alignment, but their size is known in advance
+  const TEXT_LEFT = g.getWidth() / 4;           //For text, we do not have to subtract 12 because they do obey alignment.
+  const BUTTON_MID = g.getWidth() / 2 - 12;
+  const TEXT_MID = g.getWidth() / 2;
+  const BUTTON_RIGHT = g.getHeight() * 3 / 4 - 12;
+
   g.setColor(0, 0, 1).setFontAlign(0, -1)
     .clearRect(0, BAR_TOP, g.getWidth(), g.getHeight())
     .fillRect(0, BAR_TOP, g.getWidth(), g.getHeight())
     .setColor(1, 1, 1);
 
-  if (!state.wasRunning) {  //If the timer was never started, only show a play button
-    g.drawImage(BUTTON_ICONS.play, g.getWidth() / 2, BAR_TOP + 12);
-  } else {
-    g.drawLine(g.getWidth() / 2, BAR_TOP, g.getWidth() / 2, g.getHeight());
-    if (state.running) {
-      g.setFont("Vector", 24)
-        .drawString("LAP", g.getWidth() / 4, BAR_TOP + 12)
-        .drawImage(BUTTON_ICONS.pause, g.getWidth() * 3 / 4, BAR_TOP + 12);
-    } else {
-      g.drawImage(BUTTON_ICONS.reset, g.getWidth() / 4, BAR_TOP + 12)
-        .drawImage(BUTTON_ICONS.play, g.getWidth() * 3 / 4, BAR_TOP + 12);
+  if (gestureMode)
+    g.setFont('Vector', 16)
+      .drawString('Button: Lap/Reset\nSwipe: Start/stop\nTap: Light', TEXT_MID, BAR_TOP);
+  else {
+    g.setFont('Vector', 24);
+    if (!state.wasRunning) {  //If the timer was never running:
+      if (storage.read('stlapview.app.js') !== undefined)         //If stlapview is installed, there should be a button to open it and a button to start the timer
+        g.drawLine(g.getWidth() / 2, BAR_TOP, g.getWidth() / 2, g.getHeight())
+          .drawString("Laps", TEXT_LEFT, BUTTON_Y)
+          .drawImage(BUTTON_ICONS.play, BUTTON_RIGHT, BUTTON_Y);
+      else g.drawImage(BUTTON_ICONS.play, BUTTON_MID, BUTTON_Y);  //Otherwise, only a button to start the timer
+    } else {                  //If the timer was running:
+      g.drawLine(g.getWidth() / 2, BAR_TOP, g.getWidth() / 2, g.getHeight());
+      if (state.running) {    //If it is running now, have a lap button and a pause button
+        g.drawString("LAP", TEXT_LEFT, BUTTON_Y)
+          .drawImage(BUTTON_ICONS.pause, BUTTON_RIGHT, BUTTON_Y);
+      } else {                //If it is not running now, have a reset button and a
+        g.drawImage(BUTTON_ICONS.reset, BUTTON_LEFT, BUTTON_Y)
+          .drawImage(BUTTON_ICONS.play, BUTTON_RIGHT, BUTTON_Y);
+      }
     }
   }
 }
@@ -98,7 +112,7 @@ function drawTime() {
 
       if (hours >= 1) return `${hours}:${pad(minutes)}:${pad(seconds)}`;
       else return `${minutes}:${pad(seconds)}:${pad(hundredths)}`;
-    })(), g.getWidth() / 2, g.getHeight() / 2)
+    })(), g.getWidth() / 2, g.getHeight() / 2);
 
   //Draw the lap labels if necessary
   if (lapHistory.splits.length >= 1) {
@@ -117,7 +131,7 @@ function drawTime() {
         else return `Lap ${curLap}: ${hours}:${pad(minutes)}:${pad(seconds)}:${pad(hundredths)}`;
       })(), g.getWidth() / 2, g.getHeight() / 2 + 18)
       .drawString((() => {
-        let lapTime
+        let lapTime;
         if (lastLap == 1) lapTime = lapHistory.splits[lastLap - 1];
         else lapTime = lapHistory.splits[lastLap - 1] - lapHistory.splits[lastLap - 2];
         let hours = Math.floor(lapTime / 3600000);
@@ -132,82 +146,130 @@ function drawTime() {
 }
 
 drawButtons();
-Bangle.on("touch", (button, xy) => {
-  //If we support full touch and we're not touching the keys, ignore.
-  //If we don't support full touch, we can't tell so just assume we are.
-  if (xy !== undefined && xy.y <= g.getHeight() - 48) return;
 
+function firstTimeStart(now, time) {
+  state = {
+    wasRunning: true,
+    sessionStart: Math.floor(now),
+    running: true,
+    startTime: now,
+    pausedTime: 0,
+    elapsedTime: 0,
+  };
+  lapFile = 'stlap-' + state.sessionStart + '.json';
+  setupTimerInterval();
+  Bangle.buzz(200);
+  drawButtons();
+}
+
+function split(now, time) {
+  lapHistory.splits.push(time);
+  Bangle.buzz();
+}
+
+function pause(now, time) {
+  //Record the exact moment that we paused
+  state.pausedTime = now;
+
+  //Stop the timer
+  state.running = false;
+  stopTimerInterval();
+  Bangle.buzz(200);
+  drawTime();
+  drawButtons();
+}
+
+function reset(now, time) {
+  //Record the time
+  lapHistory.splits.push(time);
+  lapHistory.final = true;
+  storage.writeJSON(lapFile, lapHistory);
+
+  //Reset the timer
+  state = STATE_DEFAULT;
+  lapHistory = {
+    final: false,
+    splits: []
+  };
+  Bangle.buzz(500);
+  drawTime();
+  drawButtons();
+}
+
+function start(now, time) {
+  //Start the timer and record when we started
+  state.elapsedTime += (state.pausedTime - state.startTime);
+  state.startTime = now;
+  state.running = true;
+  setupTimerInterval();
+  Bangle.buzz(200);
+  drawTime();
+  drawButtons();
+}
+
+Bangle.on("touch", (button, xy) => {
   //In gesture mode, just turn on the light and then return
   if (gestureMode) {
     Bangle.setLCDPower(true);
     return;
   }
 
+  //If we support full touch and we're not touching the keys, ignore.
+  //If we don't support full touch, we can't tell so just assume we are.
+  if (xy !== undefined && xy.y <= g.getHeight() - 48) return;
+
   let now = (new Date()).getTime();
   let time = getTime();
 
   if (!state.wasRunning) {
-    //If we were never running, there is only one button: the start button
-    state = {
-      wasRunning: true,
-      sessionStart: Math.floor(now),
-      running: true,
-      startTime: now,
-      pausedTime: 0,
-      elapsedTime: 0,
-    };
-    lapFile = 'stlap-' + state.sessionStart + '.json';
-    setupTimerInterval();
-    Bangle.buzz(200);
-    drawButtons();
-
+    if (storage.read('stlapview.app.js') !== undefined) {
+      //If we were never running and stlapview is installed, there are two buttons: open stlapview and start the timer
+      if (button == 1) load('stlapview.app.js');
+      else firstTimeStart(now, time);
+    }
+    //If stlapview there is only one button: the start button
+    else firstTimeStart(now, time);
   } else if (state.running) {
     //If we are running, there are two buttons: lap and pause
-    if (button == 1) {
-      lapHistory.splits.push(time);
-      Bangle.buzz();
-    } else {
-      //Record the exact moment that we paused
-      state.pausedTime = now;
-
-      //Stop the timer
-      state.running = false;
-      stopTimerInterval();
-      Bangle.buzz(200);
-      drawTime();
-      drawButtons();
-    }
+    if (button == 1) split(now, time);
+    else pause(now, time);
 
   } else {
     //If we are stopped, there are two buttons: reset and continue
-    if (button == 1) {
-      //Record the time
-      lapHistory.splits.push(time);
-      lapHistory.final = true;
-      storage.writeJSON(lapFile, lapHistory);
-
-      //Reset the timer
-      state = STATE_DEFAULT;
-      lapHistory = {
-        final: false,
-        splits: []
-      };
-      Bangle.buzz(500);
-      drawTime();
-      drawButtons();
-
-    } else {
-      //Start the timer and record when we started
-      state.elapsedTime += (state.pausedTime - state.startTime);
-      state.startTime = now;
-      state.running = true;
-      setupTimerInterval();
-      Bangle.buzz(200);
-      drawTime();
-      drawButtons();
-    }
+    if (button == 1) reset(now, time);
+    else start(now, time);
   }
 });
+
+Bangle.on('swipe', direction => {
+  let now = (new Date()).getTime();
+  let time = getTime();
+
+  if (gestureMode) {
+    Bangle.setLCDPower(true);
+    if (!state.wasRunning) firstTimeStart(now, time);
+    else if (state.running) pause(now, time);
+    else start(now, time);
+  } else {
+    gestureMode = true;
+    Bangle.setOptions({
+      lockTimeout: 0
+    });
+    drawTime();
+    drawButtons();
+  }
+});
+
+setWatch(() => {
+  let now = (new Date()).getTime();
+  let time = getTime();
+
+  if (gestureMode) {
+    Bangle.setLCDPower(true);
+    if (state.running) split(now, time);
+    else reset(now, time);
+  }
+}, BTN1, { repeat: true });
 
 let timerInterval;
 
