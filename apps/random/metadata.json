@@ -3,7 +3,7 @@
   "name": "Random",
   "version": "0.01",
   "description": "Flip coins, roll dice, draw a card, or choose random numbers",
-  "icon": "app.png",
+  "icon": "icon.png",
   "tags": "tool",
   "supports": [
     "BANGLEJS",
