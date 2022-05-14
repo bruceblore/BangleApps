@@ -1,7 +1,9 @@
 Bangle.js App Loader (and Apps) (Featuring Bruce's customizations)
 ==================================================================
 
-My modifications to the Bangle.js code. Apps that I don't use are not removed.
+My modifications to the [Bangle.js apps](https://github.com/espruino/BangleApps). Apps that I don't use are not removed.
+
+You can use my [app loader](https://bruceblore.org/banglejs) to install these onto your watch.
 
 **All software (including apps) in this repository is MIT Licensed - see [LICENSE](LICENSE)** By
 submitting code to this repository you confirm that you are happy with it being MIT licensed,
