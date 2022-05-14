@@ -29,12 +29,7 @@ and that it is not licensed in another way that would make this impossible.
   * Alerts now use or-equal to enable a warning at 100%
   * Monotonic percentage is rounded for better compatibility
 * 2047pp: Save state on close
-
-### To do
-
-* choozi: Better UI
-  * Buttons to select number should make sense
-  * Should be able to spin without physical button
+* random: Coin flip, dice roll, card draw, number choice
 
 ## The rest of the README is unmodified
 
