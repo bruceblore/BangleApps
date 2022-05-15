@@ -32,6 +32,7 @@ and that it is not licensed in another way that would make this impossible.
   * Monotonic percentage is rounded for better compatibility
 * 2047pp: Save state on close
 * random: Coin flip, dice roll, card draw, number choice
+* sched: Added support for infinite buzzes in case 15 is not enough to wake up
 
 ## The rest of the README is unmodified
 
