@@ -56,10 +56,18 @@ let config = Object.assign({
 
   dayProgress: {
     // A progress bar representing how far through the day you are
-    enabled: true,      // Whether this bar is enabled
-    start: 0700,        // The time of day that the bar starts filling
-    end: 2200,          // The time of day that the bar becomes full
-    reset: 0300         // The time of day when the progress bar resets from full to empty
+    enabledLocked: true,    // Whether this bar is enabled when the watch is locked
+    enabledUnlocked: false, // Whether the bar is enabled when the watch is unlocked
+    color: [0, 0, 1],      // The color of the bar
+    start: 0700,            // The time of day that the bar starts filling
+    end: 2200,              // The time of day that the bar becomes full
+    reset: 0300             // The time of day when the progress bar resets from full to empty
+  },
+
+  lowBattColor: {
+    // The text can change color to indicate that the battery is low
+    level: 20,        // The percentage where this happens
+    color: [1, 0, 0]  // The color that the text changes to
   }
 }, storage.readJSON(SETTINGS_FILE));
 
@@ -105,15 +113,22 @@ function getDayString(now) {
   else return ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][now.getDay()];
 }
 
-// Get the current date according to the user settings
+// Pad a number with zeros to be the given number of digits
+function pad(number, digits) {
+  let result = '' + number;
+  while (result.length < digits) result = '0' + result;
+  return result;
+}
+
+// Get the current date formatted according to the user settings
 function getDateString(now) {
   let month;
-  if (!config.date.monthName) month = '' + (now.getMonth() + 1);
+  if (!config.date.monthName) month = pad(now.getMonth() + 1, 2);
   else if (config.date.monthFullName) month = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'][now.getMonth()];
   else month = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][now.getMonth()];
 
-  if (config.date.mmdd) return `${month}${config.date.separator}${now.getDate()}`;
-  else return `${now.getDate()}${config.date.separator}${month}`;
+  if (config.date.mmdd) return `${month}${config.date.separator}${pad(now.getDate(), 2)}`;
+  else return `${pad(now.getDate(), 2)}${config.date.separator}${month}`;
 }
 
 // Get a floating point number from 0 to 1 representing how far between the user-defined start and end points we are
@@ -173,7 +188,7 @@ function getStepsString() {
 
 // Get a health string including daily steps and recent bpm
 function getHealthString() {
-  return `${Bangle.getHealthStatus('day').steps} st ${Bangle.getHealthStatus('last').bpm} bpm`;
+  return `${Bangle.getHealthStatus('day').steps} steps ${Bangle.getHealthStatus('last').bpm} bpm`;
 }
 
 // Set the next timeout to draw the screen
@@ -192,6 +207,7 @@ function setNextDrawTimeout() {
   drawTimeout = setTimeout(draw, time);
 }
 
+
 const DIGIT_WIDTH = 40; // How much width is allocated for each digit, 37 pixels + 3 pixels of space (which will go off of the screen on the right edge)
 const COLON_WIDTH = 19; // How much width is allocated for the colon, 16 pixels + 3 pixels of space
 const HHMM_TOP = 27;    // 24 pixels for widgets + 3 pixels of space
@@ -207,11 +223,16 @@ const DATE_CENTER_Y = DOW_CENTER_Y + DATE_LETTER_HEIGHT;      // Date will be th
 const DOW_DATE_CENTER_Y = SECONDS_TOP + (DIGIT_HEIGHT / 2);   // When displaying both on one row, center it
 const BOTTOM_CENTER_Y = ((SECONDS_TOP + DIGIT_HEIGHT + 3) + g.getHeight()) / 2;
 
-//Draw the clock
-
+// Draw the clock
 function draw() {
   //Prepare to draw
-  g.setFontAlign(0, 0);
+  g.reset()
+    .setFontAlign(0, 0);
+
+  if (E.getBattery() <= config.lowBattColor.level) {
+    let color = config.lowBattColor.color;
+    g.setColor(color[0], color[1], color[2]);
+  }
   now = new Date();
 
   if (Bangle.isLocked()) {  //When the watch is locked
@@ -251,7 +272,9 @@ function draw() {
 
     // Draw the bottom area
     if (config.bottomLocked.display == 'progress') {
-      g.fillRect(0, SECONDS_TOP + DIGIT_HEIGHT + 3, g.getWidth() * getDayProgress(now), g.getHieght());
+      let color = config.dayProgress.color;
+      g.setColor(color[0], color[1], color[2])
+        .fillRect(0, SECONDS_TOP + DIGIT_HEIGHT + 3, g.getWidth() * getDayProgress(now), g.getHieght());
     } else {
       let bottomString;
 
@@ -265,8 +288,10 @@ function draw() {
     }
 
     // Draw the day progress bar between the rows if necessary
-    if (config.dayProgress.enabled && config.bottomLocked.display != 'progress') {
-      g.fillRect(0, HHMM_TOP + DIGIT_HEIGHT, g.getWidth() * getDayProgress(now), SECONDS_TOP);
+    if (config.dayProgress.enabledLocked && config.bottomLocked.display != 'progress') {
+      let color = config.dayProgress.color;
+      g.setColor(color[0], color[1], color[2])
+        .fillRect(0, HHMM_TOP + DIGIT_HEIGHT, g.getWidth() * getDayProgress(now), SECONDS_TOP);
     }
   } else {
 
@@ -278,10 +303,10 @@ function draw() {
       getWeatherString(),
       getWeatherRow2()
     ];
-    if (shouldDisplaySeconds(now)) rows[0] += ':' + now.getSeconds();
+    if (shouldDisplaySeconds(now)) rows[0] += ':' + pad(now.getSeconds(), 2);
     if (storage.readJSON('setting.json')['12hour']) rows[0] += ((now.getHours() < 12) ? ' AM' : ' PM');
 
-    let maxHeight = ((g.getHeight() / 2) - HHMM_TOP) / (config.dayProgress.enabled ? (rows.length + 1) : rows.length);
+    let maxHeight = ((g.getHeight() / 2) - HHMM_TOP) / (config.dayProgress.enabledUnlocked ? (rows.length + 1) : rows.length);
 
     let y = HHMM_TOP + maxHeight / 2;
     for (let row of rows) {
@@ -291,31 +316,37 @@ function draw() {
       y += maxHeight;
     }
 
-    if (config.dayProgress.enabled) g.drawRect(0, y - maxHeight / 2, 176 * getDayProgress(now), y + maxHeight / 2);
+    if (config.dayProgress.enabledUnlocked) {
+      let color = config.dayProgress.color;
+      g.setColor(color[0], color[1], color[2])
+        .fillRect(0, y - maxHeight / 2, 176 * getDayProgress(now), y + maxHeight / 2);
+    }
   }
 
   setNextDrawTimeout();
+}
+
+// Draw the icons. This is done separately from the main draw routine to avoid having to scale and draw a bunch of images repeatedly.
+function drawIcons() {
+  g.clearRect(0, 24, g.getWidth(), g.getHeight());
+  for (let i = 0; i < 8; i++) {
+    let x = [0, 44, 88, 132, 0, 44, 88, 132][i];
+    let y = [88, 88, 88, 88, 132, 132, 132, 132][i];
+    let appId = config.shortcuts[i];
+    let appInfo = storage.readJSON(appId + '.info', 1);
+    if (!appInfo) continue;
+    icon = storage.read(appInfo.icon);
+    g.drawImage(icon, x, y, {
+      scale: 0.916666666667
+    });
+  }
 }
 
 weather.on("update", draw);
 Bangle.on("step", draw);
 Bangle.on('lock', locked => {
   //If the watch is unlocked, draw the icons
-  if (!locked) {
-    g.clearRect(0, 24, g.getWidth(), g.getHeight());
-    for (let i = 0; i < 8; i++) {
-      let x = [0, 44, 88, 132, 0, 44, 88, 132][i];
-      let y = [88, 88, 88, 88, 132, 132, 132, 132][i];
-      let appId = config.shortcuts[i];
-      let appInfo = storage.readJSON(appId + '.info', 1);
-      if (!appInfo) continue;
-      icon = storage.read(appInfo.icon);
-      g.drawImage(icon, x, y, {
-        scale: 0.916666666667
-      });
-    }
-  }
-
+  if (!locked) drawIcons();
   draw();
 });
 
@@ -371,3 +402,4 @@ Bangle.on('swipe', function (direction) {
 });
 
 draw();
+if (!Bangle.isLocked()) drawIcons();
