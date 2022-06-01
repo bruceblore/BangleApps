@@ -1,5 +1,5 @@
 const SETTINGS_FILE = "infoclk.json";
-const FONT = require('infoclk-font.js')
+const FONT = require('infoclk-font.js');
 
 const storage = require("Storage");
 const locale = require("locale");
@@ -85,7 +85,7 @@ function shouldDisplaySeconds(now) {
     (config.seconds.hideLocked && Bangle.isLocked()) ||
     (E.getBattery() <= config.seconds.hideBattery) ||
     (config.seconds.hideTime && timeInRange(config.seconds.hideStart, now, config.seconds.hideEnd))
-  )
+  );
 }
 
 // Determine the font size needed to fit a string of the given length widthin maxWidth number of pixels, clamped between minSize and maxSize
@@ -161,19 +161,19 @@ function getWeatherString() {
 
 // Get a second weather row showing humidity, wind speed, and wind direction
 function getWeatherRow2() {
-  let current = weather.get()
+  let current = weather.get();
   if (current) return `${current.hum}%, ${locale.speed(current.wind)} ${current.wrose}`;
   else return 'Check Gadgetbridge';
 }
 
 // Get a step string
 function getStepsString() {
-  return '' + Bangle.getHealthStatus('day').steps + ' steps'
+  return '' + Bangle.getHealthStatus('day').steps + ' steps';
 }
 
 // Get a health string including daily steps and recent bpm
 function getHealthString() {
-  return `${Bangle.getHealthStatus('day').steps} st ${Bangle.getHealthStatus('last').bpm} bpm`
+  return `${Bangle.getHealthStatus('day').steps} st ${Bangle.getHealthStatus('last').bpm} bpm`;
 }
 
 // Set the next timeout to draw the screen
@@ -185,27 +185,40 @@ function setNextDrawTimeout() {
   }
 
   let time;
-  if (shouldDisplaySeconds()) time = 1000 - ((new Date()).getTime() % 1000);
-  else time = 60000 - ((new Date()).getTime() % 60000);
+  let now = new Date();
+  if (shouldDisplaySeconds(now)) time = 1000 - (now.getTime() % 1000);
+  else time = 60000 - (now.getTime() % 60000);
 
   drawTimeout = setTimeout(draw, time);
 }
 
+const DIGIT_WIDTH = 40; // How much width is allocated for each digit, 37 pixels + 3 pixels of space (which will go off of the screen on the right edge)
+const COLON_WIDTH = 19; // How much width is allocated for the colon, 16 pixels + 3 pixels of space
+const HHMM_TOP = 27;    // 24 pixels for widgets + 3 pixels of space
+const DIGIT_HEIGHT = 64; // How tall the digits are
+
+const SECONDS_TOP = HHMM_TOP + DIGIT_HEIGHT + 3;    // The top edge of the seconds, top of hours and minutes + digit height + space
+const SECONDS_LEFT = 2 * DIGIT_WIDTH + COLON_WIDTH; // The left edge of the seconds: displayed after 2 digits and the colon
+const DATE_LETTER_HEIGHT = DIGIT_HEIGHT / 2;        // Each letter of the day of week and date will be half the height of the time digits
+
+const DATE_CENTER_X = SECONDS_LEFT / 2;                       // Day of week and date will be centered between left edge of screen and where seconds start
+const DOW_CENTER_Y = SECONDS_TOP + (DATE_LETTER_HEIGHT / 2);  // Day of week will be the top row
+const DATE_CENTER_Y = DOW_CENTER_Y + DATE_LETTER_HEIGHT;      // Date will be the bottom row
+const DOW_DATE_CENTER_Y = SECONDS_TOP + (DIGIT_HEIGHT / 2);   // When displaying both on one row, center it
+const BOTTOM_CENTER_Y = ((SECONDS_TOP + DIGIT_HEIGHT + 3) + g.getHeight()) / 2;
+
 //Draw the clock
+
 function draw() {
   //Prepare to draw
   g.setFontAlign(0, 0);
   now = new Date();
 
   if (Bangle.isLocked()) {  //When the watch is locked
-    g.clearRect(0, 24, g.getWidth(), g.getHeight())
+    g.clearRect(0, 24, g.getWidth(), g.getHeight());
 
     //Draw the hours and minutes
     let x = 0;
-    const DIGIT_WIDTH = 40; // How much width is allocated for each digit, 37 pixels + 3 pixels of space (which will go off of the screen on the right edge)
-    const COLON_WIDTH = 19; // How much width is allocated for the colon, 16 pixels + 3 pixels of space
-    const HHMM_TOP = 27;    // 24 pixels for widgets + 3 pixels of space
-    const DIGIT_HEIGHT = 64; // How tall the digits are
 
     for (let digit of locale.time(now, 1)) {  //apparently this is how you get an hh:mm time string adjusting for the user's 12/24 hour preference
       if (digit != ' ') g.drawImage(FONT[digit], x, HHMM_TOP);
@@ -215,10 +228,6 @@ function draw() {
     if (storage.readJSON('setting.json')['12hour']) g.drawImage(FONT[(now.getHours() < 12) ? 'am' : 'pm'], 0, HHMM_TOP);
 
     //Draw the seconds if necessary
-    const SECONDS_TOP = HHMM_TOP + DIGIT_HEIGHT + 3;    // The top edge of the seconds, top of hours and minutes + digit height + space
-    const SECONDS_LEFT = 2 * DIGIT_WIDTH + COLON_WIDTH; // The left edge of the seconds: displayed after 2 digits and the colon
-    const DATE_LETTER_HEIGHT = DIGIT_HEIGHT / 2;        // Each letter of the day of week and date will be half the height of the time digits
-
     if (shouldDisplaySeconds(now)) {
       let tens = Math.floor(now.getSeconds() / 10);
       let ones = now.getSeconds() % 10;
@@ -226,9 +235,6 @@ function draw() {
         .drawImage(FONT[ones], SECONDS_LEFT + DIGIT_WIDTH, SECONDS_TOP);
 
       // Draw the day of week and date assuming the seconds are displayed
-      const DATE_CENTER_X = SECONDS_LEFT / 2;                       // Day of week and date will be centered between left edge of screen and where seconds start
-      const DOW_CENTER_Y = SECONDS_TOP + (DATE_LETTER_HEIGHT / 2);  // Day of week will be the top row
-      const DATE_CENTER_Y = DOW_CENTER_Y + DATE_LETTER_HEIGHT;      // Date will be the bottom row
 
       g.setFont('Vector', getFontSize(getDayString(now).length, SECONDS_LEFT, 6, DATE_LETTER_HEIGHT))
         .drawString(getDayString(now), DATE_CENTER_X, DOW_CENTER_Y)
@@ -237,18 +243,16 @@ function draw() {
 
     } else {
       //Draw the day of week and date without the seconds
-      const DOW_DATE_CENTER_Y = SECONDS_TOP + (DIGIT_HEIGHT / 2) - (DATE_LETTER_HEIGHT / 2); // When displaying both on one row, center it
 
-      let string = getDayString(now) + getDateString(now)
+      let string = getDayString(now) + ' ' + getDateString(now);
       g.setFont('Vector', getFontSize(string.length, g.getWidth(), 6, DATE_LETTER_HEIGHT))
         .drawString(string, g.getWidth() / 2, DOW_DATE_CENTER_Y);
     }
 
     // Draw the bottom area
     if (config.bottomLocked.display == 'progress') {
-      g.drawRect(0, SECONDS_TOP + DIGIT_HEIGHT + 3, g.getWidth() * getDayProgress(now), g.getHiehgt());
+      g.fillRect(0, SECONDS_TOP + DIGIT_HEIGHT + 3, g.getWidth() * getDayProgress(now), g.getHieght());
     } else {
-      const BOTTOM_CENTER_Y = ((SECONDS_TOP + DIGIT_HEIGHT + 3) + g.getHeight()) / 2;
       let bottomString;
 
       if (config.bottomLocked.display == 'weather') bottomString = getWeatherString();
@@ -262,27 +266,28 @@ function draw() {
 
     // Draw the day progress bar between the rows if necessary
     if (config.dayProgress.enabled && config.bottomLocked.display != 'progress') {
-      g.drawRect(0, HHMM_TOP + DIGIT_HEIGHT, g.width() * getDayProgress(now), SECONDS_TOP);
+      g.fillRect(0, HHMM_TOP + DIGIT_HEIGHT, g.getWidth() * getDayProgress(now), SECONDS_TOP);
     }
   } else {
 
     //If the watch is unlocked
-    g.clearRect(0, 24, g.getWidth(), g.getHeight() / 2)
+    g.clearRect(0, 24, g.getWidth(), g.getHeight() / 2);
     rows = [
       `${getDayString(now)} ${getDateString(now)} ${locale.time(now, 1)}`,
       getHealthString(),
       getWeatherString(),
       getWeatherRow2()
     ];
-    if (shouldDisplaySeconds()) rows[0] += ':' + now.getSeconds();
+    if (shouldDisplaySeconds(now)) rows[0] += ':' + now.getSeconds();
     if (storage.readJSON('setting.json')['12hour']) rows[0] += ((now.getHours() < 12) ? ' AM' : ' PM');
 
-    let maxHeight = (g.getHeight() - HHMM_TOP) / (config.dayProgress.enabled ? (rows.length + 1) : rows.length);
+    let maxHeight = ((g.getHeight() / 2) - HHMM_TOP) / (config.dayProgress.enabled ? (rows.length + 1) : rows.length);
 
     let y = HHMM_TOP + maxHeight / 2;
     for (let row of rows) {
       let size = getFontSize(row.length, g.getWidth(), 6, maxHeight);
-      g.drawString(row, g.getWidth() / 2, y);
+      g.setFont('Vector', size)
+        .drawString(row, g.getWidth() / 2, y);
       y += maxHeight;
     }
 
@@ -297,11 +302,12 @@ Bangle.on("step", draw);
 Bangle.on('lock', locked => {
   //If the watch is unlocked, draw the icons
   if (!locked) {
-    for (let i = 0; i < 7; i++) {
+    g.clearRect(0, 24, g.getWidth(), g.getHeight());
+    for (let i = 0; i < 8; i++) {
       let x = [0, 44, 88, 132, 0, 44, 88, 132][i];
       let y = [88, 88, 88, 88, 132, 132, 132, 132][i];
       let appId = config.shortcuts[i];
-      let appInfo = storage.readJSON(appID + '.info', 1);
+      let appInfo = storage.readJSON(appId + '.info', 1);
       if (!appInfo) continue;
       icon = storage.read(appInfo.icon);
       g.drawImage(icon, x, y, {
@@ -311,7 +317,7 @@ Bangle.on('lock', locked => {
   }
 
   draw();
-})
+});
 
 // Show launcher when middle button pressed
 Bangle.setUI("clock");
@@ -323,7 +329,7 @@ Bangle.drawWidgets();
 //    false: Do nothing
 //    '#LAUNCHER': Open the launcher
 //    nonexistent app: Do nothing
-function launch(appID) {
+function launch(appId) {
   if (appId == false) return;
   else if (appId == '#LAUNCHER') {
     Bangle.buzz();
@@ -343,10 +349,10 @@ Bangle.on('touch', function (button, xy) {
   if (x < 0) x = 0;
   else if (x > 3) x = 3;
 
-  let y = Math.floor(xy.y / 40)
+  let y = Math.floor(xy.y / 40);
   if (y < 0) y = -1;
   else if (y > 3) y = 1;
-  else y -= 2
+  else y -= 2;
 
   if (y < 0) {
     Bangle.buzz();
@@ -363,3 +369,5 @@ Bangle.on('swipe', function (direction) {
   else if (direction == 0) launch(config.swipe.up);
   else launch(config.swipe.right);
 });
+
+draw();
