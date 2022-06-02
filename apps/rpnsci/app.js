@@ -1,5 +1,5 @@
 const MEMORY_FILE = "rpnsci.mem.json";
-const Storage = require("Storage");
+const storage = require("Storage");
 
 class NumberButton {
     constructor(number) {
@@ -135,7 +135,7 @@ let ClearButton = {
             t = 0;
         } else {
             memory = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-            Storage.writeJSON(MEMORY_FILE, memory);
+            storage.writeJSON(MEMORY_FILE, memory);
         }
         entryTerminated = false;
         liftOnNumberPress = false;
@@ -233,7 +233,7 @@ class MemStoreIn {
 
     onclick() {
         memory[this.register] = parseFloat(x);
-        Storage.writeJSON(MEMORY_FILE, memory);
+        storage.writeJSON(MEMORY_FILE, memory);
         mode = 'scientific';
         entryTerminated = true;
         liftOnNumberPress = true;
@@ -291,7 +291,7 @@ let x = '0';
 let y = 0;
 let z = 0;
 let t = 0;
-let memJSON = Storage.readJSON(MEMORY_FILE);
+let memJSON = storage.readJSON(MEMORY_FILE);
 if (memJSON) {
     let memory = memJSON;
 } else {
@@ -338,7 +338,7 @@ function getFontSize(length) {
 }
 
 function updateDisplay() {
-    g.clearRect(0, 24, 175, 43).setColor(0.5, 0.5, 1).setFontAlign(1, -1).setFont("Vector", getFontSize(x.length)).drawString(x, 176, 24);
+    g.clearRect(0, 24, 175, 43).setColor(storage.readJSON('setting.json').theme.fg2).setFontAlign(1, -1).setFont("Vector", getFontSize(x.length)).drawString(x, 176, 24);
 }
 
 Bangle.on("touch", (button, xy) => {
