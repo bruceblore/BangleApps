@@ -35,7 +35,7 @@ function drawButtons() {
 }
 
 function drawTimerAndMessage() {
-  g.setColor(0, 0, 0)
+  g.reset()
     .setFontAlign(0, 0)
     .setFont("Vector", 36)
     .clearRect(0, 24, 176, 152)

@@ -313,7 +313,7 @@ function feedback(acceptable) {
 }
 
 function drawButtons() {
-    g.clearRect(0, 44, 175, 175).setFont("Vector", 15).setColor(0, 0, 0).setFontAlign(0, 0);
+    g.reset().clearRect(0, 44, 175, 175).setFont("Vector", 15).setFontAlign(0, 0);
     //Draw lines
     for (let x = 44; x <= 176; x += 44) {
         g.drawLine(x, 44, x, 175);

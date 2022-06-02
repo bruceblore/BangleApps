@@ -3,6 +3,10 @@ const storage = require("Storage");
 Bangle.loadWidgets();
 Bangle.drawWidgets();
 
+function pad(number) {
+  return ('00' + parseInt(number)).slice(-2);
+}
+
 function fileNameToDateString(fileName) {
   let timestamp = 0;
   let foundDigitYet = false;
@@ -18,13 +22,10 @@ function fileNameToDateString(fileName) {
   let dayOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][date.getDay()];
   let completed = storage.readJSON(fileName).final;
 
-  return `${dayOfWeek} ${date.getFullYear()}-${date.getMonth()}-${date.getDate()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}` + (completed ? '' : ' (running)');
+  return `${dayOfWeek} ${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}` + (completed ? '' : ' (running)');
 }
 
 function msToHumanReadable(ms) {
-  function pad(number) {
-    return ('00' + parseInt(number)).slice(-2);
-  }
 
   let hours = Math.floor(ms / 3600000);
   let minutes = Math.floor((ms % 3600000) / 60000);

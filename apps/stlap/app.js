@@ -98,7 +98,7 @@ function drawTime() {
   }
 
   let time = getTime();
-  g.setColor(0, 0, 0)
+  g.reset(0, 0, 0)
     .setFontAlign(0, 0)
     .setFont("Vector", 36)
     .clearRect(0, 24, g.getWidth(), g.getHeight() - 48)

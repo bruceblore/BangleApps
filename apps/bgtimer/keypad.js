@@ -30,7 +30,7 @@ class NumberButton {
     onclick() {
         if (common.state.inputString == '0') common.state.inputString = this.label;
         else common.state.inputString += this.label;
-        common.state.setTime = inputStringToTime(common.state.inputString)
+        common.state.setTime = inputStringToTime(common.state.inputString);
         feedback(true);
         updateDisplay();
     }
@@ -70,7 +70,7 @@ function feedback(acceptable) {
 }
 
 function drawButtons() {
-    g.clearRect(0, 44, 175, 175).setFont("Vector", 15).setColor(0, 0, 0).setFontAlign(0, 0);
+    g.reset().clearRect(0, 44, 175, 175).setFont("Vector", 15).setFontAlign(0, 0);
     //Draw lines
     for (let x = 44; x <= 176; x += 44) {
         g.drawLine(x, 44, x, 175);
@@ -96,7 +96,7 @@ function getFontSize(length) {
 
 function updateDisplay() {
     let displayString = inputStringToDisplayString(common.state.inputString);
-    g.clearRect(0, 24, 175, 43).setColor(0, 0, 1).setFontAlign(1, -1).setFont("Vector", getFontSize(displayString.length)).drawString(displayString, 176, 24);
+    g.clearRect(0, 24, 175, 43).setColor(0, 0.5, 1).setFontAlign(1, -1).setFont("Vector", getFontSize(displayString.length)).drawString(displayString, 176, 24);
 }
 
 exports.show = function (callerCommon) {
@@ -104,7 +104,7 @@ exports.show = function (callerCommon) {
     g.reset();
     drawButtons();
     updateDisplay();
-}
+};
 
 exports.touch = function (button, xy) {
     let row = Math.floor((xy.y - 44) / 44);

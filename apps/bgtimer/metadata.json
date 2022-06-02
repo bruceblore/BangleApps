@@ -1,7 +1,7 @@
 {
   "id": "bgtimer",
   "name": "Timer",
-  "version": "0.01",
+  "version": "0.02",
   "description": "A timer with a keypad that runs in the background",
   "icon": "icon.png",
   "type": "app",
