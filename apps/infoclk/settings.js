@@ -10,7 +10,7 @@
             hideBattery: 20,    // Hide the seconds when the battery is at or below a defined percentage.
             hideTime: true,     // Hide the seconds when between a certain period of time. Useful for when you are sleeping and don't need the seconds
             hideStart: 2200,    //    The time when the seconds are hidden: first 2 digits are hours on a 24 hour clock, last 2 are minutes
-            hideEnd: 0700,      //    The time when the seconds are shown again
+            hideEnd: 700,       //    The time when the seconds are shown again
             hideAlways: false,  // Always hide (never show) the seconds
         },
 
@@ -56,9 +56,9 @@
             enabledLocked: true,    // Whether this bar is enabled when the watch is locked
             enabledUnlocked: false, // Whether the bar is enabled when the watch is unlocked
             color: [0, 0, 1],      // The color of the bar
-            start: 0700,            // The time of day that the bar starts filling
+            start: 700,            // The time of day that the bar starts filling
             end: 2200,              // The time of day that the bar becomes full
-            reset: 0300             // The time of day when the progress bar resets from full to empty
+            reset: 300             // The time of day when the progress bar resets from full to empty
         },
 
         lowBattColor: {
@@ -130,6 +130,7 @@
                         format: hourToString,
                         min: 0,
                         max: 23,
+                        wrap: true,
                         onchange: hour => {
                             minute = config.seconds.hideStart % 100;
                             config.seconds.hideStart = (100 * hour) + minute;
@@ -140,6 +141,7 @@
                         value: config.seconds.hideStart % 100,
                         min: 0,
                         max: 59,
+                        wrap: true,
                         onchange: minute => {
                             hour = Math.floor(config.seconds.hideStart / 100);
                             config.seconds.hideStart = (100 * hour) + minute;
@@ -151,6 +153,7 @@
                         format: hourToString,
                         min: 0,
                         max: 23,
+                        wrap: true,
                         onchange: hour => {
                             minute = config.seconds.hideEnd % 100;
                             config.seconds.hideEnd = (100 * hour) + minute;
@@ -161,6 +164,7 @@
                         value: config.seconds.hideEnd % 100,
                         min: 0,
                         max: 59,
+                        wrap: true,
                         onchange: minute => {
                             hour = Math.floor(config.seconds.hideEnd / 100);
                             config.seconds.hideEnd = (100 * hour) + minute;
@@ -169,7 +173,7 @@
                     }
                 });
             }
-        })
+        });
     }
 
     // Available month/date separators
@@ -183,12 +187,12 @@
 
     // Available bottom row display options
     const BOTTOM_ROW_OPTIONS = [
-        { name: 'Gadgetbridge weather', val: 'weather' },
-        { name: 'Daily step count', val: 'steps' },
-        { name: 'Steps + heart rate', val: 'health' },
+        { name: 'Weather', val: 'weather' },
+        { name: 'Step count', val: 'steps' },
+        { name: 'Steps + BPM', val: 'health' },
         { name: 'Day progresss bar', val: 'progress' },
         { name: 'Nothing', val: false }
-    ]
+    ];
 
     // The menu for configuring which apps have shortcut icons
     function showShortcutMenu() {
@@ -196,7 +200,7 @@
         let shortcutOptions = [
             { name: 'Nothing', val: false },
             { name: 'Launcher', val: '#LAUNCHER' },
-        ]
+        ];
 
         let infoFiles = storage.list(/\.info$/).sort((a, b) => {
             if (a.name < b.name) return -1;
@@ -204,9 +208,10 @@
             else return 0;
         });
         for (let infoFile of infoFiles) {
-            if (infoFile.src) shortcutOptions.push({
-                name: infoFile.name,
-                val: infoFile.id
+            let appInfo = storage.readJSON(infoFile);
+            if (appInfo.src) shortcutOptions.push({
+                name: appInfo.name,
+                val: appInfo.id
             });
         }
 
@@ -336,7 +341,7 @@
                     saveSettings();
                 }
             },
-        })
+        });
     }
 
     const COLOR_OPTIONS = [
@@ -349,6 +354,11 @@
         { name: 'Yellow', val: [1, 1, 0] },
         { name: 'White', val: [1, 1, 1] }
     ];
+
+    // Workaround for being unable to use == on arrays: convert them into strings
+    function colorString(color) {
+        return `${color[0]} ${color[1]} ${color[2]}`;
+    }
 
     //Shows the top level menu
     function showMainMenu() {
@@ -409,9 +419,9 @@
                             saveSettings();
                         }
                     }
-                })
+                });
             },
-            'Bottom row when locked': {
+            'Bottom row': {
                 value: BOTTOM_ROW_OPTIONS.map(item => item.val).indexOf(config.bottomLocked.display),
                 format: value => BOTTOM_ROW_OPTIONS[value].name,
                 min: 0,
@@ -444,7 +454,7 @@
                         }
                     },
                     'Color': {
-                        value: COLOR_OPTIONS.map(item => item.val).indexOf(config.dayProgress.color),
+                        value: COLOR_OPTIONS.map(item => colorString(item.val)).indexOf(colorString(config.dayProgress.color)),
                         format: value => COLOR_OPTIONS[value].name,
                         min: 0,
                         max: COLOR_OPTIONS.length - 1,
@@ -459,6 +469,7 @@
                         format: hourToString,
                         min: 0,
                         max: 23,
+                        wrap: true,
                         onchange: hour => {
                             minute = config.dayProgress.start % 100;
                             config.dayProgress.start = (100 * hour) + minute;
@@ -469,6 +480,7 @@
                         value: config.dayProgress.start % 100,
                         min: 0,
                         max: 59,
+                        wrap: true,
                         onchange: minute => {
                             hour = Math.floor(config.dayProgress.start / 100);
                             config.dayProgress.start = (100 * hour) + minute;
@@ -480,6 +492,7 @@
                         format: hourToString,
                         min: 0,
                         max: 23,
+                        wrap: true,
                         onchange: hour => {
                             minute = config.dayProgress.end % 100;
                             config.dayProgress.end = (100 * hour) + minute;
@@ -490,6 +503,7 @@
                         value: config.dayProgress.end % 100,
                         min: 0,
                         max: 59,
+                        wrap: true,
                         onchange: minute => {
                             hour = Math.floor(config.dayProgress.end / 100);
                             config.dayProgress.end = (100 * hour) + minute;
@@ -501,6 +515,7 @@
                         format: hourToString,
                         min: 0,
                         max: 23,
+                        wrap: true,
                         onchange: hour => {
                             minute = config.dayProgress.reset % 100;
                             config.dayProgress.reset = (100 * hour) + minute;
@@ -511,13 +526,14 @@
                         value: config.dayProgress.reset % 100,
                         min: 0,
                         max: 59,
+                        wrap: true,
                         onchange: minute => {
                             hour = Math.floor(config.dayProgress.reset / 100);
                             config.dayProgress.reset = (100 * hour) + minute;
                             saveSettings();
                         }
                     }
-                })
+                });
             },
             'Low battery color': () => {
                 E.showMenu({
@@ -536,7 +552,7 @@
                         }
                     },
                     'Color': {
-                        value: COLOR_OPTIONS.map(item => item.val).indexOf(config.lowBattColor.color),
+                        value: COLOR_OPTIONS.map(item => colorString(item.val)).indexOf(colorString(config.lowBattColor.color)),
                         format: value => COLOR_OPTIONS[value].name,
                         min: 0,
                         max: COLOR_OPTIONS.length - 1,
@@ -546,10 +562,10 @@
                             saveSettings();
                         }
                     }
-                })
+                });
             },
-        })
+        });
     }
 
     showMainMenu();
-})
+});

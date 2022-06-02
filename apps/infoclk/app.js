@@ -13,7 +13,7 @@ let config = Object.assign({
     hideBattery: 20,    // Hide the seconds when the battery is at or below a defined percentage.
     hideTime: true,     // Hide the seconds when between a certain period of time. Useful for when you are sleeping and don't need the seconds
     hideStart: 2200,    //    The time when the seconds are hidden: first 2 digits are hours on a 24 hour clock, last 2 are minutes
-    hideEnd: 0700,      //    The time when the seconds are shown again
+    hideEnd: 700,      //    The time when the seconds are shown again
     hideAlways: false,  // Always hide (never show) the seconds
   },
 
@@ -59,9 +59,9 @@ let config = Object.assign({
     enabledLocked: true,    // Whether this bar is enabled when the watch is locked
     enabledUnlocked: false, // Whether the bar is enabled when the watch is unlocked
     color: [0, 0, 1],      // The color of the bar
-    start: 0700,            // The time of day that the bar starts filling
+    start: 700,            // The time of day that the bar starts filling
     end: 2200,              // The time of day that the bar becomes full
-    reset: 0300             // The time of day when the progress bar resets from full to empty
+    reset: 300             // The time of day when the progress bar resets from full to empty
   },
 
   lowBattColor: {
@@ -274,7 +274,7 @@ function draw() {
     if (config.bottomLocked.display == 'progress') {
       let color = config.dayProgress.color;
       g.setColor(color[0], color[1], color[2])
-        .fillRect(0, SECONDS_TOP + DIGIT_HEIGHT + 3, g.getWidth() * getDayProgress(now), g.getHieght());
+        .fillRect(0, SECONDS_TOP + DIGIT_HEIGHT + 3, g.getWidth() * getDayProgress(now), g.getHeight());
     } else {
       let bottomString;
 
