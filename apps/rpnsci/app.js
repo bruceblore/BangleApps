@@ -338,7 +338,7 @@ function getFontSize(length) {
 }
 
 function updateDisplay() {
-    g.clearRect(0, 24, 175, 43).setColor(0, 0, 1).setFontAlign(1, -1).setFont("Vector", getFontSize(x.length)).drawString(x, 176, 24);
+    g.clearRect(0, 24, 175, 43).setColor(0.5, 0.5, 1).setFontAlign(1, -1).setFont("Vector", getFontSize(x.length)).drawString(x, 176, 24);
 }
 
 Bangle.on("touch", (button, xy) => {
