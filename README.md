@@ -11,28 +11,24 @@ and that it is not licensed in another way that would make this impossible.
 
 ## My modifications
 
+## New apps
+* pomoplus: pomodoro timer
+* rpnsci: RPN scientific calculator
+* stlap: Stopwatch with laps and gesture mode that runs in the background
+* stlapview: View data recorded by stlap
+* bgtimer: A timer with a keyboard that runs in the background
+* random: Coin flip, dice roll, card draw, number choice
+* infoclk: Clock with information and shortcuts
+
+## Other modifications
 * Changed the default apps to be the list of apps that I have installed. (Mainly for my own convenience.)
-* Created my own custom version of Anton Clock called Bruce Clock (bruceclk)
-  * Display Gadgetbridge weather and step count
-  * When tapped, load an app with some shortcuts.
-  * When swiped, open notifications or change between steps and weather
-* Created a scientific RPN calculator (rpnsci)
-* Stopwatch (stlap)
-  * Now preserves data when closed
-  * Supports keeping track of laps
-  * Gesture mode
-  * Button to open stlapview if installed
 * torch: Max brightness on open
-* bgtimer
-  * Keypad to enter time
-  * Run in background
 * powermanager
   * low battery alerts
   * Alerts now use or-equal to enable a warning at 100%
   * Monotonic percentage is rounded for better compatibility
 * 2047pp: Save state on close
-* random: Coin flip, dice roll, card draw, number choice
-* sched: Added support for infinite buzzes in case 15 is not enough to wake up
+* sched and alarm: Added support for infinite buzzes in case 15 is not enough to wake up
 
 ## The rest of the README is unmodified
 

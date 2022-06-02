@@ -1,87 +1,33 @@
-# Bruce's clock
+# Informational clock
 
-Based on Anton Clock. Adds step count, Gadgetbridge weather, and Start/Stop time to the watch face. Upon tap, show a shortcut menu. For now, this will be fixed to launch a stopwatch, timer, calculator, and the main launcher. In the future, this might be customizable.
+A configurable clock with extra info and shortcuts when unlocked, but large time when locked
 
-## Features
+## Information
 
-The basic time representation only shows hours and minutes of the current time. However, Anton clock can show additional information:
+The clock has two different screen arrangements, depending on whether the watch is locked or unlocked. The most commonly viewed piece of information is the time, so when the watch is locked it optimizes for the time being visible at a glance without the backlight. The hours and minutes take up nearly the entire top half of the display, with the date and seconds taking up nearly the entire bottom half. The day progress bar is between them if enabled, unless configured to be on the bottom row. The bottom row can be configured to display a weather summary, step count, step count and heart rate, the daily progress bar, or nothing.
 
-* Seconds can be shown, either always or only if the screen is unlocked.
-* To help easy recognition, the seconds can be coloured in blue on the Bangle.js 2.
-* Date can be shown in three different formats:
-    * ISO-8601: 2021-12-19
-    * short local format: 19/12/2021, 19.12.2021
-    * long local format: DEC 19 2021
-* Weekday can be shown (on seconds screen only instead of year)
+When the watch is unlocked, it can be assumed that the backlight is on and the user is actively looking at the watch, so instead we can optimize for information density. The bottom half of the display becomes shortcuts, and the top half of the display becomes 4 rows of information (date and time, step count and heart rate, 2 line weather summary) + an optional daily progress bar. (The daily progress bar can be independently enabled when locked and unlocked.)
 
-In this version, additional features have been added:
+Most things are self-explanatory, but the day progress bar might not be. The day progress bar is intended to show approximately how far through the day you are, in the form of a progress bar. You might want to configure it to show how far you are through your waking hours, or you might want to use it to show how far you are through your work or school day.
 
-* Tap the screen to load shortcuts to stopwatch, qalarm, scicalc, and dtlaunch.
+## Shortcuts
 
-* Swipe up or down to open the messages app, if installed. (If not installed, same as a left/right swipe)
+There are generally a few apps that the user uses far more frequently than the others. For example, they might use a timer, alarm clock, and calculator every day, while everything else (such as the settings app) gets used only occasionally. This clock has space for 8 apps in the bottom half of the screen only one tap away, avoiding the need to wait for the launcher to open and then scroll through it. Tapping the top of the watch opens the launcher, eliminating the need for the button (which still opens the launcher due to bangle.js conventions). There is also handling for left, right, and vertical swipes. A vertical swipe by default opens the messages app, mimicking mobile operating systems which use a swipe down to view the notification shade.
 
-* Swipe left and right to alternate between step count and weather display.
+## Configurability
 
-## Usage
+Displaying the seconds allows for more precise timing, but waking up the CPU to refresh the display more often consumes battery. The user can enable or disable them completely, but can also configure them to be enabled or disabled automatically based on some hueristics:
 
-Install Anton clock through the Bangle.js app loader.
-Configure it through the default Bangle.js configuration mechanism
-(Settings app, "Apps" menu, "Anton clock" submenu).
-If you like it, make it your default watch face
-(Settings app, "System" menu, "Clock" submenu, select "Anton clock").
+* They can be hidden while the display is locked, if the user expects to unlock their watch when they need the seconds.
+* They can be hidden when the battery is too low, to make the last portion of the battery last a little bit longer.
+* They can be hidden during a period of time such as when the user is asleep and therefore unlikely to need very much precision.
 
-## Configuration
+The date format can be changed.
 
-Anton clock is configured by the standard settings mechanism of Bangle.js's operating system:
-Open the "Settings" app, then the "Apps" submenu and below it the "Anton clock" menu.
-You configure Anton clock through several "on/off" switches in two menus.
+As described earlier, the contents of the bottom row when locked can be changed.
 
-### The main menu
+The 8 tap-based shortcuts on the bottom and the 3 swipe-based shortcuts can be changed to nothing, the launcher, or any app on the watch.
 
-The main menu contains several settings covering Anton clock in general.
+The start and end time of the day progress bar can be changed. It can be enabled or disabled separately when the watch is locked and unlocked. The color can be changed. The time when it resets from full to empty can be changed.
 
-* **Seconds...** - Opens the submenu for configuring the presentation of the current time's seconds.
-* **Date** - Format of the date representation. Possible values are
-    * **Long** - "Long" date format in the current locale. Usually with the month as name, not number.
-    * **Short** - "Short" date format in the current locale. Usually with the month as number.
-    * **ISO8601** - Show the date in ISO-8601 format (YYYY-MM-DD), irrespective of the current locale.
-* **Show Weekday** - Weekday is shown in the time presentation without seconds.
-Weekday name depends on the current locale.
-If seconds are shown, the weekday is never shown as there is not enough space on the watch face.
-* **Show CalWeek** - Week-number (ISO-8601) is shown. (default: Off)
-If "Show Weekday" is "Off" displays the week-number as "week #<num>".
-If "Show Weekday" is "On" displays "weekday name short" with " #<num>" .
-If seconds are shown, the week number is never shown as there is not enough space on the watch face.
-* **Vector font** - Use the built-in vector font for dates and weekday.
-This can improve readability.
-Otherwise, a scaled version of the built-in 6x8 pixels font is used.
-
-### The "Seconds" submenu
-
-The "Seconds" submenu configures how (and if) seconds are shown on the "Anton" watch face.
-
-* **Show** - Configure when the seconds should be shown at all:
-    * **Never** - Seconds are never shown.
-In this case, hour and minute are a bit more centered on the screen and the clock will always only update every minute.
-This saves battery power.
-    * **Unlocked** - Seconds are shown if the display is unlocked.
-On locked displays, only hour, minutes, date and optionally the weekday are shown.
-_This option is highly recommended on the Bangle.js 2!_
-    * **Always** - Seconds are _always_ shown, irrespective of the display's unlock state.
-_Enabling this option increases power consumption as the watch face will update once per second instead of once per minute._
-* **With ":"** - If enabled, a colon ":" is prepended to the seconds.
-This resembles the usual time representation "hh:mm:ss", even though the seconds are printed on a separate line.
-* **Color** - If enabled, seconds are shown in blue instead of black.
-If the date is shown on the seconds screen, it is colored read instead of black.
-This make the visual orientation much easier on the watch face.
-* **Date** - It is possible to show the date together with the seconds:
-    * **No** - Date is _not_ shown in the seconds screen.
-In this case, the seconds are centered below hour and minute.
-    * **Year** - Date is shown with day, month, and year. If "Date" in the main settings is configured to _ISO8601_, this is used here, too. Otherwise, the short local format is used.
-    * **Weekday** - Date is shown with day, month, and weekday.
-
-The date is coloured in red if the "Coloured" option is chosen.
-
-## Compatibility
-
-Anton clock makes use of core Bangle.js 2 features (coloured display, display lock state). It also runs on the Bangle.js 1 but these features are not available there due to hardware restrictions.
+When the battery is below a defined point, the watch's color can change to another chosen color to help the user notice that the battery is low.
