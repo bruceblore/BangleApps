@@ -11,6 +11,10 @@ function inputStringToTime(inputString) {
         1000 * seconds;
 }
 
+function pad(number) {
+    return ('00' + parseInt(number)).slice(-2);
+}
+
 function inputStringToDisplayString(inputString) {
     let number = parseInt(inputString);
     let hours = Math.floor(number / 10000);
@@ -18,8 +22,8 @@ function inputStringToDisplayString(inputString) {
     let seconds = number % 100;
 
     if (hours == 0 && minutes == 0) return '' + seconds;
-    else if (hours == 0) return `${minutes}:${seconds}`;
-    else return `${hours}:${minutes}:${seconds}`;
+    else if (hours == 0) return `${pad(minutes)}:${pad(seconds)}`;
+    else return `${hours}:${pad(minutes)}:${pad(seconds)}`;
 }
 
 class NumberButton {
