@@ -401,5 +401,6 @@ Bangle.on('swipe', function (direction) {
   else launch(config.swipe.right);
 });
 
-draw();
 if (!Bangle.isLocked()) drawIcons();
+
+draw();

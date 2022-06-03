@@ -442,14 +442,14 @@
                     'Enable while locked': {
                         value: config.dayProgress.enabledLocked,
                         onchange: value => {
-                            configure.dayProgress.enableLocked = value;
+                            config.dayProgress.enableLocked = value;
                             saveSettings();
                         }
                     },
                     'Enable while unlocked': {
                         value: config.dayProgress.enabledUnlocked,
                         onchange: value => {
-                            configure.dayProgress.enabledUnlocked = value;
+                            config.dayProgress.enabledUnlocked = value;
                             saveSettings();
                         }
                     },
