@@ -31,7 +31,7 @@ function drawImage(fileName) {
     Bangle.setLCDBrightness(1);     // Full brightness
 
     let image = eval(storage.read(fileName));   // Sadly, the only reasonable way to do this
-    g.clear().drawImage(image, 0, 0);
+    g.clear().reset().drawImage(image, 0, 0);
 }
 
 // We don't load the widgets because there is no reasonable way to unload them
