@@ -139,10 +139,9 @@ function getDayProgress(now) {
   let reset = config.dayProgress.reset;
 
   // Normalize
-  if (end <= start) {
-    end += 2400;
-    if (current < start) current += 2400;
-  }
+  if (end <= start) end += 2400;
+  if (current < start) current += 2400;
+  if (reset < start) reset += 2400;
 
   // Convert an hhmm number into a floating-point hours
   function toDecimalHours(time) {
@@ -157,7 +156,7 @@ function getDayProgress(now) {
   end = toDecimalHours(end);
   reset = toDecimalHours(reset);
 
-  progress = (current - start) / (end - start);
+  let progress = (current - start) / (end - start);
 
   if (progress < 0 || progress > 1) {
     if (current < reset) return 1;

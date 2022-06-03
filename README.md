@@ -19,6 +19,7 @@ and that it is not licensed in another way that would make this impossible.
 * bgtimer: A timer with a keyboard that runs in the background
 * random: Coin flip, dice roll, card draw, number choice
 * infoclk: Clock with information and shortcuts
+* gallery: Image viewer
 
 ## Other modifications
 * Changed the default apps to be the list of apps that I have installed. (Mainly for my own convenience.)
