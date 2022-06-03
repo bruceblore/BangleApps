@@ -21,6 +21,7 @@ function drawMenu() {
 }
 
 function drawImage(fileName) {
+    E.showMenu();   // Remove the menu to prevent it from breaking things
     setTimeout(() => { Bangle.on('touch', drawMenu); }, 300);   // Touch the screen to go back to the image menu (300ms timeout to allow user to lift finger)
     Bangle.setOptions({             // Disable display power saving while showing the image
         lockTimeout: 0,
