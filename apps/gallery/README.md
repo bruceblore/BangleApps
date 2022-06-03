@@ -4,7 +4,7 @@ A simple gallery app
 
 ## Usage
 
-Upon opening the gallery app, you will be presented with a list of images that you can display. Tap the image to show it. Brightness will be set to full, and the screen timeout will be disabled. When you are done viewing the image, you can tap the screen to go back to the list of images.
+Upon opening the gallery app, you will be presented with a list of images that you can display. Tap the image to show it. Brightness will be set to full, and the screen timeout will be disabled. When you are done viewing the image, you can tap the screen to go back to the list of images. Press BTN1 to flip the image upside down.
 
 ## Adding images
 

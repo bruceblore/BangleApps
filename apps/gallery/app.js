@@ -12,10 +12,14 @@ for (let fileName of imageFiles) {
 let cachedOptions = Bangle.getOptions();    // We will change the backlight and timeouts later, and need to restore them when displaying the menu
 let backlightSetting = storage.readJSON('setting.json').brightness; // LCD brightness is not included in there for some reason
 
+let angle = 0;              // Store the angle of rotation
+let image;                  // Cache the image here because we access it in multiple places
+
 function drawMenu() {
     Bangle.removeListener('touch', drawMenu);   // We no longer want touching to reload the menu
     Bangle.setOptions(cachedOptions);           // The drawImage function set no timeout, undo that
     Bangle.setLCDBrightness(backlightSetting);  // Restore backlight
+    image = undefined;                          // Delete the image from memory
 
     E.showMenu(imageMenu);
 }
@@ -30,9 +34,19 @@ function drawImage(fileName) {
     });
     Bangle.setLCDBrightness(1);     // Full brightness
 
-    let image = eval(storage.read(fileName));   // Sadly, the only reasonable way to do this
-    g.clear().reset().drawImage(image, 0, 0);
+    image = eval(storage.read(fileName));   // Sadly, the only reasonable way to do this
+    g.clear().reset().drawImage(image, 88, 88, { rotate: angle });
 }
+
+setWatch(info => {
+    if (image) {
+        if (angle == 0) angle = Math.PI;
+        else angle = 0;
+        Bangle.buzz();
+
+        g.clear().reset().drawImage(image, 88, 88, { rotate: angle })
+    }
+}, BTN1, { repeat: true });
 
 // We don't load the widgets because there is no reasonable way to unload them
 drawMenu();
