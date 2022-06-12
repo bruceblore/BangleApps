@@ -327,7 +327,7 @@ function draw() {
 
 // Draw the icons. This is done separately from the main draw routine to avoid having to scale and draw a bunch of images repeatedly.
 function drawIcons() {
-  g.clearRect(0, 24, g.getWidth(), g.getHeight());
+  g.reset().clearRect(0, 24, g.getWidth(), g.getHeight());
   for (let i = 0; i < 8; i++) {
     let x = [0, 44, 88, 132, 0, 44, 88, 132][i];
     let y = [88, 88, 88, 88, 132, 132, 132, 132][i];

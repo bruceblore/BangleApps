@@ -129,18 +129,28 @@ let ClearButton = {
     onclick: () => {
         if (x != '0') {
             x = '0';
+            updateDisplay();
         } else if (y != 0 || z != 0 || t != 0) {
             y = 0;
             z = 0;
             t = 0;
+            E.showMessage('Registers cleared!');
+            setTimeout(() => {
+                drawButtons();
+                updateDisplay();
+            }, 250);
         } else {
             memory = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
             storage.writeJSON(MEMORY_FILE, memory);
+            E.showMessage('Memory cleared!');
+            setTimeout(() => {
+                drawButtons();
+                updateDisplay();
+            }, 250);
         }
         entryTerminated = false;
         liftOnNumberPress = false;
         feedback(true);
-        updateDisplay();
     }
 };
 
@@ -199,6 +209,7 @@ class ConstantButton {
     }
 
     onclick() {
+        if (entryTerminated && liftOnNumberPress) liftStack();
         x = '' + this.value;
         entryTerminated = true;
         liftOnNumberPress = true;
@@ -344,12 +355,30 @@ function updateDisplay() {
 Bangle.on("touch", (button, xy) => {
     let row = Math.floor((xy.y - 44) / 44);
     let col = Math.floor(xy.x / 44);
-    if (row < 0) row = 0;
-    if (row > 2) row = 2;
-    if (col < 0) col = 0;
-    if (col > 3) col = 3;
+    if (row < 0) {  // Tap number to show registers
+        g.clearRect(0, 24, 175, 43).setColor(storage.readJSON('setting.json').theme.fg2).setFontAlign(1, -1)
+            .setFont("Vector", getFontSize(x.length)).drawString('' + t, 176, 24);
 
-    BUTTONS[mode][row][col].onclick();
+        g.clearRect(0, 44, 175, 63).setColor(storage.readJSON('setting.json').theme.fg2).setFontAlign(1, -1)
+            .setFont("Vector", getFontSize(x.length)).drawString('' + z, 176, 44);
+
+        g.clearRect(0, 64, 175, 83).setColor(storage.readJSON('setting.json').theme.fg2).setFontAlign(1, -1)
+            .setFont("Vector", getFontSize(x.length)).drawString('' + y, 176, 64);
+
+        g.clearRect(0, 84, 175, 103).setColor(storage.readJSON('setting.json').theme.fg2).setFontAlign(1, -1)
+            .setFont("Vector", getFontSize(x.length)).drawString(x, 176, 84);
+
+        setTimeout(() => {
+            drawButtons();
+            updateDisplay();
+        }, 500);
+    } else {
+        if (row > 2) row = 2;
+        if (col < 0) col = 0;
+        if (col > 3) col = 3;
+
+        BUTTONS[mode][row][col].onclick();
+    }
 });
 
 Bangle.on("swipe", dir => {
