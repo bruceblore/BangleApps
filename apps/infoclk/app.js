@@ -375,11 +375,11 @@ function launch(appId) {
 
 //Set up touch to launch the selected app
 Bangle.on('touch', function (button, xy) {
-  let x = Math.floor(xy.x / 40);
+  let x = Math.floor(xy.x / 44);
   if (x < 0) x = 0;
   else if (x > 3) x = 3;
 
-  let y = Math.floor(xy.y / 40);
+  let y = Math.floor(xy.y / 44);
   if (y < 0) y = -1;
   else if (y > 3) y = 1;
   else y -= 2;
