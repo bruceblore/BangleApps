@@ -8,10 +8,12 @@
     "noImplicitOverride": true,
     "noImplicitReturns": true,
     "noImplicitThis": true,
+    "noLib": true,
     "noUncheckedIndexedAccess": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "strict": true
+    "strict": true,
+    "typeRoots": ["./types"]
   },
-  "include": ["../apps/**/*", "./**/*"], 
+  "include": ["../apps/**/*", "./**/*"]
 }
