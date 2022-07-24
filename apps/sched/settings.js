@@ -53,14 +53,6 @@
       }
     },
 
-    /*LANG*/"Infinite buzzes": {
-      value: settings.infiniteBuzzes,
-      onchange: value => {
-        settings.infiniteBuzzes = value;
-        require("sched").setSettings(settings);
-      }
-    },
-
     /*LANG*/"Buzz Interval": {
       value: settings.buzzIntervalMillis / 1000,
       min: 1,

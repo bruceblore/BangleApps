@@ -107,7 +107,6 @@ exports.getSettings = function () {
       defaultAutoSnooze: false,
       defaultDeleteExpiredTimers: true, // Always
       buzzCount: 10,
-      infiniteBuzzes: false,
       buzzIntervalMillis: 3000, // 3 seconds
       defaultAlarmPattern: "::",
       defaultTimerPattern: "::"
@@ -119,20 +118,3 @@ exports.getSettings = function () {
 exports.setSettings = function (settings) {
   require("Storage").writeJSON("sched.settings.json", settings);
 };
-
-// time in ms -> { hrs, mins }
-exports.decodeTime = function (t) {
-  t = Math.ceil(t / 60000); // sanitise to full minutes
-  let hrs = 0 | (t / 60);
-  return { hrs: hrs, mins: t - hrs * 60 };
-}
-
-// time in { hrs, mins } -> ms
-exports.encodeTime = function (o) {
-  return o.hrs * 3600000 + o.mins * 60000;
-}
-
-exports.formatTime = function (t) {
-  let o = exports.decodeTime(t);
-  return o.hrs + ":" + ("0" + o.mins).substr(-2);
-}
