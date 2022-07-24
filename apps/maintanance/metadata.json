@@ -1,0 +1,37 @@
+{
+    "id": "maintanance",
+    "name": "Maintanance",
+    "version": "0.01",
+    "description": "Run the GPS when charging to maintain almanac, and compact (while charging) storage in configurable intervals",
+    "icon": "icon.png",
+    "type": "widget",
+    "tags": "tools",
+    "supports": [
+        "BANGLEJS2"
+    ],
+    "allow_emulator": true,
+    "storage": [
+        {
+            "name": "maintanance.app.js",
+            "url": "app.js"
+        },
+        {
+            "name": "maintanance.settings.js",
+            "url": "settings.js"
+        },
+        {
+            "name": "maintanance.boot.js",
+            "url": "boot.js"
+        },
+        {
+            "name": "maintanance.img",
+            "url": "icon.js",
+            "evaluate": true
+        }
+    ],
+    "data": [
+        {
+            "name": "infoclk.json"
+        }
+    ]
+}
