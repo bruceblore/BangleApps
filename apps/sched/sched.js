@@ -67,8 +67,9 @@ function showAlarm(alarm) {
 
     const pattern = alarm.vibrate || (alarm.timer ? settings.defaultTimerPattern : settings.defaultAlarmPattern);
     require("buzz").pattern(pattern).then(() => {
-      if (buzzCount--) {
+      if (buzzCount != 0) {
         setTimeout(buzz, settings.buzzIntervalMillis);
+        buzzCount -= 1;
       } else if (alarm.as) { // auto-snooze
         buzzCount = settings.buzzCount;
         setTimeout(buzz, settings.defaultSnoozeMillis);

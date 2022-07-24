@@ -42,9 +42,9 @@
       }
     },
 
-    /*LANG*/"Buzz Count": {
+    /*LANG*/"Buzz Count (-1 = inf)": {
       value: settings.buzzCount,
-      min: 5,
+      min: -1,
       max: 15,
       step: 1,
       onchange: v => {
