@@ -1,0 +1,28 @@
+{
+  "id": "widbt_noload",
+  "name": "Bluetooth Widget with Notification that doesn't reload",
+  "version": "0.01",
+  "description": "Almost identical to widbt_notify, except it doesn't display messages in areas of the screen that apps don't expect, and therefore doesn't need to reload them. Additionally, has some mitigation for \"false\" alarms when BT disconnects but is reconnected within seconds",
+  "icon": "widget.png",
+  "type": "widget",
+  "tags": "widget,bluetooth",
+  "supports": [
+    "BANGLEJS",
+    "BANGLEJS2"
+  ],
+  "storage": [
+    {
+      "name": "widbt_noload.wid.js",
+      "url": "widget.js"
+    },
+    {
+      "name": "widbt_noload.settings.js",
+      "url": "settings.js"
+    }
+  ],
+  "data": [
+    {
+      "name": "widbt_noload.json"
+    }
+  ]
+}
