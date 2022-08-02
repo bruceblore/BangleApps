@@ -4,7 +4,7 @@
   "shortName": "ereader",
   "version": "0.01",
   "description": "Read books, text notes, etc on your watch. Files should end with .book and the first line is the title.",
-  "icon": "app.png",
+  "icon": "icon.png",
   "tags": "tool",
   "supports": [
     "BANGLEJS2"
@@ -16,7 +16,7 @@
     },
     {
       "name": "ereader.img",
-      "url": "app-icon.js",
+      "url": "icon.js",
       "evaluate": true
     },
     {
