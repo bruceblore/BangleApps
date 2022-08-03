@@ -1,69 +1,60 @@
 (function (back) {
-  var FILE = "widbt_noload.json";
-  var settings = Object.assign({
-    secondsOnUnlock: false,
-  }, require('Storage').readJSON(FILE, true) || {});
+  const storage = require('Storage');
 
-  function writeSettings() {
-    require('Storage').writeJSON(FILE, settings);
+  const FILE = "widbt_noload.json";
+
+  let settings = Object.assign({
+    showWidget: true,
+    buzzOnConnect: false,
+    buzzOnLoss: true,
+    lossDelay: true,
+    hideConnected: false,
+  }, storage.readJSON(FILE, true));
+
+  function save() {
+    storage.writeJSON(FILE, settings);
   }
 
-  // Helper method which uses int-based menu item for set of string values
-  function stringItems(startvalue, writer, values) {
-    return {
-      value: (startvalue === undefined ? 0 : values.indexOf(startvalue)),
-      format: v => values[v],
-      min: 0,
-      max: values.length - 1,
-      wrap: true,
-      step: 1,
-      onchange: v => {
-        writer(values[v]);
-        writeSettings();
-      }
-    };
-  }
-
-  // Helper method which breaks string set settings down to local settings object
-  function stringInSettings(name, values) {
-    return stringItems(settings[name], v => settings[name] = v, values);
-  }
-
-  var mainmenu = {
+  E.showMenu({
     "": {
-      "title": "Bluetooth Widget WN"
+      "title": "Bluetooth Widget",
+      'back': back,
     },
-    "< Back": () => back(),
     "Show Widget": {
-      value: (settings.showWidget !== undefined ? settings.showWidget : true),
+      value: settings.showWidget,
       onchange: v => {
         settings.showWidget = v;
-        writeSettings();
+        save();
       }
     },
     "Buzz on Connect": {
-      value: (settings.buzzOnConnect !== undefined ? settings.buzzOnConnect : true),
+      value: settings.buzzOnConnect,
       onchange: v => {
         settings.buzzOnConnect = v;
-        writeSettings();
+        save();
       }
     },
     "Buzz on loss": {
-      value: (settings.buzzOnLoss !== undefined ? settings.buzzOnLoss : true),
+      value: settings.buzzOnLoss,
       onchange: v => {
         settings.buzzOnLoss = v;
-        writeSettings();
+        save();
+      }
+    },
+    "Delay before loss buzz": {
+      value: settings.lossDelay,
+      onchange: v => {
+        settings.lossDelay = v;
+        save();
       }
     },
     "Hide connected": {
-      value: (settings.hideConnected !== undefined ? settings.hideConnected : false),
+      value: settings.hideConnected,
       onchange: v => {
         settings.hideConnected = v;
-        writeSettings();
+        save();
       }
     }
-  };
-
-  E.showMenu(mainmenu);
+  });
 
 });

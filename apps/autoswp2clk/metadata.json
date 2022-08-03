@@ -2,7 +2,7 @@
   "id": "autoswp2clk",
   "name": "Automatic Swipe back to the Clock",
   "shortName": "Auto Swipe to Clock",
-  "version": "0.01",
+  "version": "0.02",
   "description": "Swipe back to the clock on any app that doesn't use swipes, but not on apps that do. No configuration required.",
   "icon": "app.png",
   "type": "bootloader",
@@ -12,7 +12,7 @@
   ],
   "storage": [
     {
-      "name": "swp2clk.boot.js",
+      "name": "autoswp2clk.boot.js",
       "url": "boot.js"
     }
   ]

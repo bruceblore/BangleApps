@@ -21,22 +21,41 @@ Bangle.AUTOSWP2CLK = {
   swipeHandlers: []
 };
 
-Bangle.on = function (eventName, func) {
-  if (eventName == 'swipe') swipeHandlers.push(func);
-  else Bangle.AUTOSWP2CLK.on(eventName, func);
+Bangle.on = (eventName, func) => {
+  console.log(eventName);
+  if (eventName == 'swipe') {
+    Bangle.AUTOSWP2CLK.swipeHandlers.push(func);
+  }
+  else {
+    Bangle.AUTOSWP2CLK.on(eventName, func);
+  }
 };
 
-Bangle.removeListener = function (eventName, func) {
-  if (eventName == 'swipe') Bangle.AUTOSWP2CLK.swipeHandlers.splice(Bangle.AUTOSWP2CLK.swipeHandlers.indexOf(func), 1);
-  else Bangle.AUTOSWP2CLK.removeListener(eventName, func);
+Bangle.removeListener = (eventName, func) => {
+  if (eventName == 'swipe') {
+    Bangle.AUTOSWP2CLK.swipeHandlers.splice(Bangle.AUTOSWP2CLK.swipeHandlers.indexOf(func), 1);
+  }
+  else {
+    Bangle.AUTOSWP2CLK.removeListener(eventName, func);
+  }
 };
 
-Bangle.removeAllListeners = function (eventName) {
-  if (eventName == 'swipe') Bangle.AUTOSWP2CLK.swipeHandlers = [];
-  else Bangle.AUTOSWP2CLK.removeAllListeners(eventName);
+Bangle.removeAllListeners = (eventName) => {
+  if (eventName == 'swipe') {
+    Bangle.AUTOSWP2CLK.swipeHandlers = [];
+  }
+  else {
+    Bangle.AUTOSWP2CLK.removeAllListeners(eventName);
+  }
 };
 
 Bangle.AUTOSWP2CLK.on('swipe', (dirLR, dirUD) => {
-  if (Bangle.AUTOSWP2CLK.swipeHandlers.length == 0) load();
-  else for (func of Bangle.AUTOSWP2CLK.swipeHandlers) func(dirLR, dirUD);
+  if (Bangle.AUTOSWP2CLK.swipeHandlers.length == 0) {
+    load();
+  }
+  else {
+    for (let func of Bangle.AUTOSWP2CLK.swipeHandlers) {
+      func(dirLR, dirUD);
+    }
+  }
 });
