@@ -1,6 +1,0 @@
-ereader app tutorial
-Loading content: Convert your files into plain text, and give them the extension .book. The first line should be the title. Upload to the watch. The Espruino IDE is great for this.
-
-Reading content: tap the left side of the screen to go back, and the right side to go forward. (Going back isn't exactly by one page, maybe I'll fix that at some point, maybe I won't.) Press BTN1 to toggle the display backlight.
-
-Because the button toggles the backlight, you need to press and hold it to exit. If this is annoying, I recommend installing widclose or autoswp2clk.
