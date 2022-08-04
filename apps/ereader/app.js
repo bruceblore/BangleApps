@@ -1,4 +1,4 @@
-const storage = require('Storage')
+const storage = require('Storage');
 
 const DATA_FILE = "ereader.json";
 const CHUNK_SIZE = 8192;  // How many characters to load into memory at once. = Maximum length of title and maximum number of characters on screen
@@ -35,7 +35,7 @@ for (let book of data.books) {
 data.books.filter(book => !booksToRemove.includes(book));
 
 // Scan for new books and add them to the database
-for (fileName of storage.list(/\.book$/)) {
+for (let fileName of storage.list(/\.book$/)) {
   if (trackedFilenames.includes(fileName)) continue;
 
   let txt = storage.read(fileName, 0, CHUNK_SIZE);
@@ -57,7 +57,9 @@ E.on('kill', () => {
 
 // Try to render the given text and return the number of characters that were actually rendered
 function renderText(text, topY, fontHeight) {
-  let lines = g.reset().setFont('Vector', fontHeight).wrapString(text, g.getWidth()).slice(0, (g.geteight() - topY) / fontHeight);
+  let lines = g.reset().setFont('Vector', fontHeight).wrapString(text, g.getWidth()).slice(0, (g.getHeight() - topY) / fontHeight);
+  console.log(text);
+  console.log(lines);
   g.drawString(lines.join('\n'), 0, topY);
   return lines.reduce((previousValue, line) => previousValue + line.length, 0);
 }
@@ -74,7 +76,7 @@ function openBook(title) {
 
   Bangle.setOptions({
     lockTimeout: 0,
-    backlightTimeout: forceBacklightTimeout ? (data.backlightTimeout * 1000) : systemSettings.options.backlightTimeout
+    backlightTimeout: data.forceBacklightTimeout ? (data.backlightTimeout * 1000) : systemSettings.options.backlightTimeout
   });
 
   let topY = data.widgets ? 24 : 0;
@@ -90,14 +92,14 @@ function openBook(title) {
 }
 
 // Build and show the menu of books
-E.showMenu('Rendering menu...')
+E.showMessage('Rendering menu...');
 let booksByTitle = {};
 let menu = {
   '': { 'title': 'Books' },
-}
-for (book of data.books) {
+};
+for (let book of data.books) {
   booksByTitle[book.title] = book;
-  menu[book.title] = eval(`() => { openBook(${book.title}); }`);
+  menu[book.title] = eval(`() => { openBook("${book.title}"); }`);
 }
 if (data.widgets) {
   Bangle.loadWidgets();
