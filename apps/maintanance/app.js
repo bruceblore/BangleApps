@@ -20,7 +20,7 @@ function handleGPS(fix) {
         else text = `Time set (${fix.satellites} sats)`;
     } else text = `GPS fix (${fix.satellites} sats)`;
 
-    g.reset().setFont('Vector', 24).setAlign(0, -1).drawString(text, 88, 24);
+    g.reset().setFont('Vector', 24).setFontAlign(0, -1).drawString(text, 88, 24);
 }
 
 handleGPS(Bangle.getGPSFix());
@@ -28,7 +28,7 @@ Bangle.on('GPS', handleGPS);
 
 // Display the status line and full screen battery bar
 function statusAndBattBar() {
-    g.reset().setFont('Vector', 24).setAlign(-1, -1).drawString(`${E.getBattery()}% ${locale.time(new Date())}`, 0, 152);
+    g.reset().setFont('Vector', 24).setFontAlign(-1, -1).drawString(`${E.getBattery()}% ${locale.time(new Date())}`, 0, 152);
 
     if (E.getBattery() == 100) {
         g.setColor(0, 1, 0);

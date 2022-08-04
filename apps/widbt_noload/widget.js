@@ -17,12 +17,12 @@ WIDGETS.bluetooth_notify = {
             if (NRF.getSecurityStatus().connected) {
                 if (!WIDGETS.bluetooth_notify.settings.hideConnected) {
                     g.setColor((g.getBPP() > 8) ? "#07f" : (g.theme.dark ? "#0ff" : "#00f"));
-                    g.drawImage(icon, 2 + this.x, 2 + this.y);
+                    g.drawImage(WIDGETS.bluetooth_notify.icon, 2 + this.x, 2 + this.y);
                 }
             } else {
                 // g.setColor(g.theme.dark ? "#666" : "#999");
                 g.setColor("#f00"); // red is easier to distinguish from blue
-                g.drawImage(icon, 2 + this.x, 2 + this.y);
+                g.drawImage(WIDGETS.bluetooth_notify.icon, 2 + this.x, 2 + this.y);
             }
         }
     },

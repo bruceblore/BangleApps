@@ -1,7 +1,5 @@
 // Run the maintanance routine and the optional interface if requested when the watch is plugged in
 
-const storage = require('Storage');
-
 Bangle.MAINTANANCE_CONFIG = Object.assign({
     runGPS: true,
     gpsTime: false,
@@ -10,7 +8,7 @@ Bangle.MAINTANANCE_CONFIG = Object.assign({
     compactInterval: 2592000000,    // 30 days
     lastCompact: 0,
     displayUI: true,                // Show a UI when charging
-}, storage.readJSON('maintanance.json'));
+}, require('Storage').readJSON('maintanance.json'));
 
 Bangle.MAINTANANCE_USER_OPTIONS = Bangle.getOptions();
 
@@ -26,7 +24,7 @@ function onReset() {
                     setTimeout(() => {
                         setTime(Math.ceil(fix.time.getTime() / 1000));
                     }, 1000 - (fix.time.getTime() % 1000));
-                })
+                });
             }
         }
 
@@ -45,7 +43,7 @@ function onReset() {
         // Set the timeout options back to what they were, again to avoid running down the battery
         // Don't change the other options, in case something changed them in the background. We don't want to mess with more stuff than necessary
         Bangle.setOptions({
-            lockTimout: Bangle.MAINTANANCE_USER_OPTIONS.lockTimeout,
+            lockTimeout: Bangle.MAINTANANCE_USER_OPTIONS.lockTimeout,
             backlightTimeout: Bangle.MAINTANANCE_USER_OPTIONS.backlightTimeout
         });
     }
@@ -59,10 +57,10 @@ Bangle.on('charging', charging => {
     if (charging && (((new Date()).getTime() - Bangle.MAINTANANCE_CONFIG.lastCompact) > Bangle.MAINTANANCE_CONFIG.compactInterval)) {
         E.showMessage('Compacting...');
         Bangle.MAINTANANCE_CONFIG.lastCompact = (new Date()).getTime();
-        storage.writeJSON('maintanance.json', Bangle.MAINTANANCE_CONFIG);
+        require('Storage').writeJSON('maintanance.json', Bangle.MAINTANANCE_CONFIG);
     }
 
     if (Bangle.MAINTANANCE_CONFIG.displayUI) {
         load('maintanance.app.js');
     }
-})
+});
