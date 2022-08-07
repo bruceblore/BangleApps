@@ -14,47 +14,43 @@
  * Effectively, this allows applications to manage events as they usually do, but creates a "default" listener for swipe to load the clock that only gets called if the application never set a listener for swipe. From the perspective of the user, apps that use swipes can use their swipes, and apps that don't use swipes will have swipes go back to the clock.
  */
 
-Bangle.AUTOSWP2CLK = {
-  on: Bangle.on,
-  removeListener: Bangle.removeListener,
-  removeAllListeners: Bangle.removeAllListeners,
-  swipeHandlers: []
+const AUTOSWP2CLK = {
+  on: Bangle.on,                                  // Original, unmodified Bangle.on()
+  removeListener: Bangle.removeListener,          // Original Bangle.removeListener()
+  removeAllListeners: Bangle.removeAllListeners,  // Original Bangle.removeAllListeners()
+  swipeHandlers: []                               // Array of swipe handlers
 };
 
 Bangle.on = (eventName, func) => {
-  console.log(eventName);
   if (eventName == 'swipe') {
-    Bangle.AUTOSWP2CLK.swipeHandlers.push(func);
-  }
-  else {
-    Bangle.AUTOSWP2CLK.on(eventName, func);
+    AUTOSWP2CLK.swipeHandlers.push(func);
+  } else {
+    AUTOSWP2CLK.on(eventName, func);
   }
 };
 
 Bangle.removeListener = (eventName, func) => {
   if (eventName == 'swipe') {
-    Bangle.AUTOSWP2CLK.swipeHandlers.splice(Bangle.AUTOSWP2CLK.swipeHandlers.indexOf(func), 1);
-  }
-  else {
-    Bangle.AUTOSWP2CLK.removeListener(eventName, func);
+    AUTOSWP2CLK.swipeHandlers.splice(AUTOSWP2CLK.swipeHandlers.indexOf(func), 1);
+  } else {
+    AUTOSWP2CLK.removeListener(eventName, func);
   }
 };
 
 Bangle.removeAllListeners = (eventName) => {
   if (eventName == 'swipe') {
-    Bangle.AUTOSWP2CLK.swipeHandlers = [];
-  }
-  else {
-    Bangle.AUTOSWP2CLK.removeAllListeners(eventName);
+    AUTOSWP2CLK.swipeHandlers = [];
+  } else {
+    AUTOSWP2CLK.removeAllListeners(eventName);
   }
 };
 
-Bangle.AUTOSWP2CLK.on('swipe', (dirLR, dirUD) => {
-  if (Bangle.AUTOSWP2CLK.swipeHandlers.length == 0) {
+// Using the old Bangle.on rather than the new one
+AUTOSWP2CLK.on('swipe', (dirLR, dirUD) => {
+  if (AUTOSWP2CLK.swipeHandlers.length == 0) {
     load();
-  }
-  else {
-    for (let func of Bangle.AUTOSWP2CLK.swipeHandlers) {
+  } else {
+    for (let func of AUTOSWP2CLK.swipeHandlers) {
       func(dirLR, dirUD);
     }
   }

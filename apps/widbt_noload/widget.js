@@ -29,7 +29,7 @@ WIDGETS.bluetooth_notify = {
 
     // Check whether we should buzz: this is true when buzzing is not blocked by a previous buzz, and when the quiet mode setting permits it
     shouldBuzz: function () {
-        return WIDGETS.bluetooth_notify.warningEnabled && (require('Storage').readJSON('setting.json', 1) || {}).quiet;
+        return WIDGETS.bluetooth_notify.warningEnabled && !(require('Storage').readJSON('setting.json', 1) || {}).quiet;
     },
 
     // don't buzz for the next 30 seconds.
