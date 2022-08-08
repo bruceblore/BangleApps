@@ -28,10 +28,5 @@
             "url": "icon.js",
             "evaluate": true
         }
-    ],
-    "data": [
-        {
-            "name": "infoclk.json"
-        }
     ]
 }
