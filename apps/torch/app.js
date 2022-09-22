@@ -7,8 +7,8 @@ function loadSettings() {
 
 loadSettings();
 
-Bangle.setLCDPower(1);
 Bangle.setLCDBrightness(1);
+Bangle.setLCDPower(1);
 Bangle.setLCDTimeout(0);
 g.reset();
 g.setColor(settings.bg);

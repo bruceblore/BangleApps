@@ -25,7 +25,7 @@
     "calendar",
     "wid_edit",
     "torch",
-    "powermanager,
+    "powermanager",
     "2047pp",
     "calibration",
     "health",
@@ -46,5 +46,6 @@
     "bgtimer",
     "stlap",
     "random",
-    "gallery"
+    "gallery",
+    "maintanance"
 ]
