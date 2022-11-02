@@ -3,7 +3,6 @@
     "wid_a_battery_widget",
     "gpsinfo",
     "info",
-    "ltherm",
     "qmsched",
     "snaky",
     "slevel",
@@ -12,7 +11,6 @@
     "wpmoto",
     "fileman",
     "widclk",
-    "qrcode",
     "compass",
     "rpnsci",
     "recorder",
@@ -23,7 +21,6 @@
     "balltastic",
     "blackjack",
     "calendar",
-    "wid_edit",
     "torch",
     "powermanager",
     "2047pp",
@@ -33,9 +30,6 @@
     "boot",
     "sched",
     "widbt_notify",
-    "sleeplog",
-    "f9lander",
-    "tinydraw",
     "messages",
     "android",
     "alarm",
@@ -47,5 +41,6 @@
     "stlap",
     "random",
     "gallery",
-    "maintanance"
+    "maintanance",
+    "agenda"
 ]

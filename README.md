@@ -1,4 +1,4 @@
-Bangle.js App Loader (and Apps) (Featuring Bruce's customizations)
+Bangle.js App Loader (and Apps) (with my modifications)
 ==================================================================
 
 My modifications to the [Bangle.js apps](https://github.com/espruino/BangleApps). Apps that I don't use are not removed.
@@ -11,7 +11,7 @@ and that it is not licensed in another way that would make this impossible.
 
 ## My modifications
 
-## New apps
+### New apps
 * pomoplus: pomodoro timer
 * rpnsci: RPN scientific calculator
 * stlap: Stopwatch with laps and gesture mode that runs in the background
@@ -21,7 +21,7 @@ and that it is not licensed in another way that would make this impossible.
 * infoclk: Clock with information and shortcuts
 * gallery: Image viewer
 
-## Other modifications
+### Other modifications
 * Changed the default apps to be the list of apps that I have installed. (Mainly for my own convenience.)
 * torch: Max brightness on open
 * powermanager
