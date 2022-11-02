@@ -2,7 +2,10 @@
 (function(back) {
   let settings = Object.assign({
     showClocks: true,
-    fullscreen: false
+    fullscreen: false,
+    direct: false,
+    oneClickExit: false,
+    swipeExit: false
   }, require("Storage").readJSON("launch.json", true) || {});
 
   let fonts = g.getFonts();
@@ -28,6 +31,10 @@
     /*LANG*/"One click exit": {
       value: settings.oneClickExit == true,
       onchange: (m) => { save("oneClickExit", m) }
+    },
+    /*LANG*/"Swipe exit": {
+      value: settings.swipeExit == true,
+      onchange: m => { save("swipeExit", m) }
     }
   };
   E.showMenu(appMenu);
