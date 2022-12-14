@@ -12,7 +12,7 @@ Graphics.prototype.setFontPaytoneOne = function(scale) {
 { // must be inside our own scope here so that when we are unloaded everything disappears
   // we also define functions using 'let fn = function() {..}' for the same reason. function decls are global
 let drawTimeout;
-  
+
 let g2 = Graphics.createArrayBuffer(g.getWidth(),90,1,{msb:true});
 let g2img = {
   width:g2.getWidth(), height:g2.getHeight(), bpp:1,
@@ -34,21 +34,22 @@ let draw = function() {
   x = R.w / 2;
   y = R.y + R.h / 2 - 12; // 12 = room for date
   var date = new Date();
-  var hourStr = date.getHours();
-  var minStr = date.getMinutes().toString().padStart(2,0);
+  var local_time = require("locale").time(date, 1);
+  var hourStr = local_time.split(":")[0].trim().padStart(2,'0');
+  var minStr = local_time.split(":")[1].trim().padStart(2, '0');
   dateStr = require("locale").dow(date, 1).toUpperCase()+ " "+
             require("locale").date(date, 0).toUpperCase();
 
   // Draw hour
   g.reset().clearRect(R); // clear whole background (w/o widgets)
   g.setFontAlign(-1, 0).setFont("PaytoneOne");
-  g.drawString(hourStr, fontBorder, y-offsy);  
+  g.drawString(hourStr, fontBorder, y-offsy).setFont("4x6"); // draw and unload custom font
   // add slope in background color
   g.setColor(g.theme.bg).fillPoly([0,y+slope-slopeBorderUpper, R.w,y-slope-slopeBorderUpper,
                                    R.w,y-slope, 0,y+slope]);
   // Draw minute to offscreen buffer
   g2.setColor(0).fillRect(0,0,g2.getWidth(),g2.getHeight()).setFontAlign(1, 0).setFont("PaytoneOne");
-  g2.setColor(1).drawString(minStr, g2.getWidth()-fontBorder, g2.getHeight()/2);
+  g2.setColor(1).drawString(minStr, g2.getWidth()-fontBorder, g2.getHeight()/2).setFont("4x6"); // draw and unload custom font
   g2.setColor(0).fillPoly([0,0, g2.getWidth(),0, 0,slope*2]);
   // start the animation *in*
   animate(true);
@@ -84,17 +85,16 @@ let animate = function(isIn, callback) {
     if (isAnimIn && minuteX>=0) {
       minuteX=0;
       stop = true;
-    } else if (!isAnimIn && minuteX>=R.w) 
+    } else if (!isAnimIn && minuteX>=R.w)
       stop = true;
     drawMinute();
     if (stop) {
       clearInterval(animInterval);
       animInterval=undefined;
+      if (isAnimIn) // draw the date
+        g.setColor(g.theme.bg).setFontAlign(0, 0).setFont("6x15").drawString(dateStr, R.x + R.w/2, R.y+R.h-9);
       if (callback) callback();
-      if (isAnimIn) {
-        // draw the date
-        g.setColor(g.theme.bg).setFontAlign(0, 0).setFont("6x15").drawString(dateStr, R.x + R.w/2, R.y+R.h-9);}
-      }
+    }
   }, 20);
 };
 

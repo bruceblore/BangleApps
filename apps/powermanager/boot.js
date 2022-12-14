@@ -4,8 +4,7 @@
     require('Storage').readJSON("powermanager.json", true) || {}
   );
 
-  if (settings.warnHighEnabled) {
-    print("High charge warning enabled");
+  if (settings.warnEnabled) {
     var chargingInterval;
 
     function handleCharging(charging) {
@@ -75,5 +74,14 @@
       if (!Bangle.isCharging() && current < v) v = current;
       return v;
     };
+  }
+
+  if (settings.autoCalibration) {
+    let chargeStart;
+    Bangle.on("charging", (charging) => {
+      if (charging) chargeStart = Date.now();
+      if (chargeStart && !charging && (Date.now() - chargeStart > 1000 * 60 * 60 * 3)) require("powermanager").setCalibration();
+      if (!charging) chargeStart = undefined;
+    });
   }
 })();

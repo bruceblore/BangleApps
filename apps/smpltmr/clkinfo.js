@@ -63,14 +63,13 @@
     } catch(ex){ }
   }
 
-  var img = atob("GBiBAeAAB+AAB/v/3/v/3/v/3/v/3/v/n/n/H/z+P/48//85//+b//+b//8p//4E//yCP/kBH/oAn/oAX/oAX/oAX/oAX+AAB+AABw==")
   var smpltmrItems = {
     name: "Timer",
-    img: img,
+    img: atob("GBiBAAB+AAB+AAAYAAAYAAB+AA3/sA+B8A4AcAwMMBgPGBgPmDAPjDAPzDAPzDP/zDP/zDH/jBn/mBj/GAw8MA4AcAeB4AH/gAB+AA=="),
     items: [
       {
         name: null,
-        get: () => ({ text: getAlarmMinutesText() + (isAlarmEnabled() ? " min" : ""), img: null}),
+        get: () => ({ text: getAlarmMinutesText() + (isAlarmEnabled() ? " min" : ""), img: smpltmrItems.img }),
         show: function() { smpltmrItems.items[0].emit("redraw"); },
         hide: function () {},
         run: function() { }
@@ -82,7 +81,7 @@
   offsets.forEach((o, i) => {
     smpltmrItems.items = smpltmrItems.items.concat({
       name: null,
-      get: () => ({ text: (o > 0 ? "+" : "") + o + " min.", img: null}),
+      get: () => ({ text: (o > 0 ? "+" : "") + o + " min.", img: smpltmrItems.img }),
       show: function() { smpltmrItems.items[i+1].emit("redraw"); },
       hide: function () {},
       run: function() {

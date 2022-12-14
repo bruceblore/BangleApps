@@ -1,7 +1,7 @@
 {
   "id": "sched",
   "name": "Scheduler",
-  "version": "0.13",
+  "version": "0.16",
   "description": "Scheduling library for alarms and timers",
   "icon": "app.png",
   "type": "scheduler",
@@ -10,6 +10,10 @@
     "BANGLEJS",
     "BANGLEJS2"
   ],
+  "provides_modules": [
+    "sched"
+  ],
+  "default": true,
   "readme": "README.md",
   "storage": [
     {
@@ -32,6 +36,10 @@
     {
       "name": "sched.settings.js",
       "url": "settings.js"
+    },
+    {
+      "name": "sched.clkinfo.js",
+      "url": "clkinfo.js"
     }
   ],
   "data": [
