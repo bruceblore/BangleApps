@@ -302,12 +302,7 @@ let x = '0';
 let y = 0;
 let z = 0;
 let t = 0;
-let memJSON = storage.readJSON(MEMORY_FILE);
-if (memJSON) {
-    let memory = memJSON;
-} else {
-    let memory = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-}
+let memory = storage.readJSON(MEMORY_FILE) || [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 let mode = 'number';
 let entryTerminated = false;
 let liftOnNumberPress = false;

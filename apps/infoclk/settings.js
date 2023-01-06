@@ -42,11 +42,12 @@
         ],
 
         swipe: {
-            // 3 shortcuts to launch upon swiping:
+            // 4 shortcuts to launch upon swiping:
             //    false = no shortcut
             //    '#LAUNCHER' = open the launcher
             //    any other string = name of app to open
             up: 'messages',       // Swipe up or swipe down, due to limitation of event handler
+            down: 'messages',
             left: '#LAUNCHER',
             right: '#LAUNCHER',
         },
@@ -222,7 +223,7 @@
             },
             'Top first': {
                 value: shortcutOptions.map(item => item.val).indexOf(config.shortcuts[0]),
-                format: value => shortcutOptions[value].name,
+                format: value => (value == -1) ? 'Unknown app!' : shortcutOptions[value].name,
                 min: 0,
                 max: shortcutOptions.length - 1,
                 wrap: false,
@@ -233,7 +234,7 @@
             },
             'Top second': {
                 value: shortcutOptions.map(item => item.val).indexOf(config.shortcuts[1]),
-                format: value => shortcutOptions[value].name,
+                format: value => (value == -1) ? 'Unknown app!' : shortcutOptions[value].name,
                 min: 0,
                 max: shortcutOptions.length - 1,
                 wrap: false,
@@ -244,7 +245,7 @@
             },
             'Top third': {
                 value: shortcutOptions.map(item => item.val).indexOf(config.shortcuts[2]),
-                format: value => shortcutOptions[value].name,
+                format: value => (value == -1) ? 'Unknown app!' : shortcutOptions[value].name,
                 min: 0,
                 max: shortcutOptions.length - 1,
                 wrap: false,
@@ -255,7 +256,7 @@
             },
             'Top fourth': {
                 value: shortcutOptions.map(item => item.val).indexOf(config.shortcuts[3]),
-                format: value => shortcutOptions[value].name,
+                format: value => (value == -1) ? 'Unknown app!' : shortcutOptions[value].name,
                 min: 0,
                 max: shortcutOptions.length - 1,
                 wrap: false,
@@ -266,7 +267,7 @@
             },
             'Bottom first': {
                 value: shortcutOptions.map(item => item.val).indexOf(config.shortcuts[4]),
-                format: value => shortcutOptions[value].name,
+                format: value => (value == -1) ? 'Unknown app!' : shortcutOptions[value].name,
                 min: 0,
                 max: shortcutOptions.length - 1,
                 wrap: false,
@@ -277,7 +278,7 @@
             },
             'Bottom second': {
                 value: shortcutOptions.map(item => item.val).indexOf(config.shortcuts[5]),
-                format: value => shortcutOptions[value].name,
+                format: value => (value == -1) ? 'Unknown app!' : shortcutOptions[value].name,
                 min: 0,
                 max: shortcutOptions.length - 1,
                 wrap: false,
@@ -288,7 +289,7 @@
             },
             'Bottom third': {
                 value: shortcutOptions.map(item => item.val).indexOf(config.shortcuts[6]),
-                format: value => shortcutOptions[value].name,
+                format: value => (value == -1) ? 'Unknown app!' : shortcutOptions[value].name,
                 min: 0,
                 max: shortcutOptions.length - 1,
                 wrap: false,
@@ -299,7 +300,7 @@
             },
             'Bottom fourth': {
                 value: shortcutOptions.map(item => item.val).indexOf(config.shortcuts[7]),
-                format: value => shortcutOptions[value].name,
+                format: value => (value == -1) ? 'Unknown app!' : shortcutOptions[value].name,
                 min: 0,
                 max: shortcutOptions.length - 1,
                 wrap: false,
@@ -310,7 +311,7 @@
             },
             'Swipe up': {
                 value: shortcutOptions.map(item => item.val).indexOf(config.swipe.up),
-                format: value => shortcutOptions[value].name,
+                format: value => (value == -1) ? 'Unknown app!' : shortcutOptions[value].name,
                 min: 0,
                 max: shortcutOptions.length - 1,
                 wrap: false,
@@ -319,9 +320,20 @@
                     saveSettings();
                 }
             },
+            'Swipe down': {
+                value: shortcutOptions.map(item => item.val).indexOf(config.swipe.down),
+                format: value => (value == -1) ? 'Unknown app!' : shortcutOptions[value].name,
+                min: 0,
+                max: shortcutOptions.length - 1,
+                wrap: false,
+                onchange: value => {
+                    config.swipe.down = shortcutOptions[value].val;
+                    saveSettings();
+                }
+            },
             'Swipe left': {
                 value: shortcutOptions.map(item => item.val).indexOf(config.swipe.left),
-                format: value => shortcutOptions[value].name,
+                format: value => (value == -1) ? 'Unknown app!' : shortcutOptions[value].name,
                 min: 0,
                 max: shortcutOptions.length - 1,
                 wrap: false,
@@ -332,7 +344,7 @@
             },
             'Swipe right': {
                 value: shortcutOptions.map(item => item.val).indexOf(config.swipe.right),
-                format: value => shortcutOptions[value].name,
+                format: value => (value == -1) ? 'Unknown app!' : shortcutOptions[value].name,
                 min: 0,
                 max: shortcutOptions.length - 1,
                 wrap: false,

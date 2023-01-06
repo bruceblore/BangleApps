@@ -45,11 +45,12 @@ let config = Object.assign({
   ],
 
   swipe: {
-    // 3 shortcuts to launch upon swiping:
+    // 4 shortcuts to launch upon swiping:
     //    false = no shortcut
     //    '#LAUNCHER' = open the launcher
     //    any other string = name of app to open
-    up: 'messages',       // Swipe up or swipe down, due to limitation of event handler
+    up: 'messageui',
+    down: 'messageui',
     left: '#LAUNCHER',
     right: '#LAUNCHER',
   },
@@ -394,10 +395,11 @@ Bangle.on('touch', function (button, xy) {
 });
 
 //Set up swipe handler
-Bangle.on('swipe', function (direction) {
-  if (direction == -1) launch(config.swipe.left);
-  else if (direction == 0) launch(config.swipe.up);
-  else launch(config.swipe.right);
+Bangle.on('swipe', function (lr, ud) {
+  if (lr == -1) launch(config.swipe.left);
+  else if (lr == 1) launch(config.swipe.right);
+  else if (ud == -1) launch(config.swipe.up);
+  else if (ud == 1) launch(config.swipe.down);
 });
 
 if (!Bangle.isLocked()) drawIcons();
