@@ -1,9 +1,6 @@
 {
   "id": "infoclk",
   "name": "Informational clock",
-  "dependencies": {
-    "weather": "app"
-  },
   "version": "0.09",
   "description": "A configurable clock with extra info and shortcuts when unlocked, but large time when locked",
   "readme": "README.md",
