@@ -19,7 +19,7 @@ exports.getTimeLeft = function () {
 }
 
 exports.state = storage.readJSON('keytimer.json') || {
-    inputString: '',
+    inputString: '0',
     timeLeft: 0
 };
 
@@ -30,7 +30,6 @@ exports.startTimer = function (time) {
     common.state.timeLeft = time;
     timer.del = true;
     timer.appid = 'keytimer';
-    timer.msg = 'Timer expired!';
     timer.js = "load('keytimer-ring.js')";
 
     sched.setAlarm('keytimer', timer);

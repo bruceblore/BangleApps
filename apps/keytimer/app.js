@@ -10,7 +10,7 @@ Bangle.loadWidgets();
 Bangle.drawWidgets();
 
 E.on('kill', () => {
-  storage.writeJSON('keytimer.txt', common.state);
+  storage.writeJSON('keytimer.json', common.state);
 });
 
 // Handle touch here. I would implement these separately in each view, but I can't figure out how to clear the event listeners.
