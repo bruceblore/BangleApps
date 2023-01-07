@@ -2,3 +2,4 @@
 0.02: Bug fixes
 0.03: Submitted to the app loader
 0.04: Memory buttons now actually work
+      Optional ability to save the calculator state on close

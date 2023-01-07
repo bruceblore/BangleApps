@@ -19,6 +19,15 @@
             "name": "rpnsci.img",
             "url": "icon.js",
             "evaluate": "true"
+        },
+        {
+            "name": "rpnsci.settings.js",
+            "url": "settings.js"
+        }
+    ],
+    "data": [
+        {
+            "name": "rpnsci.json"
         }
     ]
 }

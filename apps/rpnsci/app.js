@@ -1,4 +1,4 @@
-const MEMORY_FILE = "rpnsci.mem.json";
+const CONFIG_FILE = "rpnsci.json";
 const storage = require("Storage");
 
 class NumberButton {
@@ -140,8 +140,7 @@ let ClearButton = {
                 updateDisplay();
             }, 250);
         } else {
-            memory = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-            storage.writeJSON(MEMORY_FILE, memory);
+            config.memory = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
             E.showMessage('Memory cleared!');
             setTimeout(() => {
                 drawButtons();
@@ -243,8 +242,7 @@ class MemStoreIn {
     }
 
     onclick() {
-        memory[this.register] = parseFloat(x);
-        storage.writeJSON(MEMORY_FILE, memory);
+        config.memory[this.register] = parseFloat(x);
         mode = 'scientific';
         entryTerminated = true;
         liftOnNumberPress = true;
@@ -260,7 +258,7 @@ class MemRecFrom {
     }
 
     onclick() {
-        x = '' + memory[this.register];
+        x = '' + config.memory[this.register];
         mode = 'scientific';
         entryTerminated = true;
         liftOnNumberPress = true;
@@ -298,14 +296,49 @@ const BUTTONS = {
     ],
 };
 
-let x = '0';
-let y = 0;
-let z = 0;
-let t = 0;
-let memory = storage.readJSON(MEMORY_FILE) || [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-let mode = 'number';
-let entryTerminated = false;
-let liftOnNumberPress = false;
+// Load the memory and stack if necessary
+let config = storage.readJSON(CONFIG_FILE) || {
+    saveState: false,
+    x: '0',
+    y: 0,
+    z: 0,
+    t: 0,
+    mode: 'number',
+    entryTerminated: false,
+    liftOnNumberPress: false,
+    memory: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+}
+let x, y, z, t;
+let mode, entryTerminated, liftOnNumberPress;
+if (config.saveState) {
+    x = config.x;
+    y = config.y;
+    z = config.z;
+    t = config.t;
+    mode = config.mode;
+    entryTerminated = config.entryTerminated;
+    liftOnNumberPress = config.liftOnNumberPress;
+} else {
+    x = '0';
+    y = 0;
+    z = 0;
+    t = 0;
+    mode = 'number';
+    entryTerminated = false;
+    liftOnNumberPress = false;
+}
+
+// Prepare to save the memory and stack if necessary on exit
+E.on('kill', () => {
+    if (config.saveState) {
+        config.x = x;
+        config.y = y;
+        config.z = z;
+        config.t = t;
+    }
+    storage.writeJSON(CONFIG_FILE, config);
+});
+
 
 function liftStack() {
     t = z;
