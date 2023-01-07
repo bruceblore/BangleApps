@@ -3,6 +3,8 @@
     const storage = require('Storage');
 
     let config = Object.assign({
+        dualStageUnlock: 0,
+
         seconds: {
             // Displaying the seconds can reduce battery life because the CPU must wake up more often to update the display.
             // The seconds will be shown unless one of these conditions is enabled here, and currently true.
@@ -378,6 +380,16 @@
             '': {
                 'title': 'Informational Clock',
                 'back': back
+            },
+            'Dual stage unlock': {
+                value: config.dualStageUnlock,
+                format: value => (value == 0) ? "Off" : `${value} taps`,
+                min: 0,
+                step: 1,
+                onchange: value => {
+                    config.dualStageUnlock = value;
+                    saveSettings();
+                }
             },
             'Seconds display': showSecondsMenu,
             'Day of week format': {

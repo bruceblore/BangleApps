@@ -6,6 +6,8 @@ const locale = require("locale");
 const weather = require('weather');
 
 let config = Object.assign({
+  dualStageUnlock: 0,
+
   seconds: {
     // Displaying the seconds can reduce battery life because the CPU must wake up more often to update the display.
     // The seconds will be shown unless one of these conditions is enabled here, and currently true.
@@ -235,7 +237,8 @@ function draw() {
   }
   now = new Date();
 
-  if (Bangle.isLocked()) {  //When the watch is locked
+  //When the watch is locked or in first stage
+  if (Bangle.isLocked() || dualStageTaps < config.dualStageUnlock) {
     g.clearRect(0, 24, g.getWidth(), g.getHeight());
 
     //Draw the hours and minutes
@@ -293,6 +296,8 @@ function draw() {
       g.setColor(color[0], color[1], color[2])
         .fillRect(0, HHMM_TOP + DIGIT_HEIGHT, g.getWidth() * getDayProgress(now), SECONDS_TOP);
     }
+
+    // When watch in second stage
   } else {
 
     //If the watch is unlocked
@@ -345,8 +350,11 @@ function drawIcons() {
 weather.on("update", draw);
 Bangle.on("step", draw);
 Bangle.on('lock', locked => {
-  //If the watch is unlocked, draw the icons
-  if (!locked) drawIcons();
+  //If the watch is unlocked and the necessary number of dual stage taps have been performed, draw the shortcuts
+  if (!locked && dualStageTaps >= config.dualStageUnlock) drawIcons();
+
+  // If locked, reset dual stage taps to zero
+  else if (locked) dualStageTaps = 0;
   draw();
 });
 
@@ -374,23 +382,39 @@ function launch(appId) {
   }
 }
 
-//Set up touch to launch the selected app
+//Set up touch to launch the selected app, and to handle dual stage unlock
+let dualStageTaps = 0;
+
 Bangle.on('touch', function (button, xy) {
-  let x = Math.floor(xy.x / 44);
-  if (x < 0) x = 0;
-  else if (x > 3) x = 3;
-
-  let y = Math.floor(xy.y / 44);
-  if (y < 0) y = -1;
-  else if (y > 3) y = 1;
-  else y -= 2;
-
-  if (y < 0) {
+  // If only the first stage has been unlocked, increase the counter
+  if (dualStageTaps < config.dualStageUnlock) {
+    dualStageTaps++;
     Bangle.buzz();
-    Bangle.showLauncher();
+
+    // If we reach the unlock threshold, redraw the screen because we have now done the second unlock stage
+    if (dualStageTaps == config.dualStageUnlock) {
+      drawIcons();
+      draw();
+    }
+
+    // If we have unlocked both stages, handle a shortcut tap
   } else {
-    let i = 4 * y + x;
-    launch(config.shortcuts[i]);
+    let x = Math.floor(xy.x / 44);
+    if (x < 0) x = 0;
+    else if (x > 3) x = 3;
+
+    let y = Math.floor(xy.y / 44);
+    if (y < 0) y = -1;
+    else if (y > 3) y = 1;
+    else y -= 2;
+
+    if (y < 0) {
+      Bangle.buzz();
+      Bangle.showLauncher();
+    } else {
+      let i = 4 * y + x;
+      launch(config.shortcuts[i]);
+    }
   }
 });
 
@@ -402,6 +426,9 @@ Bangle.on('swipe', function (lr, ud) {
   else if (ud == 1) launch(config.swipe.down);
 });
 
-if (!Bangle.isLocked()) drawIcons();
+// If the clock starts with the watch unlocked, the first stage of unlocking is skipped
+if (!Bangle.isLocked()) {
+  dualStageTaps = config.dualStageUnlock
+  drawIcons();
 
-draw();
+  draw();

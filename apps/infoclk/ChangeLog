@@ -1,6 +1,8 @@
 0.01: New app!
 0.02-0.07: Bug fixes
 0.08: Submitted to the app loader
-0.09: Up and down swipes can now be configured separately
+0.09: Added weather dependency
+      Up and down swipes can now be configured separately
       the settings menu can now handle having shortcuts configured to apps that were
       Default notification app is now messageui rather than messages
+      Support for dual stage unlock
