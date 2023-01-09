@@ -30,7 +30,7 @@
             //    'weather': The current temperature and weather description
             //    'steps': Step count
             //    'health': Step count and bpm
-            //    'progress': Day progress bar
+            //    'progress': Bar configured in config.bar ('progress' is a remnant of an older version when it was only day progress)
             //    false: Nothing
         },
 
@@ -48,20 +48,27 @@
             //    false = no shortcut
             //    '#LAUNCHER' = open the launcher
             //    any other string = name of app to open
-            up: 'messages',       // Swipe up or swipe down, due to limitation of event handler
-            down: 'messages',
+            up: 'messageui',       // Swipe up or swipe down, due to limitation of event handler
+            down: 'messageui',
             left: '#LAUNCHER',
             right: '#LAUNCHER',
         },
 
-        dayProgress: {
-            // A progress bar representing how far through the day you are
+        bar: {
             enabledLocked: true,    // Whether this bar is enabled when the watch is locked
             enabledUnlocked: false, // Whether the bar is enabled when the watch is unlocked
-            color: [0, 0, 1],      // The color of the bar
-            start: 700,            // The time of day that the bar starts filling
-            end: 2200,              // The time of day that the bar becomes full
-            reset: 300             // The time of day when the progress bar resets from full to empty
+            type: 'split',          // off = no bar, dayProgress = day progress bar, calendar = calendar bar, split = both
+
+            dayProgress: {          // A progress bar representing how far through the day you are
+                color: [0, 0, 1],   // The color of the bar
+                start: 700,         // The time of day that the bar starts filling
+                end: 2200,          // The time of day that the bar becomes full
+                reset: 300          // The time of day when the progress bar resets from full to empty
+            },
+
+            calendar: {
+                duration: 10800
+            },
         },
 
         lowBattColor: {
@@ -193,7 +200,7 @@
         { name: 'Weather', val: 'weather' },
         { name: 'Step count', val: 'steps' },
         { name: 'Steps + BPM', val: 'health' },
-        { name: 'Day progresss bar', val: 'progress' },
+        { name: 'Bar', val: 'progress' },
         { name: 'Nothing', val: false }
     ];
 
@@ -369,9 +376,170 @@
         { name: 'White', val: [1, 1, 1] }
     ];
 
+    const BAR_MODE_OPTIONS = [
+        { name: 'None', val: 'off' },
+        { name: 'Day progress only', val: 'dayProgress' },
+        { name: 'Calendar only', val: 'calendar' },
+        { name: 'Split', val: 'split' }
+    ];
+
     // Workaround for being unable to use == on arrays: convert them into strings
     function colorString(color) {
         return `${color[0]} ${color[1]} ${color[2]}`;
+    }
+
+    //Menu to configure the bar
+    function showBarMenu() {
+        E.showMenu({
+            '': {
+                'title': 'Bar',
+                'back': showMainMenu
+            },
+            'Enable while locked': {
+                value: config.bar.enabledLocked,
+                onchange: value => {
+                    config.bar.enableLocked = value;
+                    saveSettings();
+                }
+            },
+            'Enable while unlocked': {
+                value: config.bar.enabledUnlocked,
+                onchange: value => {
+                    config.bar.enabledUnlocked = value;
+                    saveSettings();
+                }
+            },
+            'Mode': {
+                value: BAR_MODE_OPTIONS.map(item => item.val).indexOf(config.bar.type),
+                format: value => BAR_MODE_OPTION_NAMES[value].name,
+                onchange: value => {
+                    config.bar.type = BAR_MODE_OPTIONS[value].val;
+                    saveSettings();
+                }
+            },
+            'Day progress': () => {
+                E.showMenu({
+                    '': {
+                        'title': 'Day progress',
+                        'back': showBarMenu
+                    },
+                    'Color': {
+                        value: COLOR_OPTIONS.map(item => colorString(item.val)).indexOf(colorString(config.bar.dayProgress.color)),
+                        format: value => COLOR_OPTIONS[value].name,
+                        min: 0,
+                        max: COLOR_OPTIONS.length - 1,
+                        wrap: false,
+                        onchange: value => {
+                            config.bar.dayProgress.color = COLOR_OPTIONS[value].val;
+                            saveSettings();
+                        }
+                    },
+                    'Start hour': {
+                        value: Math.floor(config.bar.dayProgress.start / 100),
+                        format: hourToString,
+                        min: 0,
+                        max: 23,
+                        wrap: true,
+                        onchange: hour => {
+                            minute = config.bar.dayProgress.start % 100;
+                            config.bar.dayProgress.start = (100 * hour) + minute;
+                            saveSettings();
+                        }
+                    },
+                    'Start minute': {
+                        value: config.bar.dayProgress.start % 100,
+                        min: 0,
+                        max: 59,
+                        wrap: true,
+                        onchange: minute => {
+                            hour = Math.floor(config.bar.dayProgress.start / 100);
+                            config.bar.dayProgress.start = (100 * hour) + minute;
+                            saveSettings();
+                        }
+                    },
+                    'End hour': {
+                        value: Math.floor(config.bar.dayProgress.end / 100),
+                        format: hourToString,
+                        min: 0,
+                        max: 23,
+                        wrap: true,
+                        onchange: hour => {
+                            minute = config.bar.dayProgress.end % 100;
+                            config.bar.dayProgress.end = (100 * hour) + minute;
+                            saveSettings();
+                        }
+                    },
+                    'End minute': {
+                        value: config.bar.dayProgress.end % 100,
+                        min: 0,
+                        max: 59,
+                        wrap: true,
+                        onchange: minute => {
+                            hour = Math.floor(config.bar.dayProgress.end / 100);
+                            config.bar.dayProgress.end = (100 * hour) + minute;
+                            saveSettings();
+                        }
+                    },
+                    'Reset hour': {
+                        value: Math.floor(config.bar.dayProgress.reset / 100),
+                        format: hourToString,
+                        min: 0,
+                        max: 23,
+                        wrap: true,
+                        onchange: hour => {
+                            minute = config.bar.dayProgress.reset % 100;
+                            config.bar.dayProgress.reset = (100 * hour) + minute;
+                            saveSettings();
+                        }
+                    },
+                    'Reset minute': {
+                        value: config.bar.dayProgress.reset % 100,
+                        min: 0,
+                        max: 59,
+                        wrap: true,
+                        onchange: minute => {
+                            hour = Math.floor(config.bar.dayProgress.reset / 100);
+                            config.bar.dayProgress.reset = (100 * hour) + minute;
+                            saveSettings();
+                        }
+                    }
+                });
+            },
+            'Calendar bar': () => {
+                E.showMenu({
+                    '': {
+                        'title': 'Calendar bar',
+                        'back': showBarMenu
+                    },
+                    'Look ahead duration': {
+                        value: config.bar.calendar.duration,
+                        format: value => {
+                            let hours = value / 3600;
+                            let minutes = (value % 3600) / 60;
+                            let seconds = value % 60;
+
+                            let result = (hours == 0) ? '' : `${hours} hr`;
+                            if (minutes != 0) {
+                                if (result == '') result = `${minutes} min`;
+                                else result += `, ${minutes} min`;
+                            }
+                            if (seconds != 0) {
+                                if (result == '') result = `${seconds} sec`;
+                                else result += `, ${seconds} sec`;
+                            }
+                            return result;
+                        },
+                        onchange: value => {
+                            config.bar.calendar.duration = value;
+                            saveSettings();
+                        },
+                        min: 900,
+                        max: 86400,
+                        step: 900
+                    }
+                });
+            }
+        });
     }
 
     //Shows the top level menu
@@ -457,108 +625,7 @@
                 }
             },
             'Shortcuts': showShortcutMenu,
-            'Day progress': () => {
-                E.showMenu({
-                    '': {
-                        'title': 'Day progress',
-                        'back': showMainMenu
-                    },
-                    'Enable while locked': {
-                        value: config.dayProgress.enabledLocked,
-                        onchange: value => {
-                            config.dayProgress.enableLocked = value;
-                            saveSettings();
-                        }
-                    },
-                    'Enable while unlocked': {
-                        value: config.dayProgress.enabledUnlocked,
-                        onchange: value => {
-                            config.dayProgress.enabledUnlocked = value;
-                            saveSettings();
-                        }
-                    },
-                    'Color': {
-                        value: COLOR_OPTIONS.map(item => colorString(item.val)).indexOf(colorString(config.dayProgress.color)),
-                        format: value => COLOR_OPTIONS[value].name,
-                        min: 0,
-                        max: COLOR_OPTIONS.length - 1,
-                        wrap: false,
-                        onchange: value => {
-                            config.dayProgress.color = COLOR_OPTIONS[value].val;
-                            saveSettings();
-                        }
-                    },
-                    'Start hour': {
-                        value: Math.floor(config.dayProgress.start / 100),
-                        format: hourToString,
-                        min: 0,
-                        max: 23,
-                        wrap: true,
-                        onchange: hour => {
-                            minute = config.dayProgress.start % 100;
-                            config.dayProgress.start = (100 * hour) + minute;
-                            saveSettings();
-                        }
-                    },
-                    'Start minute': {
-                        value: config.dayProgress.start % 100,
-                        min: 0,
-                        max: 59,
-                        wrap: true,
-                        onchange: minute => {
-                            hour = Math.floor(config.dayProgress.start / 100);
-                            config.dayProgress.start = (100 * hour) + minute;
-                            saveSettings();
-                        }
-                    },
-                    'End hour': {
-                        value: Math.floor(config.dayProgress.end / 100),
-                        format: hourToString,
-                        min: 0,
-                        max: 23,
-                        wrap: true,
-                        onchange: hour => {
-                            minute = config.dayProgress.end % 100;
-                            config.dayProgress.end = (100 * hour) + minute;
-                            saveSettings();
-                        }
-                    },
-                    'End minute': {
-                        value: config.dayProgress.end % 100,
-                        min: 0,
-                        max: 59,
-                        wrap: true,
-                        onchange: minute => {
-                            hour = Math.floor(config.dayProgress.end / 100);
-                            config.dayProgress.end = (100 * hour) + minute;
-                            saveSettings();
-                        }
-                    },
-                    'Reset hour': {
-                        value: Math.floor(config.dayProgress.reset / 100),
-                        format: hourToString,
-                        min: 0,
-                        max: 23,
-                        wrap: true,
-                        onchange: hour => {
-                            minute = config.dayProgress.reset % 100;
-                            config.dayProgress.reset = (100 * hour) + minute;
-                            saveSettings();
-                        }
-                    },
-                    'Reset minute': {
-                        value: config.dayProgress.reset % 100,
-                        min: 0,
-                        max: 59,
-                        wrap: true,
-                        onchange: minute => {
-                            hour = Math.floor(config.dayProgress.reset / 100);
-                            config.dayProgress.reset = (100 * hour) + minute;
-                            saveSettings();
-                        }
-                    }
-                });
-            },
+            'Bar': showBarMenu,
             'Low battery color': () => {
                 E.showMenu({
                     '': {

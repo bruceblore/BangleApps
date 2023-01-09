@@ -15,7 +15,7 @@ let config = Object.assign({
     hideBattery: 20,    // Hide the seconds when the battery is at or below a defined percentage.
     hideTime: true,     // Hide the seconds when between a certain period of time. Useful for when you are sleeping and don't need the seconds
     hideStart: 2200,    //    The time when the seconds are hidden: first 2 digits are hours on a 24 hour clock, last 2 are minutes
-    hideEnd: 700,      //    The time when the seconds are shown again
+    hideEnd: 700,       //    The time when the seconds are shown again
     hideAlways: false,  // Always hide (never show) the seconds
   },
 
@@ -51,20 +51,27 @@ let config = Object.assign({
     //    false = no shortcut
     //    '#LAUNCHER' = open the launcher
     //    any other string = name of app to open
-    up: 'messageui',
+    up: 'messageui',       // Swipe up or swipe down, due to limitation of event handler
     down: 'messageui',
     left: '#LAUNCHER',
     right: '#LAUNCHER',
   },
 
-  dayProgress: {
-    // A progress bar representing how far through the day you are
+  bar: {
     enabledLocked: true,    // Whether this bar is enabled when the watch is locked
     enabledUnlocked: false, // Whether the bar is enabled when the watch is unlocked
-    color: [0, 0, 1],      // The color of the bar
-    start: 700,            // The time of day that the bar starts filling
-    end: 2200,              // The time of day that the bar becomes full
-    reset: 300             // The time of day when the progress bar resets from full to empty
+    type: 'split',          // off = no bar, dayProgress = day progress bar, calendar = calendar bar, split = both
+
+    dayProgress: {          // A progress bar representing how far through the day you are
+      color: [0, 0, 1],   // The color of the bar
+      start: 700,         // The time of day that the bar starts filling
+      end: 2200,          // The time of day that the bar becomes full
+      reset: 300          // The time of day when the progress bar resets from full to empty
+    },
+
+    calendar: {
+      duration: 10800
+    },
   },
 
   lowBattColor: {
@@ -136,10 +143,10 @@ function getDateString(now) {
 
 // Get a floating point number from 0 to 1 representing how far between the user-defined start and end points we are
 function getDayProgress(now) {
-  let start = config.dayProgress.start;
+  let start = config.bar.dayProgress.start;
   let current = now.getHours() * 100 + now.getMinutes();
-  let end = config.dayProgress.end;
-  let reset = config.dayProgress.reset;
+  let end = config.bar.dayProgress.end;
+  let reset = config.bar.dayProgress.reset;
 
   // Normalize
   if (end <= start) end += 2400;
@@ -275,7 +282,7 @@ function draw() {
 
     // Draw the bottom area
     if (config.bottomLocked.display == 'progress') {
-      let color = config.dayProgress.color;
+      let color = config.bar.dayProgress.color;
       g.setColor(color[0], color[1], color[2])
         .fillRect(0, SECONDS_TOP + DIGIT_HEIGHT + 3, g.getWidth() * getDayProgress(now), g.getHeight());
     } else {
@@ -291,8 +298,8 @@ function draw() {
     }
 
     // Draw the day progress bar between the rows if necessary
-    if (config.dayProgress.enabledLocked && config.bottomLocked.display != 'progress') {
-      let color = config.dayProgress.color;
+    if (config.bar.enabledLocked && config.bottomLocked.display != 'progress') {
+      let color = config.bar.dayProgress.color;
       g.setColor(color[0], color[1], color[2])
         .fillRect(0, HHMM_TOP + DIGIT_HEIGHT, g.getWidth() * getDayProgress(now), SECONDS_TOP);
     }
@@ -311,7 +318,7 @@ function draw() {
     if (shouldDisplaySeconds(now)) rows[0] += ':' + pad(now.getSeconds(), 2);
     if (storage.readJSON('setting.json')['12hour']) rows[0] += ((now.getHours() < 12) ? ' AM' : ' PM');
 
-    let maxHeight = ((g.getHeight() / 2) - HHMM_TOP) / (config.dayProgress.enabledUnlocked ? (rows.length + 1) : rows.length);
+    let maxHeight = ((g.getHeight() / 2) - HHMM_TOP) / (config.bar.enabledUnlocked ? (rows.length + 1) : rows.length);
 
     let y = HHMM_TOP + maxHeight / 2;
     for (let row of rows) {
@@ -321,7 +328,7 @@ function draw() {
       y += maxHeight;
     }
 
-    if (config.dayProgress.enabledUnlocked) {
+    if (config.bar.enabledUnlocked) {
       let color = config.dayProgress.color;
       g.setColor(color[0], color[1], color[2])
         .fillRect(0, y - maxHeight / 2, 176 * getDayProgress(now), y + maxHeight / 2);
@@ -432,3 +439,4 @@ if (!Bangle.isLocked()) {
   drawIcons();
 
   draw();
+}
