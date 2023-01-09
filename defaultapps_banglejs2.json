@@ -14,7 +14,6 @@
     "compass",
     "rpnsci",
     "recorder",
-    "swp2clk",
     "widclose",
     "altimeter",
     "acmaze",
@@ -24,13 +23,13 @@
     "torch",
     "powermanager",
     "2047pp",
-    "calibration",
     "health",
     "dtlaunch",
     "boot",
     "sched",
     "widbt_notify",
     "messages",
+    "messageui",
     "android",
     "alarm",
     "setting",
@@ -41,6 +40,13 @@
     "stlap",
     "random",
     "gallery",
-    "maintanance",
-    "agenda"
+    "agenda",
+    "kbmulti",
+    "gpsautotime",
+    "dvdbounce",
+    "tictactoe",
+    "widalarm",
+    "widram",
+    "files"
+
 ]
