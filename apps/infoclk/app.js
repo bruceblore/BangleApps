@@ -70,7 +70,9 @@ let config = Object.assign({
     },
 
     calendar: {
-      duration: 10800
+      duration: 10800,
+      pipeColor: [1, 1, 1],
+      defaultColor: [0, 0, 1]
     },
   },
 
@@ -232,6 +234,58 @@ const DATE_CENTER_Y = DOW_CENTER_Y + DATE_LETTER_HEIGHT;      // Date will be th
 const DOW_DATE_CENTER_Y = SECONDS_TOP + (DIGIT_HEIGHT / 2);   // When displaying both on one row, center it
 const BOTTOM_CENTER_Y = ((SECONDS_TOP + DIGIT_HEIGHT + 3) + g.getHeight()) / 2;
 
+// Draw a day progress bar at the given position with given width and height
+function drawDayProgress(x1, y1, x2, y2) {
+  let color = config.bar.dayProgress.color;
+  g.setColor(color[0], color[1], color[2])
+    .fillRect(x1, y1, x1 + (x2 - x1) * getDayProgress(now), y2);
+}
+
+// Draw a calendar bar at the given position with given width and height
+function drawCalendar(x1, y1, x2, y2) {
+  let calendar = storage.readJSON('android.calendar.json', true) || [];
+  let now = (new Date()).getTime();
+  let endTime = now + config.bar.calendar.duration * 1000;
+  // Events must end in the future. Requirement to end in the future rather than start is so ongoing events display partially at the left
+  // Events must start before the end of the lookahead window
+  calendar = calendar.filter(event => ((now < event.timestamp + (1000 * event.durationInSeconds)) && (event.timestamp < endTime)));
+
+  for (let event of calendar) {
+    // left = boundary + how far event is in the future mapped from our allowed duration to a distance in pixels, clamped to x1
+    let leftUnclamped = x1 + (event.timestamp - now) * (x2 - x1) / (config.bar.calendar.duration * 1000);
+    let left = Math.max(leftUnclamped, x1);
+    // right = unclamped left + how long the event is mapped from seconds to a distance in pixels, clamped to x2
+    let right = Math.min(leftUnclamped + event.durationInSeconds * (x2 - x1) / (config.bar.calendar.duration), x2);
+
+    //Draw the actual bar
+    if (event.color) g.setColor("#" + (0x1000000 + Number(event.color)).toString(16).padStart(6, "0")); // Line plagiarized from the agenda app
+    else {
+      let color = config.bar.calendar.defaultColor;
+      g.setColor(color[0], color[1], color[2]);
+    }
+    g.fillRect(left, y1, right, y2);
+
+    // Draw the pipes
+    let color = config.bar.calendar.pipeColor;
+    g.setColor(color[0], color[1], color[2])
+      .fillRect(left - 1, y1, left + 1, y2)
+      .fillRect(right - 1, y1, right + 1, y2);
+  }
+}
+
+// Draw a bar with the given top and bottom position
+function drawBar(x1, y1, x2, y2) {
+  if (config.bar.type == 'dayProgress') {
+    drawDayProgress(x1, y1, x2, y2);
+  } else if (config.bar.type == 'calendar') {
+    drawCalendar(x1, y1, x2, y2);
+  } else if (config.bar.type == 'split') {
+    xavg = (x1 + x2) / 2;
+    drawDayProgress(x1, y1, xavg, y2);
+    drawCalendar(xavg, y1, x2, y2);
+  }
+}
+
 // Draw the clock
 function draw() {
   //Prepare to draw
@@ -281,11 +335,8 @@ function draw() {
     }
 
     // Draw the bottom area
-    if (config.bottomLocked.display == 'progress') {
-      let color = config.bar.dayProgress.color;
-      g.setColor(color[0], color[1], color[2])
-        .fillRect(0, SECONDS_TOP + DIGIT_HEIGHT + 3, g.getWidth() * getDayProgress(now), g.getHeight());
-    } else {
+    if (config.bottomLocked.display == 'progress') drawBar(0, SECONDS_TOP + DIGIT_HEIGHT + 3, g.getWidth(), g.getHeight());
+    else {
       let bottomString;
 
       if (config.bottomLocked.display == 'weather') bottomString = getWeatherString();
@@ -297,12 +348,8 @@ function draw() {
         .drawString(bottomString, g.getWidth() / 2, BOTTOM_CENTER_Y);
     }
 
-    // Draw the day progress bar between the rows if necessary
-    if (config.bar.enabledLocked && config.bottomLocked.display != 'progress') {
-      let color = config.bar.dayProgress.color;
-      g.setColor(color[0], color[1], color[2])
-        .fillRect(0, HHMM_TOP + DIGIT_HEIGHT, g.getWidth() * getDayProgress(now), SECONDS_TOP);
-    }
+    // Draw the bar between the rows if necessary
+    if (config.bar.enabledLocked && config.bottomLocked.display != 'progress') drawBar(0, HHMM_TOP + DIGIT_HEIGHT, g.getWidth(), SECONDS_TOP);
 
     // When watch in second stage
   } else {
@@ -328,11 +375,7 @@ function draw() {
       y += maxHeight;
     }
 
-    if (config.bar.enabledUnlocked) {
-      let color = config.dayProgress.color;
-      g.setColor(color[0], color[1], color[2])
-        .fillRect(0, y - maxHeight / 2, 176 * getDayProgress(now), y + maxHeight / 2);
-    }
+    if (config.bar.enabledUnlocked) drawBar(0, y - maxHeight / 2, g.getWidth(), y + maxHeight / 2);
   }
 
   setNextDrawTimeout();

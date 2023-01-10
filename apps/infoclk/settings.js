@@ -67,7 +67,9 @@
             },
 
             calendar: {
-                duration: 10800
+                duration: 10800,    // How long to look ahead for calendar events
+                pipeColor: [1, 1, 1],   // What color the vertical bar at event start/end is
+                defaultColor: [0, 0, 1] // Default color for events that don't have one set
             },
         },
 
@@ -536,6 +538,28 @@
                         min: 900,
                         max: 86400,
                         step: 900
+                    },
+                    'Pipe color': {
+                        value: COLOR_OPTIONS.map(color => color.val).indexOf(config.bar.calendar.pipeColor),
+                        format: value => COLOR_OPTIONS[value].name,
+                        onchange: value => {
+                            config.bar.calendar.pipeColor = COLOR_OPTIONS[value].val;
+                            saveSettings();
+                        },
+                        min: 0,
+                        max: COLOR_OPTIONS.length - 1,
+                        wrap: true
+                    },
+                    'Default color': {
+                        value: COLOR_OPTIONS.map(color => color.val).indexOf(config.bar.calendar.defaultColor),
+                        format: value => COLOR_OPTIONS[value].name,
+                        onchange: value => {
+                            config.bar.calendar.defaultColor = COLOR_OPTIONS[value].val;
+                            saveSettings();
+                        },
+                        min: 0,
+                        max: COLOR_OPTIONS.length - 1,
+                        wrap: true
                     }
                 });
             }
