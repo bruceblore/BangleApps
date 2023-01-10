@@ -413,11 +413,14 @@
             },
             'Mode': {
                 value: BAR_MODE_OPTIONS.map(item => item.val).indexOf(config.bar.type),
-                format: value => BAR_MODE_OPTION_NAMES[value].name,
+                format: value => BAR_MODE_OPTIONS[value].name,
                 onchange: value => {
                     config.bar.type = BAR_MODE_OPTIONS[value].val;
                     saveSettings();
-                }
+                },
+                min: 0,
+                max: BAR_MODE_OPTIONS.length - 1,
+                wrap: true
             },
             'Day progress': () => {
                 E.showMenu({
@@ -540,7 +543,7 @@
                         step: 900
                     },
                     'Pipe color': {
-                        value: COLOR_OPTIONS.map(color => color.val).indexOf(config.bar.calendar.pipeColor),
+                        value: COLOR_OPTIONS.map(color => colorString(color.val)).indexOf(colorString(config.bar.calendar.pipeColor)),
                         format: value => COLOR_OPTIONS[value].name,
                         onchange: value => {
                             config.bar.calendar.pipeColor = COLOR_OPTIONS[value].val;
@@ -551,7 +554,7 @@
                         wrap: true
                     },
                     'Default color': {
-                        value: COLOR_OPTIONS.map(color => color.val).indexOf(config.bar.calendar.defaultColor),
+                        value: COLOR_OPTIONS.map(color => colorString(color.val)).indexOf(colorString(config.bar.calendar.defaultColor)),
                         format: value => COLOR_OPTIONS[value].name,
                         onchange: value => {
                             config.bar.calendar.defaultColor = COLOR_OPTIONS[value].val;

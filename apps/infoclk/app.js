@@ -248,11 +248,11 @@ function drawCalendar(x1, y1, x2, y2) {
   let endTime = now + config.bar.calendar.duration * 1000;
   // Events must end in the future. Requirement to end in the future rather than start is so ongoing events display partially at the left
   // Events must start before the end of the lookahead window
-  calendar = calendar.filter(event => ((now < event.timestamp + (1000 * event.durationInSeconds)) && (event.timestamp < endTime)));
+  calendar = calendar.filter(event => ((now < 1000 * (event.timestamp + event.durationInSeconds)) && (event.timestamp * 1000 < endTime)));
 
   for (let event of calendar) {
     // left = boundary + how far event is in the future mapped from our allowed duration to a distance in pixels, clamped to x1
-    let leftUnclamped = x1 + (event.timestamp - now) * (x2 - x1) / (config.bar.calendar.duration * 1000);
+    let leftUnclamped = x1 + (event.timestamp * 1000 - now) * (x2 - x1) / (config.bar.calendar.duration * 1000);
     let left = Math.max(leftUnclamped, x1);
     // right = unclamped left + how long the event is mapped from seconds to a distance in pixels, clamped to x2
     let right = Math.min(leftUnclamped + event.durationInSeconds * (x2 - x1) / (config.bar.calendar.duration), x2);
@@ -280,9 +280,10 @@ function drawBar(x1, y1, x2, y2) {
   } else if (config.bar.type == 'calendar') {
     drawCalendar(x1, y1, x2, y2);
   } else if (config.bar.type == 'split') {
-    xavg = (x1 + x2) / 2;
+    let xavg = (x1 + x2) / 2;
     drawDayProgress(x1, y1, xavg, y2);
     drawCalendar(xavg, y1, x2, y2);
+    g.setColor(g.theme.fg).fillRect(xavg - 1, y1, xavg + 1, y2);
   }
 }
 
@@ -478,8 +479,7 @@ Bangle.on('swipe', function (lr, ud) {
 
 // If the clock starts with the watch unlocked, the first stage of unlocking is skipped
 if (!Bangle.isLocked()) {
-  dualStageTaps = config.dualStageUnlock
+  dualStageTaps = config.dualStageUnlock;
   drawIcons();
-
-  draw();
 }
+draw();
