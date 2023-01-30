@@ -103,6 +103,13 @@ class TwoK {
             this.b[3][x] = 0;
           }
       }
+      return (E.CRC32(this.b.toString()) != crc);
+    }
+    function addDigit() {
+      var d = Math.random() > 0.9 ? 4 : 2;
+      var id = Math.floor(Math.random() * 16);
+      while (this.b[Math.floor(id / 4)][id % 4] > 0) id = Math.floor(Math.random() * 16);
+      this.b[Math.floor(id / 4)][id % 4] = d;
     }
     return (E.CRC32(this.b.toString()) != crc);
   }
@@ -128,26 +135,26 @@ function dragHandler(e) {
     if (res) twok.addDigit();
     twok.render();
   }
+
+  function swipeHandler() {
+
+  }
+
+  function buttonHandler() {
+
+  }
+
+  var twok = new TwoK();
+  twok.addDigit(); twok.addDigit();
+  twok.render();
+  if (process.env.HWVERSION == 2) Bangle.on("drag", dragHandler);
+  if (process.env.HWVERSION == 1) {
+    Bangle.on("swipe", (e) => { res = twok.shift(e); if (res) twok.addDigit(); twok.render(); });
+    setWatch(() => { res = twok.shift(2); if (res) twok.addDigit(); twok.render(); }, BTN1, { repeat: true });
+    setWatch(() => { res = twok.shift(-2); if (res) twok.addDigit(); twok.render(); }, BTN3, { repeat: true });
+  }
+
+  E.on('kill', () => {
+    storage.writeJSON('2047pp.json', { b: twok.b, score: twok.score });
+  })
 }
-
-function swipeHandler() {
-
-}
-
-function buttonHandler() {
-
-}
-
-var twok = new TwoK();
-twok.addDigit(); twok.addDigit();
-twok.render();
-if (process.env.HWVERSION == 2) Bangle.on("drag", dragHandler);
-if (process.env.HWVERSION == 1) {
-  Bangle.on("swipe", (e) => { res = twok.shift(e); if (res) twok.addDigit(); twok.render(); });
-  setWatch(() => { res = twok.shift(2); if (res) twok.addDigit(); twok.render(); }, BTN1, { repeat: true });
-  setWatch(() => { res = twok.shift(-2); if (res) twok.addDigit(); twok.render(); }, BTN3, { repeat: true });
-}
-
-E.on('kill', () => {
-  storage.writeJSON('2047pp.json', { b: twok.b, score: twok.score });
-})

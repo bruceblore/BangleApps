@@ -15,8 +15,9 @@ Note that each item is an object with:
 
 {
   'text'  // the text to display for this item
-  'short' : (optional) a shorter text to display for this item (at most 6 characters)
+  'short' // optional: a shorter text to display for this item (at most 6 characters)
   'img'   // optional: a 24x24px image to display for this item
+  'color' // optional: a color string (like "#ffffff") to color the icon in compatible clocks
   'v'     // (if hasRange==true) a numerical value
   'min','max' // (if hasRange==true) a minimum and maximum numerical value (if this were to be displayed as a guage)
 }
@@ -278,9 +279,12 @@ exports.addInteractive = function(menu, options) {
       if (!options.focus) {
         options.focus=true; // if not focussed, set focus
        options.redraw();
-      } else if (menu[options.menuA].items[options.menuB].run)
+      } else if (menu[options.menuA].items[options.menuB].run) {
+        Bangle.buzz(100, 0.7);
         menu[options.menuA].items[options.menuB].run(); // allow tap on an item to run it (eg home assistant)
-      else options.focus=true;
+      } else {
+        options.focus=true;
+      }
     };
     Bangle.on("touch",touchHandler);
   }
@@ -296,6 +300,23 @@ exports.addInteractive = function(menu, options) {
   options.redraw = function() {
     drawItem(menu[options.menuA].items[options.menuB]);
   };
+  options.setItem = function (menuA, menuB) {
+    if (!menu[menuA] || !menu[menuA].items[menuB] || (options.menuA == menuA && options.menuB == menuB)) {
+      // menuA or menuB did not exist or did not change
+      return false;
+    }
+
+    const oldMenuItem = menu[options.menuA].items[options.menuB];
+    if (oldMenuItem) {
+      menuHideItem(oldMenuItem);
+      oldMenuItem.removeAllListeners("draw");
+    }
+    options.menuA = menuA;
+    options.menuB = menuB;
+    menuShowItem(menu[options.menuA].items[options.menuB]);
+
+    return true;
+  }
   return options;
 };
 
