@@ -4,7 +4,7 @@ const storage = require("Storage");
 const locale = require("locale");
 const weather = require('weather');
 
-let config = require('infoclk-config.js');
+let config = require('infoclk-config.js').getConfig();
 
 // Return whether the given time (as a date object) is between start and end (as a number where the first 2 digits are hours on a 24 hour clock and the last 2 are minutes), with end time wrapping to next day if necessary
 function timeInRange(start, time, end) {
@@ -23,7 +23,7 @@ function timeInRange(start, time, end) {
 
 // Return whether settings should be displayed based on the user's configuration
 function shouldDisplaySeconds(now) {
-  return (config.seconds.forceWhenUnlocked > 0 && getUnlockStage() >= config.seconds.forceWhenUnlocked()) || !(
+  return (config.seconds.forceWhenUnlocked > 0 && getUnlockStage() >= config.seconds.forceWhenUnlocked) || !(
     (config.seconds.hideAlways) ||
     (config.seconds.hideLocked && getUnlockStage() < 2) ||
     (E.getBattery() <= config.seconds.hideBattery) ||

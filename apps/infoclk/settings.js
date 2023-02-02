@@ -2,7 +2,7 @@
     const SETTINGS_FILE = "infoclk.json";
     const storage = require('Storage');
 
-    let config = require('infoclk-config.js');
+    let config = require('infoclk-config.js').getConfig();
 
     function saveSettings() {
         storage.writeJSON(SETTINGS_FILE, config);

@@ -1,7 +1,8 @@
 const storage = require("Storage");
 
 const SETTINGS_FILE = "infoclk.json";
-const DEFAULT_CONFIG = {
+
+let defaultConfig = {
     dualStageUnlock: 0,
 
     seconds: {
@@ -82,6 +83,11 @@ const DEFAULT_CONFIG = {
 
 let storedConfig = storage.readJSON(SETTINGS_FILE, true) || {};
 
+// Ugly slow workaround because object.constructor doesn't exist on Bangle
+function isDictionary(object) {
+    return JSON.stringify(object)[0] == '{';
+}
+
 /** Merge two objects recursively. (Object.assign() cannot be used here because it is NOT recursive.)
  * Any key that is in one object but not the other will be included as is.
  * Any key that is in both objects, but whose value is not a dictionary in both objects, will have the version in overlay included.
@@ -91,11 +97,15 @@ function merge(overlay, base) {
     let result = base;
 
     for (objectKey in overlay) {
-        if (!Object.keys(base).includes(objectKey)) result[objectKey] = overlay[objectKey];             // If the key isn't there, add it
-        else if (base[objectKey].constructor == Object && overlay[objectKey].constructor == Object)     // If the key is a dictionary in both, do recursive call
+        if (!Object.keys(base).includes(objectKey)) result[objectKey] = overlay[objectKey];     // If the key isn't there, add it
+        else if (isDictionary(base[objectKey]) && isDictionary(overlay[objectKey]))             // If the key is a dictionary in both, do recursive call
             result[objectKey] = merge(overlay[objectKey], base[objectKey]);
-        else result[objectKey] = overlay[objectKey];                                                    // Otherwise, override
+        else result[objectKey] = overlay[objectKey];                                            // Otherwise, override
     }
+
+    return result;
 }
 
-exports = merge(storedConfig, defaultConfig);
+exports.getConfig = () => {
+    return merge(storedConfig, defaultConfig);
+};
