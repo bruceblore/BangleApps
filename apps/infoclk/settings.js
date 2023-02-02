@@ -14,6 +14,7 @@
             hideStart: 2200,    //    The time when the seconds are hidden: first 2 digits are hours on a 24 hour clock, last 2 are minutes
             hideEnd: 700,       //    The time when the seconds are shown again
             hideAlways: false,  // Always hide (never show) the seconds
+            forceWhenUnlocked: 1, // Force the seconds to be displayed when the watch is unlocked, no matter the other settings. 0 = never, 1 = first or second stage unlock, 2 = second stage unlock only
         },
 
         date: {
@@ -184,6 +185,18 @@
                         }
                     }
                 });
+            },
+            '...unconditionally when unlocked': {
+                value: config.seconds.forceWhenUnlocked,
+                format: value => ['No', 'First or second stage', 'Second stage only'][value ? value : 0],
+                onchange: value => {
+                    config.seconds.forceWhenUnlocked = value;
+                    saveSettings();
+                },
+                min: 0,
+                max: 2,
+                step: 1,
+                wrap: false
             }
         });
     }

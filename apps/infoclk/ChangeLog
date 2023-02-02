@@ -3,6 +3,9 @@
 0.08: Submitted to the app loader
 0.09: Added weather dependency
       Up and down swipes can now be configured separately
-      the settings menu can now handle having shortcuts configured to apps that were
+      The settings menu can now handle having shortcuts configured to apps that were removed
       Default notification app is now messageui rather than messages
       Support for dual stage unlock
+      Support for a calendar bar
+      The clock face is redrawn less often, hoping to save some battery
+      Option to show the seconds when unlocked, even when otherwise hidden by other settings

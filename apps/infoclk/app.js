@@ -17,6 +17,7 @@ let config = Object.assign({
     hideStart: 2200,    //    The time when the seconds are hidden: first 2 digits are hours on a 24 hour clock, last 2 are minutes
     hideEnd: 700,       //    The time when the seconds are shown again
     hideAlways: false,  // Always hide (never show) the seconds
+    forceWhenUnlocked: 1, // Force the seconds to be displayed when the watch is unlocked, no matter the other settings. 0 = never, 1 = first or second stage unlock, 2 = second stage unlock only
   },
 
   date: {
@@ -100,9 +101,9 @@ function timeInRange(start, time, end) {
 
 // Return whether settings should be displayed based on the user's configuration
 function shouldDisplaySeconds(now) {
-  return !(
+  return (config.seconds.forceWhenUnlocked > 0 && getUnlockStage() >= config.seconds.forceWhenUnlocked()) || !(
     (config.seconds.hideAlways) ||
-    (config.seconds.hideLocked && Bangle.isLocked()) ||
+    (config.seconds.hideLocked && getUnlockStage() < 2) ||
     (E.getBattery() <= config.seconds.hideBattery) ||
     (config.seconds.hideTime && timeInRange(config.seconds.hideStart, now, config.seconds.hideEnd))
   );
@@ -143,41 +144,6 @@ function getDateString(now) {
   else return `${pad(now.getDate(), 2)}${config.date.separator}${month}`;
 }
 
-// Get a floating point number from 0 to 1 representing how far between the user-defined start and end points we are
-function getDayProgress(now) {
-  let start = config.bar.dayProgress.start;
-  let current = now.getHours() * 100 + now.getMinutes();
-  let end = config.bar.dayProgress.end;
-  let reset = config.bar.dayProgress.reset;
-
-  // Normalize
-  if (end <= start) end += 2400;
-  if (current < start) current += 2400;
-  if (reset < start) reset += 2400;
-
-  // Convert an hhmm number into a floating-point hours
-  function toDecimalHours(time) {
-    let hours = Math.floor(time / 100);
-    let minutes = time % 100;
-
-    return hours + (minutes / 60);
-  }
-
-  start = toDecimalHours(start);
-  current = toDecimalHours(current);
-  end = toDecimalHours(end);
-  reset = toDecimalHours(reset);
-
-  let progress = (current - start) / (end - start);
-
-  if (progress < 0 || progress > 1) {
-    if (current < reset) return 1;
-    else return 0;
-  } else {
-    return progress;
-  }
-}
-
 // Get a Gadgetbridge weather string
 function getWeatherString() {
   let current = weather.get();
@@ -215,7 +181,18 @@ function setNextDrawTimeout() {
   if (shouldDisplaySeconds(now)) time = 1000 - (now.getTime() % 1000);
   else time = 60000 - (now.getTime() % 60000);
 
-  drawTimeout = setTimeout(draw, time);
+  drawTimeout = setTimeout(drawLockedSeconds, time);
+}
+
+/** Return one of the following values:
+ *  0: Watch is locked
+ *  1: Watch is unlocked, but should still be displaying the large clock (first stage unlock)
+ *  2: Watch is unlocked and should be displaying the extra info and icons (second stage unlock)
+ */
+function getUnlockStage() {
+  if (Bangle.isLocked()) return 0;
+  else if (dualStageTaps < config.dualStageUnlock) return 1;
+  else return 2;
 }
 
 
@@ -234,47 +211,92 @@ const DATE_CENTER_Y = DOW_CENTER_Y + DATE_LETTER_HEIGHT;      // Date will be th
 const DOW_DATE_CENTER_Y = SECONDS_TOP + (DIGIT_HEIGHT / 2);   // When displaying both on one row, center it
 const BOTTOM_CENTER_Y = ((SECONDS_TOP + DIGIT_HEIGHT + 3) + g.getHeight()) / 2;
 
-// Draw a day progress bar at the given position with given width and height
-function drawDayProgress(x1, y1, x2, y2) {
-  let color = config.bar.dayProgress.color;
-  g.setColor(color[0], color[1], color[2])
-    .fillRect(x1, y1, x1 + (x2 - x1) * getDayProgress(now), y2);
-}
+// Draw a bar with the given top and bottom position
+function drawBar(x1, y1, x2, y2) {
+  // Draw a day progress bar at the given position with given width and height
+  function drawDayProgress(x1, y1, x2, y2) {
+    // Get a floating point number from 0 to 1 representing how far between the user-defined start and end points we are
+    function getDayProgress(now) {
+      let start = config.bar.dayProgress.start;
+      let current = now.getHours() * 100 + now.getMinutes();
+      let end = config.bar.dayProgress.end;
+      let reset = config.bar.dayProgress.reset;
 
-// Draw a calendar bar at the given position with given width and height
-function drawCalendar(x1, y1, x2, y2) {
-  let calendar = storage.readJSON('android.calendar.json', true) || [];
-  let now = (new Date()).getTime();
-  let endTime = now + config.bar.calendar.duration * 1000;
-  // Events must end in the future. Requirement to end in the future rather than start is so ongoing events display partially at the left
-  // Events must start before the end of the lookahead window
-  calendar = calendar.filter(event => ((now < 1000 * (event.timestamp + event.durationInSeconds)) && (event.timestamp * 1000 < endTime)));
+      // Normalize
+      if (end <= start) end += 2400;
+      if (current < start) current += 2400;
+      if (reset < start) reset += 2400;
 
-  for (let event of calendar) {
-    // left = boundary + how far event is in the future mapped from our allowed duration to a distance in pixels, clamped to x1
-    let leftUnclamped = x1 + (event.timestamp * 1000 - now) * (x2 - x1) / (config.bar.calendar.duration * 1000);
-    let left = Math.max(leftUnclamped, x1);
-    // right = unclamped left + how long the event is mapped from seconds to a distance in pixels, clamped to x2
-    let right = Math.min(leftUnclamped + event.durationInSeconds * (x2 - x1) / (config.bar.calendar.duration), x2);
+      // Convert an hhmm number into a floating-point hours
+      function toDecimalHours(time) {
+        let hours = Math.floor(time / 100);
+        let minutes = time % 100;
 
-    //Draw the actual bar
-    if (event.color) g.setColor("#" + (0x1000000 + Number(event.color)).toString(16).padStart(6, "0")); // Line plagiarized from the agenda app
-    else {
-      let color = config.bar.calendar.defaultColor;
-      g.setColor(color[0], color[1], color[2]);
+        return hours + (minutes / 60);
+      }
+
+      start = toDecimalHours(start);
+      current = toDecimalHours(current);
+      end = toDecimalHours(end);
+      reset = toDecimalHours(reset);
+
+      let progress = (current - start) / (end - start);
+
+      if (progress < 0 || progress > 1) {
+        if (current < reset) return 1;
+        else return 0;
+      } else {
+        return progress;
+      }
     }
-    g.fillRect(left, y1, right, y2);
+
+    let color = config.bar.dayProgress.color;
+    g.setColor(color[0], color[1], color[2])
+      .fillRect(x1, y1, x1 + (x2 - x1) * getDayProgress(now), y2);
+  }
+
+  // Draw a calendar bar at the given position with given width and height
+  function drawCalendar(x1, y1, x2, y2) {
+    let calendar = storage.readJSON('android.calendar.json', true) || [];
+    let now = (new Date()).getTime();
+    let endTime = now + config.bar.calendar.duration * 1000;
+    // Events must end in the future. Requirement to end in the future rather than start is so ongoing events display partially at the left
+    // Events must start before the end of the lookahead window
+    // Sort longer events first, so shorter events get placed on top. Tries to prevent the situation where an event entirely within the timespan of another gets completely covered
+    calendar = calendar.filter(event => ((now < 1000 * (event.timestamp + event.durationInSeconds)) && (event.timestamp * 1000 < endTime)))
+      .sort((a, b) => { return b.durationInSeconds - a.durationInSeconds; });
+
+    pipes = []; // Cache the pipes and draw them all at once, on top of the bar
+
+    for (let event of calendar) {
+      // left = boundary + how far event is in the future mapped from our allowed duration to a distance in pixels, clamped to x1
+      let leftUnclamped = x1 + (event.timestamp * 1000 - now) * (x2 - x1) / (config.bar.calendar.duration * 1000);
+      let left = Math.max(leftUnclamped, x1);
+      // right = unclamped left + how long the event is mapped from seconds to a distance in pixels, clamped to x2
+      let rightUnclamped = leftUnclamped + event.durationInSeconds * (x2 - x1) / (config.bar.calendar.duration)
+      let right = Math.min(rightUnclamped, x2);
+
+      //Draw the actual bar
+      if (event.color) g.setColor("#" + (0x1000000 + Number(event.color)).toString(16).padStart(6, "0")); // Line plagiarized from the agenda app
+      else {
+        let color = config.bar.calendar.defaultColor;
+        g.setColor(color[0], color[1], color[2]);
+      }
+      g.fillRect(left, y1, right, y2);
+
+      // Cache the pipes if necessary
+      if (leftUnclamped == left) pipes.push(left);
+      if (rightUnclamped == right) pipes.push(right);
+    }
 
     // Draw the pipes
     let color = config.bar.calendar.pipeColor;
-    g.setColor(color[0], color[1], color[2])
-      .fillRect(left - 1, y1, left + 1, y2)
-      .fillRect(right - 1, y1, right + 1, y2);
+    g.setColor(color[0], color[1], color[2]);
+    for (let pipe of pipes) {
+      g.fillRect(pipe - 1, y1, pipe + 1, y2);
+    }
   }
-}
 
-// Draw a bar with the given top and bottom position
-function drawBar(x1, y1, x2, y2) {
   if (config.bar.type == 'dayProgress') {
     drawDayProgress(x1, y1, x2, y2);
   } else if (config.bar.type == 'calendar') {
@@ -287,8 +309,66 @@ function drawBar(x1, y1, x2, y2) {
   }
 }
 
+// Draw the big seconds that are displayed when the screen is locked. Call drawClock if anything else needs to be updated
+function drawLockedSeconds() {
+  // If the watch is in the second stage of unlock, call drawClock()
+  if (getUnlockStage() == 2) {
+    drawClock();
+    setNextDrawTimeout();
+    return
+  }
+
+  now = new Date();
+
+  // If we should not be displaying the seconds right now, call drawClock()
+  if (!shouldDisplaySeconds(now)) {
+    drawClock();
+    setNextDrawTimeout();
+    return;
+  }
+
+  // If the seconds are zero, call drawClock() but also display the seconds
+  else if (now.getSeconds() == 0) {
+    drawClock();
+  }
+
+  // If none of the prior conditions are met, draw the seconds only and do not call drawClock()
+  g.reset()
+    .setFontAlign(0, 0)
+    .clearRect(SECONDS_TOP, SECONDS_LEFT, g.getWidth(), SECONDS_TOP + DIGIT_HEIGHT);
+
+  if (E.getBattery() <= config.lowBattColor.level) {
+    let color = config.lowBattColor.color;
+    g.setColor(color[0], color[1], color[2]);
+  }
+
+  let tens = Math.floor(now.getSeconds() / 10);
+  let ones = now.getSeconds() % 10;
+  g.drawImage(FONT[tens], SECONDS_LEFT, SECONDS_TOP)
+    .drawImage(FONT[ones], SECONDS_LEFT + DIGIT_WIDTH, SECONDS_TOP);
+
+}
+
+// Draw the bottom text area
+function drawBottomText() {
+  g.clearRect(0, SECONDS_TOP + DIGIT_HEIGHT, g.getWidth(), g.getHeight());
+
+  if (config.bottomLocked.display == 'progress') drawBar(0, SECONDS_TOP + DIGIT_HEIGHT + 3, g.getWidth(), g.getHeight());
+  else {
+    let bottomString;
+
+    if (config.bottomLocked.display == 'weather') bottomString = getWeatherString();
+    else if (config.bottomLocked.display == 'steps') bottomString = getStepsString();
+    else if (config.bottomLocked.display == 'health') bottomString = getHealthString();
+    else bottomString = ' ';
+
+    g.setFont('Vector', getFontSize(bottomString.length, 176, 6, g.getHeight() - (SECONDS_TOP + DIGIT_HEIGHT + 3)))
+      .drawString(bottomString, g.getWidth() / 2, BOTTOM_CENTER_Y);
+  }
+}
+
 // Draw the clock
-function draw() {
+function drawClock(now) {
   //Prepare to draw
   g.reset()
     .setFontAlign(0, 0);
@@ -297,13 +377,13 @@ function draw() {
     let color = config.lowBattColor.color;
     g.setColor(color[0], color[1], color[2]);
   }
-  now = new Date();
+  if (now == undefined) now = new Date();
 
   //When the watch is locked or in first stage
-  if (Bangle.isLocked() || dualStageTaps < config.dualStageUnlock) {
-    g.clearRect(0, 24, g.getWidth(), g.getHeight());
+  if (getUnlockStage() < 2) {
 
     //Draw the hours and minutes
+    g.clearRect(0, 24, g.getWidth(), SECONDS_TOP);
     let x = 0;
 
     for (let digit of locale.time(now, 1)) {  //apparently this is how you get an hh:mm time string adjusting for the user's 12/24 hour preference
@@ -313,49 +393,29 @@ function draw() {
     }
     if (storage.readJSON('setting.json')['12hour']) g.drawImage(FONT[(now.getHours() < 12) ? 'am' : 'pm'], 0, HHMM_TOP);
 
-    //Draw the seconds if necessary
+    // If the seconds should be displayed, don't use the area when drawing the date
     if (shouldDisplaySeconds(now)) {
-      let tens = Math.floor(now.getSeconds() / 10);
-      let ones = now.getSeconds() % 10;
-      g.drawImage(FONT[tens], SECONDS_LEFT, SECONDS_TOP)
-        .drawImage(FONT[ones], SECONDS_LEFT + DIGIT_WIDTH, SECONDS_TOP);
-
-      // Draw the day of week and date assuming the seconds are displayed
-
-      g.setFont('Vector', getFontSize(getDayString(now).length, SECONDS_LEFT, 6, DATE_LETTER_HEIGHT))
+      g.clearRect(0, SECONDS_TOP, SECONDS_LEFT, SECONDS_TOP + DIGIT_HEIGHT)
+        .setFont('Vector', getFontSize(getDayString(now).length, SECONDS_LEFT, 6, DATE_LETTER_HEIGHT))
         .drawString(getDayString(now), DATE_CENTER_X, DOW_CENTER_Y)
         .setFont('Vector', getFontSize(getDateString(now).length, SECONDS_LEFT, 6, DATE_LETTER_HEIGHT))
         .drawString(getDateString(now), DATE_CENTER_X, DATE_CENTER_Y);
-
-    } else {
-      //Draw the day of week and date without the seconds
-
+    }
+    // Otherwise, use the seconds area
+    else {
       let string = getDayString(now) + ' ' + getDateString(now);
-      g.setFont('Vector', getFontSize(string.length, g.getWidth(), 6, DATE_LETTER_HEIGHT))
+      g.clearRect(0, SECONDS_TOP, g.getWidth(), SECONDS_TOP + DIGIT_HEIGHT)
+        .setFont('Vector', getFontSize(string.length, g.getWidth(), 6, DATE_LETTER_HEIGHT))
         .drawString(string, g.getWidth() / 2, DOW_DATE_CENTER_Y);
     }
 
-    // Draw the bottom area
-    if (config.bottomLocked.display == 'progress') drawBar(0, SECONDS_TOP + DIGIT_HEIGHT + 3, g.getWidth(), g.getHeight());
-    else {
-      let bottomString;
-
-      if (config.bottomLocked.display == 'weather') bottomString = getWeatherString();
-      else if (config.bottomLocked.display == 'steps') bottomString = getStepsString();
-      else if (config.bottomLocked.display == 'health') bottomString = getHealthString();
-      else bottomString = ' ';
-
-      g.setFont('Vector', getFontSize(bottomString.length, 176, 6, g.getHeight() - (SECONDS_TOP + DIGIT_HEIGHT + 3)))
-        .drawString(bottomString, g.getWidth() / 2, BOTTOM_CENTER_Y);
-    }
+    drawBottomText();
 
     // Draw the bar between the rows if necessary
     if (config.bar.enabledLocked && config.bottomLocked.display != 'progress') drawBar(0, HHMM_TOP + DIGIT_HEIGHT, g.getWidth(), SECONDS_TOP);
-
-    // When watch in second stage
-  } else {
-
-    //If the watch is unlocked
+  }
+  // When watch in second stage
+  else {
     g.clearRect(0, 24, g.getWidth(), g.getHeight() / 2);
     rows = [
       `${getDayString(now)} ${getDateString(now)} ${locale.time(now, 1)}`,
@@ -378,8 +438,6 @@ function draw() {
 
     if (config.bar.enabledUnlocked) drawBar(0, y - maxHeight / 2, g.getWidth(), y + maxHeight / 2);
   }
-
-  setNextDrawTimeout();
 }
 
 // Draw the icons. This is done separately from the main draw routine to avoid having to scale and draw a bunch of images repeatedly.
@@ -398,15 +456,21 @@ function drawIcons() {
   }
 }
 
-weather.on("update", draw);
-Bangle.on("step", draw);
+// Draw only the bottom row if we are in first or second stage unlock, otherwise call drawClock()
+function drawBottomRowOrClock() {
+  if (getUnlockStage() < 2) drawBottomText();
+  else drawClock();
+}
+
+weather.on("update", drawBottomRowOrClock);
+Bangle.on("step", drawBottomRowOrClock);
 Bangle.on('lock', locked => {
   //If the watch is unlocked and the necessary number of dual stage taps have been performed, draw the shortcuts
   if (!locked && dualStageTaps >= config.dualStageUnlock) drawIcons();
 
   // If locked, reset dual stage taps to zero
   else if (locked) dualStageTaps = 0;
-  draw();
+  drawLockedSeconds();
 });
 
 // Show launcher when middle button pressed
@@ -445,7 +509,7 @@ Bangle.on('touch', function (button, xy) {
     // If we reach the unlock threshold, redraw the screen because we have now done the second unlock stage
     if (dualStageTaps == config.dualStageUnlock) {
       drawIcons();
-      draw();
+      drawClock();
     }
 
     // If we have unlocked both stages, handle a shortcut tap
@@ -482,4 +546,4 @@ if (!Bangle.isLocked()) {
   dualStageTaps = config.dualStageUnlock;
   drawIcons();
 }
-draw();
+drawLockedSeconds();
