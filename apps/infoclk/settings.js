@@ -2,84 +2,7 @@
     const SETTINGS_FILE = "infoclk.json";
     const storage = require('Storage');
 
-    let config = Object.assign({
-        dualStageUnlock: 0,
-
-        seconds: {
-            // Displaying the seconds can reduce battery life because the CPU must wake up more often to update the display.
-            // The seconds will be shown unless one of these conditions is enabled here, and currently true.
-            hideLocked: false,  // Hide the seconds when the display is locked.
-            hideBattery: 20,    // Hide the seconds when the battery is at or below a defined percentage.
-            hideTime: true,     // Hide the seconds when between a certain period of time. Useful for when you are sleeping and don't need the seconds
-            hideStart: 2200,    //    The time when the seconds are hidden: first 2 digits are hours on a 24 hour clock, last 2 are minutes
-            hideEnd: 700,       //    The time when the seconds are shown again
-            hideAlways: false,  // Always hide (never show) the seconds
-            forceWhenUnlocked: 1, // Force the seconds to be displayed when the watch is unlocked, no matter the other settings. 0 = never, 1 = first or second stage unlock, 2 = second stage unlock only
-        },
-
-        date: {
-            // Settings related to the display of the date
-            mmdd: true,           // If true, display the month first. If false, display the date first.
-            separator: '-',       // The character that goes between the month and date
-            monthName: false,     // If false, display the month as a number. If true, display the name.
-            monthFullName: false, //    If displaying the name: If false, display an abbreviation. If true, display a full name.
-            dayFullName: false,   // If false, display the day of the week's abbreviation. If true, display the full name.
-        },
-
-        bottomLocked: {
-            display: 'weather'    // What to display in the bottom row when locked:
-            //    'weather': The current temperature and weather description
-            //    'steps': Step count
-            //    'health': Step count and bpm
-            //    'progress': Bar configured in config.bar ('progress' is a remnant of an older version when it was only day progress)
-            //    false: Nothing
-        },
-
-        shortcuts: [
-            //8 shortcuts, displayed in the bottom half of the screen (2 rows of 4 shortcuts) when unlocked
-            //    false = no shortcut
-            //    '#LAUNCHER' = open the launcher
-            //    any other string = name of app to open
-            'stlap', 'keytimer', 'pomoplus', 'alarm',
-            'rpnsci', 'calendar', 'torch', 'weather'
-        ],
-
-        swipe: {
-            // 4 shortcuts to launch upon swiping:
-            //    false = no shortcut
-            //    '#LAUNCHER' = open the launcher
-            //    any other string = name of app to open
-            up: 'messageui',       // Swipe up or swipe down, due to limitation of event handler
-            down: 'messageui',
-            left: '#LAUNCHER',
-            right: '#LAUNCHER',
-        },
-
-        bar: {
-            enabledLocked: true,    // Whether this bar is enabled when the watch is locked
-            enabledUnlocked: false, // Whether the bar is enabled when the watch is unlocked
-            type: 'split',          // off = no bar, dayProgress = day progress bar, calendar = calendar bar, split = both
-
-            dayProgress: {          // A progress bar representing how far through the day you are
-                color: [0, 0, 1],   // The color of the bar
-                start: 700,         // The time of day that the bar starts filling
-                end: 2200,          // The time of day that the bar becomes full
-                reset: 300          // The time of day when the progress bar resets from full to empty
-            },
-
-            calendar: {
-                duration: 10800,    // How long to look ahead for calendar events
-                pipeColor: [1, 1, 1],   // What color the vertical bar at event start/end is
-                defaultColor: [0, 0, 1] // Default color for events that don't have one set
-            },
-        },
-
-        lowBattColor: {
-            // The text can change color to indicate that the battery is low
-            level: 20,        // The percentage where this happens
-            color: [1, 0, 0]  // The color that the text changes to
-        }
-    }, storage.readJSON(SETTINGS_FILE));
+    let config = require('infoclk-config.js');
 
     function saveSettings() {
         storage.writeJSON(SETTINGS_FILE, config);
@@ -188,7 +111,7 @@
             },
             '...unconditionally when unlocked': {
                 value: config.seconds.forceWhenUnlocked,
-                format: value => ['No', 'First or second stage', 'Second stage only'][value ? value : 0],
+                format: value => ['No', 'First or second stage', 'Second stage only'][value],
                 onchange: value => {
                     config.seconds.forceWhenUnlocked = value;
                     saveSettings();

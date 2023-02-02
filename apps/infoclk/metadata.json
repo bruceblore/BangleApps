@@ -24,6 +24,10 @@
       "url": "font.js"
     },
     {
+      "name": "infoclk-config.js",
+      "url": "configLoad.js"
+    },
+    {
       "name": "infoclk.img",
       "url": "icon.js",
       "evaluate": true
