@@ -231,8 +231,13 @@ function drawBar(x1, y1, x2, y2) {
   }
 }
 
+// Monotonic low battery achieves 2 things:
+//  - Once the battery is marked low, it stays marked low, at least until the app is changed
+//  - Allows us to redraw the full time in the low battery color to avoid only the seconds changing, but still do it once
+let lowBattery = false;
+
 // Draw the big seconds that are displayed when the screen is locked. Call drawClock if anything else needs to be updated
-function drawLockedSeconds() {
+function drawLockedSeconds(forceDrawClock) {
   // If the watch is in the second stage of unlock, call drawClock()
   if (getUnlockStage() == 2) {
     drawClock();
@@ -249,17 +254,23 @@ function drawLockedSeconds() {
     return;
   }
 
-  // If the seconds are zero, call drawClock() but also display the seconds
-  else if (now.getSeconds() == 0) {
+  // If the seconds are zero, or we are forced to raw the clock, call drawClock() but also display the seconds
+  else if (now.getSeconds() == 0 || forceDrawClock) {
     drawClock();
   }
 
   // If none of the prior conditions are met, draw the seconds only and do not call drawClock()
   g.reset()
     .setFontAlign(0, 0)
-    .clearRect(SECONDS_TOP, SECONDS_LEFT, g.getWidth(), SECONDS_TOP + DIGIT_HEIGHT);
+    .clearRect(SECONDS_LEFT, SECONDS_TOP, g.getWidth(), SECONDS_TOP + DIGIT_HEIGHT);
 
+  // If the battery is low, redraw the clock so it can change color
   if (E.getBattery() <= config.lowBattColor.level) {
+    lowBattery = true;
+    drawClock();
+  }
+
+  if (lowBattery) {
     let color = config.lowBattColor.color;
     g.setColor(color[0], color[1], color[2]);
   }
@@ -269,6 +280,7 @@ function drawLockedSeconds() {
   g.drawImage(FONT[tens], SECONDS_LEFT, SECONDS_TOP)
     .drawImage(FONT[ones], SECONDS_LEFT + DIGIT_WIDTH, SECONDS_TOP);
 
+  setNextDrawTimeout();
 }
 
 // Draw the bottom text area
@@ -284,7 +296,9 @@ function drawBottomText() {
     else if (config.bottomLocked.display == 'health') bottomString = getHealthString();
     else bottomString = ' ';
 
-    g.setFont('Vector', getFontSize(bottomString.length, 176, 6, g.getHeight() - (SECONDS_TOP + DIGIT_HEIGHT + 3)))
+    g.reset()
+      .setFontAlign(0, 0)
+      .setFont('Vector', getFontSize(bottomString.length, 176, 6, g.getHeight() - (SECONDS_TOP + DIGIT_HEIGHT + 3)))
       .drawString(bottomString, g.getWidth() / 2, BOTTOM_CENTER_Y);
   }
 }
@@ -295,7 +309,8 @@ function drawClock(now) {
   g.reset()
     .setFontAlign(0, 0);
 
-  if (E.getBattery() <= config.lowBattColor.level) {
+  if (E.getBattery() <= config.lowBattColor.level) lowBattery = true;
+  if (lowBattery) {
     let color = config.lowBattColor.color;
     g.setColor(color[0], color[1], color[2]);
   }
@@ -392,7 +407,8 @@ Bangle.on('lock', locked => {
 
   // If locked, reset dual stage taps to zero
   else if (locked) dualStageTaps = 0;
-  drawLockedSeconds();
+
+  drawLockedSeconds(true);
 });
 
 // Show launcher when middle button pressed
@@ -432,6 +448,7 @@ Bangle.on('touch', function (button, xy) {
     if (dualStageTaps == config.dualStageUnlock) {
       drawIcons();
       drawClock();
+      setNextDrawTimeout(); // In case we need to replace an every minute timeout with an every second timeout
     }
 
     // If we have unlocked both stages, handle a shortcut tap
