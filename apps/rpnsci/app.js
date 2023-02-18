@@ -335,6 +335,9 @@ E.on('kill', () => {
         config.y = y;
         config.z = z;
         config.t = t;
+        config.mode = mode;
+        config.entryTerminated = entryTerminated;
+        config.liftOnNumberPress = liftOnNumberPress;
     }
     storage.writeJSON(CONFIG_FILE, config);
 });
