@@ -231,10 +231,20 @@ function drawBar(x1, y1, x2, y2) {
   }
 }
 
-// Monotonic low battery achieves 2 things:
-//  - Once the battery is marked low, it stays marked low, at least until the app is changed
-//  - Allows us to redraw the full time in the low battery color to avoid only the seconds changing, but still do it once
+// Return whether low battery behavior should be used.
+//  - If the watch isn't charging and the battery is low, mark it low. Once the battery is marked low, it stays marked low for subsequent calls.
+//  - When the watch sees external power, unmark the low battery.
+// This allows us to redraw the full time in the low battery color to avoid only the seconds changing, but still do it once. And it avoids alternating.
 let lowBattery = false;
+function checkLowBattery() {
+  if (!Bangle.isCharging() && E.getBattery() <= config.lowBattColor.level) lowBattery = true;
+  else if (Bangle.isCharging()) lowBattery = true;
+  return lowBattery;
+}
+Bangle.on('charging', charging => {
+  if (checkLowBattery());
+  drawLockedSeconds(true);
+})
 
 // Draw the big seconds that are displayed when the screen is locked. Call drawClock if anything else needs to be updated
 function drawLockedSeconds(forceDrawClock) {
@@ -265,12 +275,7 @@ function drawLockedSeconds(forceDrawClock) {
     .clearRect(SECONDS_LEFT, SECONDS_TOP, g.getWidth(), SECONDS_TOP + DIGIT_HEIGHT);
 
   // If the battery is low, redraw the clock so it can change color
-  if (E.getBattery() <= config.lowBattColor.level) {
-    lowBattery = true;
-    drawClock();
-  }
-
-  if (lowBattery) {
+  if (checkLowBattery()) {
     let color = config.lowBattColor.color;
     g.setColor(color[0], color[1], color[2]);
   }
@@ -309,8 +314,7 @@ function drawClock(now) {
   g.reset()
     .setFontAlign(0, 0);
 
-  if (E.getBattery() <= config.lowBattColor.level) lowBattery = true;
-  if (lowBattery) {
+  if (checkLowBattery()) {
     let color = config.lowBattColor.color;
     g.setColor(color[0], color[1], color[2]);
   }
@@ -485,4 +489,5 @@ if (!Bangle.isLocked()) {
   dualStageTaps = config.dualStageUnlock;
   drawIcons();
 }
-drawLockedSeconds();
+
+drawLockedSeconds(true);
