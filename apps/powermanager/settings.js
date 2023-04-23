@@ -23,6 +23,10 @@
     '': {
       'title': 'Power Manager'
     },
+    "< Back": back,
+    'Widget': function () {
+      E.showMenu(submenu_widget);
+    },
     'Monotonic percentage': {
       value: !!settings.forceMonoPercentage,
       onchange: v => {
@@ -43,6 +47,9 @@
     },
     'Calibrate': function () {
       E.showMenu(submenu_calibrate);
+    },
+    'Logging': function () {
+      E.showMenu(submenu_logging);
     }
   };
 
@@ -101,8 +108,7 @@
       },
     },
     'Enabled': {
-      value: !!settings.warnHighEnabled,
-      format: v => settings.warnHighEnabled ? "On" : "Off",
+      value: !!settings.warnEnabled,
       onchange: v => {
         writeSettings("warnHighEnabled", v);
       }
@@ -144,6 +150,62 @@
       }
     }
   };
+
+  var submenu_logging = {
+    '': {
+      title: "Logging",
+      back: function () {
+        E.showMenu(mainmenu);
+      },
+    },
+    'Enabled': {
+      value: !!settings.log,
+      onchange: v => {
+        writeSettings("log", v);
+      }
+    },
+    'Trace': {
+      value: !!settings.logDetails,
+      onchange: v => {
+        writeSettings("logDetails", v);
+      }
+    }
+  }
+
+  var submenu_widget = {
+    '': {
+      title: "Widget",
+      back: function () {
+        E.showMenu(mainmenu);
+      },
+    },
+    'Enabled': {
+      value: !!settings.widget,
+      onchange: v => {
+        writeSettings("widget", v);
+      }
+    },
+    'Refresh': {
+      min: 0.5,
+      max: 60,
+      step: 0.5,
+      value: settings.refreshUnlocked || 1,
+      format: v => v + "s",
+      onchange: v => {
+        writeSettings("refreshUnlocked", v);
+      }
+    },
+    'Refresh locked': {
+      min: 5,
+      max: 120,
+      step: 5,
+      value: settings.refreshLocked || 60,
+      format: v => v + "s",
+      onchange: v => {
+        writeSettings("refreshLocked", v);
+      }
+    }
+  }
 
   E.showMenu(mainmenu);
 });
