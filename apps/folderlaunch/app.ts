@@ -1,5 +1,6 @@
 {
   const loader = require('folderlaunch-configLoad.js')
+  const storage = require('Storage')
 
   const FOLDER_ICON = require("heatshrink").decompress(atob("mEwwMA///wAJCAoPAAongAonwAon4Aon8Aon+Aon/AooA/AH4A/AFgA="))
 
@@ -22,7 +23,6 @@
   }
 
   let folderPath: Array<string> = [];
-  let folder: Folder = getFolder(folderPath);
   /**
    * Get the folder at the provided path
    *
@@ -32,8 +32,29 @@
   function getFolder(folderPath: Array<string>): Folder {
     let result: Folder = config.rootFolder;
     for (let folderName of folderPath)
-      result = folder.folders[folderName]!;
+      result = result.folders[folderName]!;
+    nPages = Math.ceil((result.apps.length + Object.keys(result.folders).length) / (config.display.rows * config.display.rows));
     return result;
+  }
+  let folder: Folder = getFolder(folderPath);
+
+  /**
+   * Determine the font size needed to fit a string of the given length widthin maxWidth number of pixels, clamped between minSize and maxSize
+   *
+   * @param length the number of characters of the string
+   * @param maxWidth the maximum allowable width
+   * @param minSize the minimum acceptable font size
+   * @param maxSize the maximum acceptable font size
+   * @return the calculated font size
+  */
+  function getFontSize(length: number, maxWidth: number, minSize: number, maxSize: number): number {
+    let size = Math.floor(maxWidth / length);  //Number of pixels of width available to character
+    size *= (20 / 12);  //Convert to height, assuming 20 pixels of height for every 12 of width
+
+    // Clamp to within range
+    if (size < minSize) return minSize;
+    else if (size > maxSize) return maxSize;
+    else return Math.floor(size);
   }
 
   // grid[x][y] = id of app at column x row y, or undefined if no app displayed there
@@ -59,22 +80,20 @@
 
       // Try to place a folder
       let folderIndex = startIndex + i;
+      let appIndex = folderIndex - Object.keys(folder.folders).length;
       if (folderIndex < folder.folders.length) {
         grid[x]![y]!.type = 'folder';
         grid[x]![y]!.id = Object.keys(folder.folders)[i];
-        continue;
       }
 
       // If that fails, try to place an app
-      let appIndex = folderIndex - folder.folders.length;
-      if (appIndex < folder.apps.length) {
+      else if (appIndex < folder.apps.length) {
         grid[x]![y]!.type = 'app';
         grid[x]![y]!.id = folder.apps[appIndex]!;
-        continue;
       }
 
       // If that also fails, make the space empty
-      grid[x]![y]!.type = 'empty';
+      else grid[x]![y]!.type = 'empty';
     }
 
     // Prepare to draw the grid
@@ -84,7 +103,7 @@
     let squareSize: number = (g.getHeight() - 24) / config.display.rows;
     let iconSize: number = config.display.icon ? squareSize : 0;
     if (config.display.font) {
-      g.setFont(config.display.font as FontNameWithScaleFactor);
+      g.setFont('Vector', config.display.font);
       iconSize = Math.max(0, iconSize - g.getFontHeight());
     }
     let iconScale: number = iconSize / 48;
@@ -98,8 +117,9 @@
 
         switch (entry.type) {
           case 'app':
-            icon = config.apps[entry.id]!.icon;
-            text = config.apps[entry.id]!.name;
+            let app: AppInfoFile = storage.readJSON(entry.id + '.info', false);
+            icon = storage.read(app.icon)!;
+            text = app.name;
             break;
           case 'folder':
             icon = FOLDER_ICON;
@@ -116,23 +136,31 @@
           g.drawImage(icon, posX + (squareSize - iconSize) / 2, posY, { scale: iconScale });
 
         if (config.display.font)
-          g.drawString(text, posX + (squareSize / 2), posY + iconSize);
+          g.setFont('Vector', getFontSize(text.length, squareSize, 6, squareSize - iconSize))
+            .drawString(text, posX + (squareSize / 2), posY + iconSize);
       }
     }
+
+    // Draw a scroll bar
+    let barSize = (g.getHeight() - 24) / nPages;
+    let barTop = 24 + (page * barSize);
+    g.fillRect(
+      g.getWidth() - 8, barTop,
+      g.getWidth() - 4, barTop + barSize);
   }
 
   /**
    * Handle a touch
    *
-   * @param button 1 for left half, 2 for right half
+   * @param _button 1 for left half, 2 for right half
    * @param xy postion on screen
    */
-  function onTouch(button: number, xy: { x: number, y: number } | undefined) {
+  function onTouch(_button: number, xy: { x: number, y: number } | undefined) {
     // Determine which grid cell was tapped
-    let x: number = (xy!.x - 12) / ((g.getWidth() - 24) / config.display.rows);
+    let x: number = Math.round((xy!.x - 12) / ((g.getWidth() - 24) / config.display.rows));
     if (x < 0) x = 0;
     else if (x >= config.display.rows) x = config.display.rows - 1;
-    let y: number = (xy!.y - 24) / ((g.getWidth() - 24) / config.display.rows);
+    let y: number = Math.round((xy!.y - 24) / ((g.getHeight() - 24) / config.display.rows));
     if (y < 0) y = 0;
     else if (y >= config.display.rows) y = config.display.rows - 1;
 
@@ -142,7 +170,8 @@
       case "app":
         Bangle.buzz();
         let app = config.apps[entry.id]!;
-        if (app.fast) Bangle.load(app.src);
+        let infoFile = storage.readJSON(entry.id + '.info', false);
+        if (app.fast) Bangle.load(infoFile.src);
         else if (config.fastNag && !app.nagged)
           E.showPrompt(/*LANG*/ 'Would you like to fast load?', {
             title: /*LANG*/ 'Fast load?',
@@ -157,19 +186,19 @@
                 app.nagged = true;
                 app.fast = true;
                 loader.cleanAndSave(config);
-                Bangle.load(app.src);
+                Bangle.load(infoFile.src);
                 break;
               case 1:
-                load(app.src);
+                load(infoFile.src);
                 break;
               default:
                 app.nagged = true;
                 loader.cleanAndSave(config);
-                load(app.src);
+                load(infoFile.src);
                 break;
             }
           });
-        else load(app.src);
+        else load(infoFile.src);
         break;
       case "folder":
         Bangle.buzz();
@@ -185,7 +214,9 @@
     }
   }
 
-  let page = 0;
+  let page: number = 0;
+  let nPages: number; // Set when setting folder
+
   /**
    * Handle a swipe
    *
@@ -195,26 +226,24 @@
    * @param ud -1 if up, 0 if pure left/right, 1 if down
    */
   function onSwipe(lr: -1 | 0 | 1 | undefined, ud: -1 | 0 | 1 | undefined) {
-    if (lr == -1 && ud == 0) {
+    if (lr == 1 && ud == 0) {
       onBackButton();
       return;
-    } else if (ud == -1) {
+    } else if (ud == 1) {
       resetTimeout();
       if (page == 0) {
         Bangle.buzz(200);
         return;
       } else page--;
-    } else if (ud == 1) {
+    } else if (ud == -1) {
       resetTimeout();
-      let maxPage = Math.ceil((folder.apps.length + folder.folders.length) / (config.display.rows * config.display.rows));
-      if (page == maxPage) {
+      if (page == nPages - 1) {
         Bangle.buzz(200);
         return;
       } else page++;
     }
 
     // If we reached this point, the page number has been changed and is valid.
-    Bangle.buzz();
     render();
   }
 
@@ -236,7 +265,7 @@
 
 
   Bangle.loadWidgets();
-  Bangle.drawWidgets(); // To immediately update widget field to follow current theme - remove leftovers if previous app set custom theme.
+  Bangle.drawWidgets();
 
   Bangle.setUI({
     mode: 'custom',

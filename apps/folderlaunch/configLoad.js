@@ -7,7 +7,7 @@ var DEFAULT_CONFIG = {
     display: {
         rows: 2,
         icon: true,
-        font: 'Vector:8'
+        font: 12
     },
     fastNag: true,
     timeout: 30000,
@@ -50,7 +50,20 @@ module.exports = {
             return config;
         }
         E.showMessage('Rebuilding cache...');
+        config.rootFolder = clearFolder(config.rootFolder);
         var infoFiles = storage.list(/\.info$/);
+        infoFiles.sort(function (a, b) {
+            var aJson = storage.readJSON(a, false);
+            var bJson = storage.readJSON(b, false);
+            var n = (0 | aJson.sortorder) - (0 | bJson.sortorder);
+            if (n)
+                return n;
+            if (aJson.name < bJson.name)
+                return -1;
+            if (aJson.name > bJson.name)
+                return 1;
+            return 0;
+        });
         for (var _i = 0, infoFiles_2 = infoFiles; _i < infoFiles_2.length; _i++) {
             var infoFile = infoFiles_2[_i];
             var app_1 = storage.readJSON(infoFile, false);
@@ -61,11 +74,12 @@ module.exports = {
                     nagged: false
                 };
             }
-            config.apps[app_1.id].name = app_1.name;
-            config.apps[app_1.id].type = app_1.hasOwnProperty('type') ? app_1.type : '';
-            config.apps[app_1.id].src = app_1.src;
-            config.apps[app_1.id].icon = storage.read(app_1.icon);
-            config.folder = clearFolder(config.rootFolder);
+            if ((!config.showClocks && app_1.type == 'clock') ||
+                (!config.showLaunchers && app_1.type == 'launch') ||
+                (app_1.type == 'widget') ||
+                (!app_1.src) ||
+                (config.hidden.includes(app_1.id)))
+                continue;
             var curFolder = config.rootFolder;
             var depth = 0;
             for (var _a = 0, _b = config.apps[app_1.id].folder; _a < _b.length; _a++) {
@@ -81,6 +95,7 @@ module.exports = {
             }
             curFolder.apps.push(app_1.id);
         }
+        config.hash = storage.hash(/\.info$/);
         return cleanAndSave(config);
     }
 };

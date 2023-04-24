@@ -2,12 +2,13 @@ type AppInfoFile = {                // Contents of a .info file
     id: string,
     name: string,
     type?: string,
-    src: string,
+    src?: string,
     icon: string,
     version: string,
     tags: string,
     files: string,
-    data: string
+    data: string,
+    sortorder?: number
 };
 
 type Folder = {
@@ -26,17 +27,13 @@ type Config = {
     display: {
         rows: number,               // Display an X by X grid of apps
         icon: boolean,              // Whether to show icons
-        font: string | false        // Which font to use for the name, or false to not show the name
+        font: number | false        // Which font to use for the name, or false to not show the name
     },
     fastNag: boolean,               // Ask whether new apps should be fast-loaded the first time they are launched
     timeout: number,                // How many ms before returning to the clock, or zero to never return
     rootFolder: Folder,             // The top level folder, first displayed when opened
     apps: {                         // Saved info for each app
         [key: string]: {
-            name: string,           // Cached name
-            type: string,           // Cached type (clock, launcher, etc)
-            src: string,            // Cached filename of main code
-            icon: string,           // Cached icon
             folder: FolderList,     // Folder path
             fast: boolean,          // Whether the app should be fast launched
             nagged: boolean         // Whether the app's fast launch setting was configured

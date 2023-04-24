@@ -9,7 +9,7 @@ const DEFAULT_CONFIG: Config = {
     display: {
         rows: 2,
         icon: true,
-        font: 'Vector:8'
+        font: 12
     },
     fastNag: true,
     timeout: 30000,
@@ -87,7 +87,20 @@ export = {
         }
 
         E.showMessage('Rebuilding cache...')
+        config.rootFolder = clearFolder(config.rootFolder);
         let infoFiles: Array<string> = storage.list(/\.info$/);
+
+        // Sorting code modified from dtlaunch
+        infoFiles.sort((a, b) => {
+            let aJson: AppInfoFile = storage.readJSON(a, false);
+            let bJson: AppInfoFile = storage.readJSON(b, false);
+            var n = (0 | aJson.sortorder!) - (0 | bJson.sortorder!);
+            if (n) return n; // do sortorder first
+            if (aJson.name < bJson.name) return -1;
+            if (aJson.name > bJson.name) return 1;
+            return 0;
+        });
+
         for (let infoFile of infoFiles) {
             let app: AppInfoFile = storage.readJSON(infoFile, false);
 
@@ -100,14 +113,15 @@ export = {
                 };
             }
 
-            // Update parts of the apps entry that may have changed
-            config.apps[app.id].name = app.name;
-            config.apps[app.id].type = app.hasOwnProperty('type') ? app.type : '';
-            config.apps[app.id].src = app.src;
-            config.apps[app.id].icon = storage.read(app.icon);
-
-            // Clear the folders
-            config.folder = clearFolder(config.rootFolder);
+            // If the app is to be hidden, don't place it into a folder
+            if (
+                (!config.showClocks && app.type == 'clock') ||
+                (!config.showLaunchers && app.type == 'launch') ||
+                (app.type == 'widget') ||
+                (!app.src) ||
+                (config.hidden.includes(app.id))
+            )
+                continue;
 
             // Place apps in folders, deleting references to folders that no longer exist
             // Note: Relies on curFolder secretly being a reference rather than a copy
@@ -124,6 +138,7 @@ export = {
             }
             curFolder.apps.push(app.id);
         }
+        config.hash = storage.hash(/\.info$/);
 
         return cleanAndSave(config);
     }
