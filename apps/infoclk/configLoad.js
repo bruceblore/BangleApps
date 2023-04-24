@@ -55,6 +55,19 @@ let defaultConfig = {
         right: '#LAUNCHER',
     },
 
+    fastLoad: {
+        shortcuts: [
+            false, false, false, false,
+            false, false, false, false
+        ],
+        swipe: {
+            up: false,
+            down: false,
+            left: false,
+            right: false
+        }
+    },
+
     bar: {
         enabledLocked: true,    // Whether this bar is enabled when the watch is locked
         enabledUnlocked: false, // Whether the bar is enabled when the watch is unlocked

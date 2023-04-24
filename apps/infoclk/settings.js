@@ -161,7 +161,7 @@
                 name: appInfo.name,
                 val: appInfo.id
             });
-        }
+        };
 
         E.showMenu({
             '': {
@@ -176,6 +176,7 @@
                 wrap: false,
                 onchange: value => {
                     config.shortcuts[0] = shortcutOptions[value].val;
+                    config.fastLoad.shortcuts[0] = false;
                     saveSettings();
                 }
             },
@@ -187,6 +188,7 @@
                 wrap: false,
                 onchange: value => {
                     config.shortcuts[1] = shortcutOptions[value].val;
+                    config.fastLoad.shortcuts[1] = false;
                     saveSettings();
                 }
             },
@@ -198,6 +200,7 @@
                 wrap: false,
                 onchange: value => {
                     config.shortcuts[2] = shortcutOptions[value].val;
+                    config.fastLoad.shortcuts[2] = false;
                     saveSettings();
                 }
             },
@@ -209,6 +212,7 @@
                 wrap: false,
                 onchange: value => {
                     config.shortcuts[3] = shortcutOptions[value].val;
+                    config.fastLoad.shortcuts[3] = false;
                     saveSettings();
                 }
             },
@@ -220,6 +224,7 @@
                 wrap: false,
                 onchange: value => {
                     config.shortcuts[4] = shortcutOptions[value].val;
+                    config.fastLoad.shortcuts[4] = false;
                     saveSettings();
                 }
             },
@@ -231,6 +236,7 @@
                 wrap: false,
                 onchange: value => {
                     config.shortcuts[5] = shortcutOptions[value].val;
+                    config.fastLoad.shortcuts[5] = false;
                     saveSettings();
                 }
             },
@@ -242,6 +248,7 @@
                 wrap: false,
                 onchange: value => {
                     config.shortcuts[6] = shortcutOptions[value].val;
+                    config.fastLoad.shortcuts[6] = false;
                     saveSettings();
                 }
             },
@@ -253,6 +260,7 @@
                 wrap: false,
                 onchange: value => {
                     config.shortcuts[7] = shortcutOptions[value].val;
+                    config.fastLoad.shortcuts[7] = false;
                     saveSettings();
                 }
             },
@@ -264,6 +272,7 @@
                 wrap: false,
                 onchange: value => {
                     config.swipe.up = shortcutOptions[value].val;
+                    config.fastLoad.swipe.up = false;
                     saveSettings();
                 }
             },
@@ -275,6 +284,7 @@
                 wrap: false,
                 onchange: value => {
                     config.swipe.down = shortcutOptions[value].val;
+                    config.fastLoad.swipe.down = false;
                     saveSettings();
                 }
             },
@@ -286,6 +296,7 @@
                 wrap: false,
                 onchange: value => {
                     config.swipe.left = shortcutOptions[value].val;
+                    config.fastLoad.swipe.left = false;
                     saveSettings();
                 }
             },
@@ -297,10 +308,120 @@
                 wrap: false,
                 onchange: value => {
                     config.swipe.right = shortcutOptions[value].val;
+                    config.fastLoad.swipe.right = false;
                     saveSettings();
                 }
-            },
+            }
         });
+    }
+
+    // The menu for configuring which apps can be fast loaded
+    function showFastLoadMenu() {
+        E.showMenu();
+        E.showAlert(/*LANG*/"WARNING! Only enable fast loading for apps that use widgets.").then(() => {
+            E.showMenu({
+                '': {
+                    'title': 'Shortcuts',
+                    'back': showMainMenu
+                },
+                'Top first': {
+                    value: config.fastLoad.shortcuts[0],
+                    format: value => value ? 'Fast' : 'Slow',
+                    onchange: value => {
+                        config.fastLoad.shortcuts[0] = value;
+                        saveSettings();
+                    }
+                },
+                'Top second': {
+                    value: config.fastLoad.shortcuts[1],
+                    format: value => value ? 'Fast' : 'Slow',
+                    onchange: value => {
+                        config.fastLoad.shortcuts[1] = value;
+                        saveSettings();
+                    }
+                },
+                'Top third': {
+                    value: config.fastLoad.shortcuts[2],
+                    format: value => value ? 'Fast' : 'Slow',
+                    onchange: value => {
+                        config.fastLoad.shortcuts[2] = value;
+                        saveSettings();
+                    }
+                },
+                'Top fourth': {
+                    value: config.fastLoad.shortcuts[3],
+                    format: value => value ? 'Fast' : 'Slow',
+                    onchange: value => {
+                        config.fastLoad.shortcuts[3] = value;
+                        saveSettings();
+                    }
+                },
+                'Bottom first': {
+                    value: config.fastLoad.shortcuts[4],
+                    format: value => value ? 'Fast' : 'Slow',
+                    onchange: value => {
+                        config.fastLoad.shortcuts[4] = value;
+                        saveSettings();
+                    }
+                },
+                'Bottom second': {
+                    value: config.fastLoad.shortcuts[5],
+                    format: value => value ? 'Fast' : 'Slow',
+                    onchange: value => {
+                        config.fastLoad.shortcuts[5] = value;
+                        saveSettings();
+                    }
+                },
+                'Bottom third': {
+                    value: config.fastLoad.shortcuts[6],
+                    format: value => value ? 'Fast' : 'Slow',
+                    onchange: value => {
+                        config.fastLoad.shortcuts[6] = value;
+                        saveSettings();
+                    }
+                },
+                'Bottom fourth': {
+                    value: config.fastLoad.shortcuts[7],
+                    format: value => value ? 'Fast' : 'Slow',
+                    onchange: value => {
+                        config.fastLoad.shortcuts[7] = value;
+                        saveSettings();
+                    }
+                },
+                'Swipe up': {
+                    value: config.fastLoad.swipe.up,
+                    format: value => value ? 'Fast' : 'Slow',
+                    onchange: value => {
+                        config.fastLoad.swipe.up = value;
+                        saveSettings();
+                    }
+                },
+                'Swipe down': {
+                    value: config.fastLoad.swipe.down,
+                    format: value => value ? 'Fast' : 'Slow',
+                    onchange: value => {
+                        config.fastLoad.swipe.down = value;
+                        saveSettings();
+                    }
+                },
+                'Swipe left': {
+                    value: config.fastLoad.swipe.left,
+                    format: value => value ? 'Fast' : 'Slow',
+                    onchange: value => {
+                        config.fastLoad.swipe.left = value;
+                        saveSettings();
+                    }
+                },
+                'Swipe right': {
+                    value: config.fastLoad.swipe.right,
+                    format: value => value ? 'Fast' : 'Slow',
+                    onchange: value => {
+                        config.fastLoad.swipe.right = value;
+                        saveSettings();
+                    }
+                }
+            });
+        })
     }
 
     const COLOR_OPTIONS = [
@@ -588,6 +709,7 @@
                 }
             },
             'Shortcuts': showShortcutMenu,
+            'Fast load shortcuts': showFastLoadMenu,
             'Bar': showBarMenu,
             'Low battery color': () => {
                 E.showMenu({

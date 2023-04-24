@@ -15,3 +15,5 @@ _site
 Desktop.ini
 .sync_*.db*
 *.swp
+todo.txt
+upload.sh
