@@ -67,6 +67,14 @@ module.exports = {
         for (var _i = 0, infoFiles_2 = infoFiles; _i < infoFiles_2.length; _i++) {
             var infoFile = infoFiles_2[_i];
             var app_1 = storage.readJSON(infoFile, false);
+            if ((!config.showClocks && app_1.type == 'clock') ||
+                (!config.showLaunchers && app_1.type == 'launch') ||
+                (app_1.type == 'widget') ||
+                (!app_1.src)) {
+                if (Object.keys(config.apps).includes(app_1.id))
+                    delete config.apps[app_1.id];
+                continue;
+            }
             if (!config.apps.hasOwnProperty(app_1.id)) {
                 config.apps[app_1.id] = {
                     folder: [],
@@ -74,11 +82,7 @@ module.exports = {
                     nagged: false
                 };
             }
-            if ((!config.showClocks && app_1.type == 'clock') ||
-                (!config.showLaunchers && app_1.type == 'launch') ||
-                (app_1.type == 'widget') ||
-                (!app_1.src) ||
-                (config.hidden.includes(app_1.id)))
+            if (config.hidden.includes(app_1.id))
                 continue;
             var curFolder = config.rootFolder;
             var depth = 0;

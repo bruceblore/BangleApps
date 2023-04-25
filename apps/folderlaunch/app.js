@@ -53,7 +53,7 @@
             var x = i % config_1.display.rows;
             var folderIndex = startIndex + i;
             var appIndex = folderIndex - Object.keys(folder_1.folders).length;
-            if (folderIndex < folder_1.folders.length) {
+            if (folderIndex < Object.keys(folder_1.folders).length) {
                 grid_1[x][y].type = 'folder';
                 grid_1[x][y].id = Object.keys(folder_1.folders)[i];
             }
@@ -74,6 +74,7 @@
             iconSize = Math.max(0, iconSize - g.getFontHeight());
         }
         var iconScale = iconSize / 48;
+        var empty = true;
         for (var x = 0; x < config_1.display.rows; x++) {
             for (var y = 0; y < config_1.display.rows; y++) {
                 var entry = grid_1[x][y];
@@ -84,10 +85,12 @@
                         var app_1 = storage_1.readJSON(entry.id + '.info', false);
                         icon = storage_1.read(app_1.icon);
                         text = app_1.name;
+                        empty = false;
                         break;
                     case 'folder':
                         icon = FOLDER_ICON_1;
                         text = entry.id;
+                        empty = false;
                         break;
                     default:
                         continue;
@@ -101,9 +104,13 @@
                         .drawString(text, posX + (squareSize / 2), posY + iconSize);
             }
         }
-        var barSize = (g.getHeight() - 24) / nPages_1;
-        var barTop = 24 + (page_1 * barSize);
-        g.fillRect(g.getWidth() - 8, barTop, g.getWidth() - 4, barTop + barSize);
+        if (empty)
+            E.showMessage('Folder is empty. Swipe left, back button, or BTN1 to go back.');
+        if (nPages_1 > 1) {
+            var barSize = (g.getHeight() - 24) / nPages_1;
+            var barTop = 24 + (page_1 * barSize);
+            g.fillRect(g.getWidth() - 8, barTop, g.getWidth() - 4, barTop + barSize);
+        }
     }
     function onTouch(_button, xy) {
         var x = Math.round((xy.x - 12) / ((g.getWidth() - 24) / config_1.display.rows));
@@ -126,7 +133,7 @@
                     Bangle.load(infoFile_1.src);
                 else if (config_1.fastNag && !app_2.nagged)
                     E.showPrompt('Would you like to fast load?', {
-                        title: 'Fast load?',
+                        title: infoFile_1.name,
                         buttons: {
                             "Yes": 0,
                             "Not now": 1,

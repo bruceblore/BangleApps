@@ -1,5 +1,5 @@
 (function (back) {
-    var loader = require('folderlaunch-configLoader.js');
+    var loader = require('folderlaunch-configLoad.js');
     var storage = require('Storage');
     var textinput = require('textinput');
     var config = loader.getConfig();
@@ -23,15 +23,22 @@
             menu[appInfo.name] = {
                 value: config.hidden.includes(app_1),
                 format: function (value) { return (value ? 'Yes' : 'No'); },
-                onchange: eval("() => { onchange(value, \"".concat(app_1, "\"); }"))
+                onchange: eval("(value) => { onchange(value, \"".concat(app_1, "\"); }"))
             };
         }
+        E.showMenu(menu);
     };
     var showFolderMenu = function (path) {
+        E.showMenu();
         var folder = config.rootFolder;
         for (var _i = 0, path_1 = path; _i < path_1.length; _i++) {
             var folderName = path_1[_i];
-            folder = folder.folders[folderName];
+            try {
+                folder = folder.folders[folderName];
+            }
+            catch (_a) {
+                E.showAlert('BUG: Nonexistent folder ' + path);
+            }
         }
         var back = function () {
             if (path.length) {
@@ -58,12 +65,14 @@
                 });
             },
             'Move app here': {
-                value: 0,
+                value: -1,
                 min: 0,
                 max: Object.keys(config.apps).length - 1,
                 wrap: true,
-                format: function (value) { return storage.readJSON(Object.keys(config.apps)[value], false).name; },
+                format: function (value) { return (value == -1) ? '' : storage.readJSON(Object.keys(config.apps)[value] + '.info', false).name; },
                 onchange: function (value) {
+                    if (value == -1)
+                        return;
                     var appId = Object.keys(config.apps)[value];
                     var app = Object.values(config.apps)[value];
                     var folder = config.rootFolder;
@@ -84,14 +93,16 @@
                 }
             }
         };
-        if (folder.folders.length)
+        if (Object.keys(folder.folders).length)
             menu['View subfolder'] = {
-                value: 0,
+                value: -1,
                 min: 0,
                 max: folder.folders.length - 1,
                 wrap: true,
-                format: function (value) { return Object.keys(folder.folders)[value]; },
+                format: function (value) { return (value == -1) ? '' : Object.keys(folder.folders)[value]; },
                 onchange: function (value) {
+                    if (value == -1)
+                        return;
                     path.push(Object.keys(folder.folders)[value]);
                     showFolderMenu(path);
                 }
@@ -137,6 +148,8 @@
     };
     var exit = function () {
         if (changed) {
+            E.showMessage('Saving...');
+            config.hash = 0;
             loader.cleanAndSave(config);
         }
         back();

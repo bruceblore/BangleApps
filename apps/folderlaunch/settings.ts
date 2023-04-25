@@ -1,5 +1,5 @@
 (function (back: Function) {
-    const loader = require('folderlaunch-configLoader.js');
+    const loader = require('folderlaunch-configLoad.js');
     const storage = require('Storage');
     const textinput = require('textinput');
 
@@ -27,15 +27,22 @@
             menu[appInfo.name] = {
                 value: config.hidden.includes(app),
                 format: (value: boolean) => (value ? 'Yes' : 'No'),
-                onchange: eval(`() => { onchange(value, "${app}"); }`)
+                onchange: eval(`(value) => { onchange(value, "${app}"); }`)
             }
         }
+
+        E.showMenu(menu);
     };
 
     let showFolderMenu = (path: Array<string>) => {
+        E.showMenu();
         let folder: Folder = config.rootFolder;
         for (let folderName of path)
-            folder = folder.folders[folderName]!;
+            try {
+                folder = folder.folders[folderName]!;
+            } catch {
+                E.showAlert(/*LANG*/'BUG: Nonexistent folder ' + path);
+            }
 
         let back = () => {
             if (path.length) {
@@ -61,12 +68,14 @@
                 });
             },
             'Move app here': {
-                value: 0,
+                value: -1,
                 min: 0,
                 max: Object.keys(config.apps).length - 1,
                 wrap: true,
-                format: value => storage.readJSON(Object.keys(config.apps)[value], false).name,
+                format: (value: number) => (value == -1) ? '' : storage.readJSON(Object.keys(config.apps)[value] + '.info', false).name,
                 onchange: (value: number) => {
+                    if (value == -1) return;
+
                     // Delete app from old folder
                     let appId = Object.keys(config.apps)[value];
                     let app = Object.values(config.apps)[value];
@@ -92,13 +101,14 @@
             }
         };
 
-        if (folder.folders.length) menu['View subfolder'] = {
-            value: 0,
+        if (Object.keys(folder.folders).length) menu['View subfolder'] = {
+            value: -1,
             min: 0,
             max: folder.folders.length - 1,
             wrap: true,
-            format: (value: number) => Object.keys(folder.folders)[value],
+            format: (value: number) => (value == -1) ? '' : Object.keys(folder.folders)[value],
             onchange: (value: number) => {
+                if (value == -1) return;
                 path.push(Object.keys(folder.folders)[value]);
                 showFolderMenu(path);
             }
@@ -147,6 +157,8 @@
 
     let exit = () => {
         if (changed) {
+            E.showMessage(/*LANG*/'Saving...');
+            config.hash = 0;    // Invalidate the cache so changes to hidden apps or folders actually get reflected
             loader.cleanAndSave(config);
         }
         back();

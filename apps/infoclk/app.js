@@ -94,7 +94,7 @@
   // Set the next timeout to draw the screen
   let drawTimeout;
   function setNextDrawTimeout() {
-    if (drawTimeout) {
+    if (drawTimeout !== undefined) {
       clearTimeout(drawTimeout);
       drawTimeout = undefined;
     }
@@ -497,8 +497,10 @@
 
   // Show launcher when middle button pressed, and enable fast loading
   Bangle.setUI({
-    mode: "clock", remove: function () {
-      if (drawTimeout) {
+    mode: "clock", remove: () => {
+      console.log(/*LANG*/'Fast unloaded clock');
+      if (drawTimeout !== undefined) {
+        console.log(/*LANG*/'Cleared draw timeout');
         clearTimeout(drawTimeout);
         drawTimeout = undefined;
       }

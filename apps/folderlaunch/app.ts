@@ -81,7 +81,7 @@
       // Try to place a folder
       let folderIndex = startIndex + i;
       let appIndex = folderIndex - Object.keys(folder.folders).length;
-      if (folderIndex < folder.folders.length) {
+      if (folderIndex < Object.keys(folder.folders).length) {
         grid[x]![y]!.type = 'folder';
         grid[x]![y]!.id = Object.keys(folder.folders)[i];
       }
@@ -109,6 +109,7 @@
     let iconScale: number = iconSize / 48;
 
     // Actually draw the grid
+    let empty = true; // Set to empty upon drawing something, so we can know whether to draw a nice message rather than leaving the screen completely blank
     for (let x = 0; x < config.display.rows; x++) {
       for (let y = 0; y < config.display.rows; y++) {
         let entry: GridEntry = grid[x]![y]!;
@@ -120,10 +121,12 @@
             let app: AppInfoFile = storage.readJSON(entry.id + '.info', false);
             icon = storage.read(app.icon)!;
             text = app.name;
+            empty = false;
             break;
           case 'folder':
             icon = FOLDER_ICON;
             text = entry.id;
+            empty = false;
             break;
           default:
             continue;
@@ -141,12 +144,17 @@
       }
     }
 
-    // Draw a scroll bar
-    let barSize = (g.getHeight() - 24) / nPages;
-    let barTop = 24 + (page * barSize);
-    g.fillRect(
-      g.getWidth() - 8, barTop,
-      g.getWidth() - 4, barTop + barSize);
+    // Draw a nice message if there is nothing to see, so the user doesn't think the app is broken
+    if (empty) E.showMessage(/*LANG*/'Folder is empty. Swipe left, back button, or BTN1 to go back.');
+
+    // Draw a scroll bar if necessary
+    if (nPages > 1) { // Avoid divide-by-zero and pointless scroll bars
+      let barSize = (g.getHeight() - 24) / nPages;
+      let barTop = 24 + (page * barSize);
+      g.fillRect(
+        g.getWidth() - 8, barTop,
+        g.getWidth() - 4, barTop + barSize);
+    }
   }
 
   /**
@@ -174,7 +182,7 @@
         if (app.fast) Bangle.load(infoFile.src);
         else if (config.fastNag && !app.nagged)
           E.showPrompt(/*LANG*/ 'Would you like to fast load?', {
-            title: /*LANG*/ 'Fast load?',
+            title: infoFile.name,
             buttons: {
               "Yes": 0,
               "Not now": 1,

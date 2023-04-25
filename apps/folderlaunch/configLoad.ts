@@ -86,7 +86,7 @@ export = {
             return config;
         }
 
-        E.showMessage('Rebuilding cache...')
+        E.showMessage(/*LANG*/'Rebuilding cache...')
         config.rootFolder = clearFolder(config.rootFolder);
         let infoFiles: Array<string> = storage.list(/\.info$/);
 
@@ -104,6 +104,17 @@ export = {
         for (let infoFile of infoFiles) {
             let app: AppInfoFile = storage.readJSON(infoFile, false);
 
+            // If the app is to be hidden by policy, exclude it completely
+            if (
+                (!config.showClocks && app.type == 'clock') ||
+                (!config.showLaunchers && app.type == 'launch') ||
+                (app.type == 'widget') ||
+                (!app.src)
+            ) {
+                if (Object.keys(config.apps).includes(app.id)) delete config.apps[app.id];
+                continue;
+            }
+
             // Creates the apps entry if it doesn't exist yet.
             if (!config.apps.hasOwnProperty(app.id)) {
                 config.apps[app.id] = {
@@ -113,15 +124,8 @@ export = {
                 };
             }
 
-            // If the app is to be hidden, don't place it into a folder
-            if (
-                (!config.showClocks && app.type == 'clock') ||
-                (!config.showLaunchers && app.type == 'launch') ||
-                (app.type == 'widget') ||
-                (!app.src) ||
-                (config.hidden.includes(app.id))
-            )
-                continue;
+            // If the app is manually hidden, don't put it in a folder but still keep information about it
+            if (config.hidden.includes(app.id)) continue;
 
             // Place apps in folders, deleting references to folders that no longer exist
             // Note: Relies on curFolder secretly being a reference rather than a copy
