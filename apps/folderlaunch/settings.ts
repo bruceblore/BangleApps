@@ -18,9 +18,10 @@
             if (value && !config.hidden.includes(appId)) // Hiding, not already hidden
                 config.hidden.push(appId);
             else if (!value && config.hidden.includes(appId)) // Unhiding, already hidden
-                config.hidden.filter(item => item != appId)
+                config.hidden = config.hidden.filter(item => item != appId)
             changed = true;
         }
+        onchange    // Do nothing, but stop typescript from yelling at me for this function being unused. It gets used by eval. I know eval is evil, but the menus are a bit limited.
 
         for (let app in config.apps) {
             let appInfo: AppInfoFile = storage.readJSON(app + '.info', false);
@@ -34,8 +35,11 @@
         E.showMenu(menu);
     };
 
+    let getAppInfo = (id: string): AppInfoFile => {
+        return storage.readJSON(id + '.info', false);
+    }
+
     let showFolderMenu = (path: Array<string>) => {
-        E.showMenu();
         let folder: Folder = config.rootFolder;
         for (let folderName of path)
             try {
@@ -56,65 +60,87 @@
                 'title': path.length ? path[path.length - 1]! : /*LANG*/ 'Root folder',
                 'back': back
             },
-            'New subfolder': () => {
+            /*LANG*/'New subfolder': () => {
                 textinput.input({ text: '' }).then((result: string) => {
-                    folder.folders[result] = {
-                        folders: {},
-                        apps: []
-                    };
-                    changed = true;
-                    path.push(result);
-                    showFolderMenu(path);
+                    if (result && !Object.keys(folder.folders).includes(result)) {
+                        folder.folders[result] = {
+                            folders: {},
+                            apps: []
+                        };
+                        changed = true;
+                        path.push(result);
+                        showFolderMenu(path);
+                    } else {
+                        E.showAlert(/*LANG*/'No folder created').then(() => {
+                            showFolderMenu(path);
+                        })
+                    }
                 });
             },
-            'Move app here': {
-                value: -1,
-                min: 0,
-                max: Object.keys(config.apps).length - 1,
-                wrap: true,
-                format: (value: number) => (value == -1) ? '' : storage.readJSON(Object.keys(config.apps)[value] + '.info', false).name,
-                onchange: (value: number) => {
-                    if (value == -1) return;
+            /*LANG*/'Move app here': () => {
+                let menu: Menu = {
+                    '': {
+                        'title': /*LANG*/'Select app',
+                        'back': () => {
+                            showFolderMenu(path);
+                        }
+                    }
+                };
 
+                let mover = (appId: string) => {
                     // Delete app from old folder
-                    let appId = Object.keys(config.apps)[value];
-                    let app = Object.values(config.apps)[value];
-
                     let folder: Folder = config.rootFolder;
-                    for (let folderName of app.folder)
+                    for (let folderName of config.apps[appId]!.folder)
                         folder = folder.folders[folderName]!;
-                    folder.apps.filter((item: string) => item != appId);
+                    folder.apps = folder.apps.filter((item: string) => item != appId);
 
                     // Change folder in app info
-                    app.folder.path = path;
+                    config.apps[appId]!.folder = path;
 
-                    // Place app in new folder
+                    // Place app in new folder (here)
                     folder = config.rootFolder;
-                    for (let folderName of app.folder)
+                    for (let folderName of path)
                         folder = folder.folders[folderName]!;
                     folder.apps.push(appId);
 
                     // Mark changed and refresh menu
                     changed = true;
                     showFolderMenu(path);
+                };
+                mover;
+
+                for (let appId of Object.keys(config.apps).filter(item => !folder.apps.includes(item))) {
+                    menu[getAppInfo(appId).name] = eval(`() => { mover("${appId}"); }`);
                 }
+
+                E.showMenu(menu);
             }
         };
 
-        if (Object.keys(folder.folders).length) menu['View subfolder'] = {
-            value: -1,
-            min: 0,
-            max: folder.folders.length - 1,
-            wrap: true,
-            format: (value: number) => (value == -1) ? '' : Object.keys(folder.folders)[value],
-            onchange: (value: number) => {
-                if (value == -1) return;
-                path.push(Object.keys(folder.folders)[value]);
-                showFolderMenu(path);
+        if (Object.keys(folder.folders).length) menu[/*LANG*/'View subfolder'] = () => {
+            let menu: Menu = {
+                '': {
+                    'title': /*LANG*/'Subfolders',
+                    'back': () => {
+                        showFolderMenu(path);
+                    }
+                }
             }
+
+            let switchToFolder = (subfolder: string) => {
+                path.push(subfolder);
+                showFolderMenu(path);
+            };
+            switchToFolder;
+
+            for (let subfolder of Object.keys(folder.folders)) {
+                menu[subfolder] = eval(`() => { switchToFolder("${subfolder}") }`);
+            }
+
+            E.showMenu(menu);
         }
 
-        if (folder.apps.length) menu['View apps'] = () => {
+        if (folder.apps.length) menu[/*LANG*/'View apps'] = () => {
             let menu: Menu = {
                 '': {
                     'title': path[path.length - 1]!,
@@ -127,7 +153,7 @@
             E.showMenu(menu);
         }
 
-        if (path.length) menu['Delete folder'] = () => {
+        if (path.length) menu[/*LANG*/'Delete folder'] = () => {
             // Cache apps for changing the folder reference
             let apps: Array<string> = folder.apps;
             let subfolders = folder.folders;
@@ -160,9 +186,19 @@
             E.showMessage(/*LANG*/'Saving...');
             config.hash = 0;    // Invalidate the cache so changes to hidden apps or folders actually get reflected
             loader.cleanAndSave(config);
-        }
+            changed = false; // So we don't do it again on exit
+        };
         back();
     };
+
+    E.on('kill', () => {
+        if (changed) {
+            E.showMessage(/*LANG*/'Saving...');
+            config.hash = 0;    // Invalidate the cache so changes to hidden apps or folders actually get reflected
+            loader.cleanAndSave(config);
+            changed = false; // So we don't do it again on exit
+        };
+    })
 
     let showMainMenu = () => {
         E.showMenu({

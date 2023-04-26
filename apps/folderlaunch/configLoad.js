@@ -71,7 +71,7 @@ module.exports = {
                 (!config.showLaunchers && app_1.type == 'launch') ||
                 (app_1.type == 'widget') ||
                 (!app_1.src)) {
-                if (Object.keys(config.apps).includes(app_1.id))
+                if (Object.keys(config.hidden).includes(app_1.id))
                     delete config.apps[app_1.id];
                 continue;
             }

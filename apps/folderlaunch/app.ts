@@ -83,7 +83,7 @@
       let appIndex = folderIndex - Object.keys(folder.folders).length;
       if (folderIndex < Object.keys(folder.folders).length) {
         grid[x]![y]!.type = 'folder';
-        grid[x]![y]!.id = Object.keys(folder.folders)[i];
+        grid[x]![y]!.id = Object.keys(folder.folders)[folderIndex];
       }
 
       // If that fails, try to place an app

@@ -503,6 +503,8 @@
         console.log(/*LANG*/'Cleared draw timeout');
         clearTimeout(drawTimeout);
         drawTimeout = undefined;
+      } else {
+        console.log(/*LANG*/'WARNING: Didn\'t clear draw timeout!');
       }
       Bangle.removeListener('charging', onCharging);
       weather.removeListener('update', drawBottomRowOrClock);

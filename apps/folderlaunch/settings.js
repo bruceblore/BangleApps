@@ -15,9 +15,10 @@
             if (value && !config.hidden.includes(appId))
                 config.hidden.push(appId);
             else if (!value && config.hidden.includes(appId))
-                config.hidden.filter(function (item) { return item != appId; });
+                config.hidden = config.hidden.filter(function (item) { return item != appId; });
             changed = true;
         };
+        onchange;
         for (var app_1 in config.apps) {
             var appInfo = storage.readJSON(app_1 + '.info', false);
             menu[appInfo.name] = {
@@ -28,8 +29,10 @@
         }
         E.showMenu(menu);
     };
+    var getAppInfo = function (id) {
+        return storage.readJSON(id + '.info', false);
+    };
     var showFolderMenu = function (path) {
-        E.showMenu();
         var folder = config.rootFolder;
         for (var _i = 0, path_1 = path; _i < path_1.length; _i++) {
             var folderName = path_1[_i];
@@ -55,57 +58,76 @@
             },
             'New subfolder': function () {
                 textinput.input({ text: '' }).then(function (result) {
-                    folder.folders[result] = {
-                        folders: {},
-                        apps: []
-                    };
-                    changed = true;
-                    path.push(result);
-                    showFolderMenu(path);
+                    if (result && !Object.keys(folder.folders).includes(result)) {
+                        folder.folders[result] = {
+                            folders: {},
+                            apps: []
+                        };
+                        changed = true;
+                        path.push(result);
+                        showFolderMenu(path);
+                    }
+                    else {
+                        E.showAlert('No folder created').then(function () {
+                            showFolderMenu(path);
+                        });
+                    }
                 });
             },
-            'Move app here': {
-                value: -1,
-                min: 0,
-                max: Object.keys(config.apps).length - 1,
-                wrap: true,
-                format: function (value) { return (value == -1) ? '' : storage.readJSON(Object.keys(config.apps)[value] + '.info', false).name; },
-                onchange: function (value) {
-                    if (value == -1)
-                        return;
-                    var appId = Object.keys(config.apps)[value];
-                    var app = Object.values(config.apps)[value];
+            'Move app here': function () {
+                var menu = {
+                    '': {
+                        'title': 'Select app',
+                        'back': function () {
+                            showFolderMenu(path);
+                        }
+                    }
+                };
+                var mover = function (appId) {
                     var folder = config.rootFolder;
-                    for (var _i = 0, _a = app.folder; _i < _a.length; _i++) {
+                    for (var _i = 0, _a = config.apps[appId].folder; _i < _a.length; _i++) {
                         var folderName = _a[_i];
                         folder = folder.folders[folderName];
                     }
-                    folder.apps.filter(function (item) { return item != appId; });
-                    app.folder.path = path;
+                    folder.apps = folder.apps.filter(function (item) { return item != appId; });
+                    config.apps[appId].folder = path;
                     folder = config.rootFolder;
-                    for (var _b = 0, _c = app.folder; _b < _c.length; _b++) {
-                        var folderName = _c[_b];
+                    for (var _b = 0, path_2 = path; _b < path_2.length; _b++) {
+                        var folderName = path_2[_b];
                         folder = folder.folders[folderName];
                     }
                     folder.apps.push(appId);
                     changed = true;
                     showFolderMenu(path);
+                };
+                mover;
+                for (var _i = 0, _a = Object.keys(config.apps).filter(function (item) { return !folder.apps.includes(item); }); _i < _a.length; _i++) {
+                    var appId = _a[_i];
+                    menu[getAppInfo(appId).name] = eval("() => { mover(\"".concat(appId, "\"); }"));
                 }
+                E.showMenu(menu);
             }
         };
         if (Object.keys(folder.folders).length)
-            menu['View subfolder'] = {
-                value: -1,
-                min: 0,
-                max: folder.folders.length - 1,
-                wrap: true,
-                format: function (value) { return (value == -1) ? '' : Object.keys(folder.folders)[value]; },
-                onchange: function (value) {
-                    if (value == -1)
-                        return;
-                    path.push(Object.keys(folder.folders)[value]);
+            menu['View subfolder'] = function () {
+                var menu = {
+                    '': {
+                        'title': 'Subfolders',
+                        'back': function () {
+                            showFolderMenu(path);
+                        }
+                    }
+                };
+                var switchToFolder = function (subfolder) {
+                    path.push(subfolder);
                     showFolderMenu(path);
+                };
+                switchToFolder;
+                for (var _i = 0, _a = Object.keys(folder.folders); _i < _a.length; _i++) {
+                    var subfolder = _a[_i];
+                    menu[subfolder] = eval("() => { switchToFolder(\"".concat(subfolder, "\") }"));
                 }
+                E.showMenu(menu);
             };
         if (folder.apps.length)
             menu['View apps'] = function () {
@@ -127,8 +149,8 @@
                 var subfolders = folder.folders;
                 var toDelete = path.pop();
                 folder = config.rootFolder;
-                for (var _i = 0, path_2 = path; _i < path_2.length; _i++) {
-                    var folderName = path_2[_i];
+                for (var _i = 0, path_3 = path; _i < path_3.length; _i++) {
+                    var folderName = path_3[_i];
                     folder = folder.folders[folderName];
                 }
                 for (var _a = 0, apps_1 = apps; _a < apps_1.length; _a++) {
@@ -151,9 +173,20 @@
             E.showMessage('Saving...');
             config.hash = 0;
             loader.cleanAndSave(config);
+            changed = false;
         }
+        ;
         back();
     };
+    E.on('kill', function () {
+        if (changed) {
+            E.showMessage('Saving...');
+            config.hash = 0;
+            loader.cleanAndSave(config);
+            changed = false;
+        }
+        ;
+    });
     var showMainMenu = function () {
         E.showMenu({
             '': {

@@ -55,7 +55,7 @@
             var appIndex = folderIndex - Object.keys(folder_1.folders).length;
             if (folderIndex < Object.keys(folder_1.folders).length) {
                 grid_1[x][y].type = 'folder';
-                grid_1[x][y].id = Object.keys(folder_1.folders)[i];
+                grid_1[x][y].id = Object.keys(folder_1.folders)[folderIndex];
             }
             else if (appIndex < folder_1.apps.length) {
                 grid_1[x][y].type = 'app';

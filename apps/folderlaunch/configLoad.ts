@@ -111,7 +111,7 @@ export = {
                 (app.type == 'widget') ||
                 (!app.src)
             ) {
-                if (Object.keys(config.apps).includes(app.id)) delete config.apps[app.id];
+                if (Object.keys(config.hidden).includes(app.id)) delete config.apps[app.id];
                 continue;
             }
 

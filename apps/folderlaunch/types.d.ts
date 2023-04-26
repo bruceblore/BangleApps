@@ -18,7 +18,7 @@ type Folder = {
     apps: Array<string>             // List of ids of all apps in this folder
 };
 
-type FolderList = Array<String>;
+type FolderList = Array<string>;
 
 type Config = {
     showClocks: boolean,            // Whether clocks are shown
