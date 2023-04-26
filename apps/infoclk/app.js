@@ -8,7 +8,7 @@
   let config = require('infoclk-config.js').getConfig();
 
   // Return whether the given time (as a date object) is between start and end (as a number where the first 2 digits are hours on a 24 hour clock and the last 2 are minutes), with end time wrapping to next day if necessary
-  function timeInRange(start, time, end) {
+  let timeInRange = function (start, time, end) {
 
     // Convert the given date object to a time number
     let timeNumber = time.getHours() * 100 + time.getMinutes();
@@ -23,7 +23,7 @@
   }
 
   // Return whether settings should be displayed based on the user's configuration
-  function shouldDisplaySeconds(now) {
+  let shouldDisplaySeconds = function (now) {
     return (config.seconds.forceWhenUnlocked > 0 && getUnlockStage() >= config.seconds.forceWhenUnlocked) || !(
       (config.seconds.hideAlways) ||
       (config.seconds.hideLocked && getUnlockStage() < 2) ||
@@ -33,7 +33,7 @@
   }
 
   // Determine the font size needed to fit a string of the given length widthin maxWidth number of pixels, clamped between minSize and maxSize
-  function getFontSize(length, maxWidth, minSize, maxSize) {
+  let getFontSize = function (length, maxWidth, minSize, maxSize) {
     let size = Math.floor(maxWidth / length);  //Number of pixels of width available to character
     size *= (20 / 12);  //Convert to height, assuming 20 pixels of height for every 12 of width
 
@@ -44,20 +44,20 @@
   }
 
   // Get the current day of the week according to user settings
-  function getDayString(now) {
+  let getDayString = function (now) {
     if (config.date.dayFullName) return ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][now.getDay()];
     else return ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][now.getDay()];
   }
 
   // Pad a number with zeros to be the given number of digits
-  function pad(number, digits) {
+  let pad = function (number, digits) {
     let result = '' + number;
     while (result.length < digits) result = '0' + result;
     return result;
   }
 
   // Get the current date formatted according to the user settings
-  function getDateString(now) {
+  let getDateString = function (now) {
     let month;
     if (!config.date.monthName) month = pad(now.getMonth() + 1, 2);
     else if (config.date.monthFullName) month = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'][now.getMonth()];
@@ -68,32 +68,32 @@
   }
 
   // Get a Gadgetbridge weather string
-  function getWeatherString() {
+  let getWeatherString = function () {
     let current = weather.get();
     if (current) return locale.temp(current.temp - 273.15) + ', ' + current.txt;
     else return 'Weather unknown!';
   }
 
   // Get a second weather row showing humidity, wind speed, and wind direction
-  function getWeatherRow2() {
+  let getWeatherRow2 = function () {
     let current = weather.get();
     if (current) return `${current.hum}%, ${locale.speed(current.wind)} ${current.wrose}`;
     else return 'Check Gadgetbridge';
   }
 
   // Get a step string
-  function getStepsString() {
+  let getStepsString = function () {
     return '' + Bangle.getHealthStatus('day').steps + ' steps';
   }
 
   // Get a health string including daily steps and recent bpm
-  function getHealthString() {
+  let getHealthString = function () {
     return `${Bangle.getHealthStatus('day').steps} steps ${Bangle.getHealthStatus('last').bpm} bpm`;
   }
 
   // Set the next timeout to draw the screen
   let drawTimeout;
-  function setNextDrawTimeout() {
+  let setNextDrawTimeout = function () {
     if (drawTimeout !== undefined) {
       clearTimeout(drawTimeout);
       drawTimeout = undefined;
@@ -112,7 +112,7 @@
    *  1: Watch is unlocked, but should still be displaying the large clock (first stage unlock)
    *  2: Watch is unlocked and should be displaying the extra info and icons (second stage unlock)
    */
-  function getUnlockStage() {
+  let getUnlockStage = function () {
     if (Bangle.isLocked()) return 0;
     else if (dualStageTaps < config.dualStageUnlock) return 1;
     else return 2;
@@ -135,11 +135,11 @@
   const BOTTOM_CENTER_Y = ((SECONDS_TOP + DIGIT_HEIGHT + 3) + g.getHeight()) / 2;
 
   // Draw a bar with the given top and bottom position
-  function drawBar(x1, y1, x2, y2) {
+  let drawBar = function (x1, y1, x2, y2) {
     // Draw a day progress bar at the given position with given width and height
-    function drawDayProgress(x1, y1, x2, y2) {
+    let drawDayProgress = function (x1, y1, x2, y2) {
       // Get a floating point number from 0 to 1 representing how far between the user-defined start and end points we are
-      function getDayProgress(now) {
+      let getDayProgress = function (now) {
         let start = config.bar.dayProgress.start;
         let current = now.getHours() * 100 + now.getMinutes();
         let end = config.bar.dayProgress.end;
@@ -151,7 +151,7 @@
         if (reset < start) reset += 2400;
 
         // Convert an hhmm number into a floating-point hours
-        function toDecimalHours(time) {
+        let toDecimalHours = function (time) {
           let hours = Math.floor(time / 100);
           let minutes = time % 100;
 
@@ -179,7 +179,7 @@
     }
 
     // Draw a calendar bar at the given position with given width and height
-    function drawCalendar(x1, y1, x2, y2) {
+    let drawCalendar = function (x1, y1, x2, y2) {
       let calendar = storage.readJSON('android.calendar.json', true) || [];
       let now = (new Date()).getTime();
       let endTime = now + config.bar.calendar.duration * 1000;
@@ -237,7 +237,7 @@
   //  - When the watch sees external power, unmark the low battery.
   // This allows us to redraw the full time in the low battery color to avoid only the seconds changing, but still do it once. And it avoids alternating.
   let lowBattery = false;
-  function checkLowBattery() {
+  let checkLowBattery = function () {
     if (!Bangle.isCharging() && E.getBattery() <= config.lowBattColor.level) lowBattery = true;
     else if (Bangle.isCharging()) lowBattery = false;
     return lowBattery;
@@ -250,7 +250,7 @@
   Bangle.on('charging', onCharging);
 
   // Draw the big seconds that are displayed when the screen is locked. Call drawClock if anything else needs to be updated
-  function drawLockedSeconds(forceDrawClock) {
+  let drawLockedSeconds = function (forceDrawClock) {
     // If the watch is in the second stage of unlock, call drawClock()
     if (getUnlockStage() == 2) {
       drawClock();
@@ -292,7 +292,7 @@
   }
 
   // Draw the bottom text area
-  function drawBottomText() {
+  let drawBottomText = function () {
     g.clearRect(0, SECONDS_TOP + DIGIT_HEIGHT, g.getWidth(), g.getHeight());
 
     if (config.bottomLocked.display == 'progress') drawBar(0, SECONDS_TOP + DIGIT_HEIGHT + 3, g.getWidth(), g.getHeight());
@@ -312,7 +312,7 @@
   }
 
   // Draw the clock
-  function drawClock(now) {
+  let drawClock = function (now) {
     //Prepare to draw
     g.reset()
       .setFontAlign(0, 0);
@@ -385,7 +385,7 @@
   }
 
   // Draw the icons. This is done separately from the main draw routine to avoid having to scale and draw a bunch of images repeatedly.
-  function drawIcons() {
+  let drawIcons = function () {
     g.reset().clearRect(0, 24, g.getWidth(), g.getHeight());
     for (let i = 0; i < 8; i++) {
       let x = [0, 44, 88, 132, 0, 44, 88, 132][i];
@@ -401,7 +401,7 @@
   }
 
   // Draw only the bottom row if we are in first or second stage unlock, otherwise call drawClock()
-  function drawBottomRowOrClock() {
+  let drawBottomRowOrClock = function () {
     if (getUnlockStage() < 2) drawBottomText();
     else drawClock();
   }
@@ -427,7 +427,7 @@
   //    false: Do nothing
   //    '#LAUNCHER': Open the launcher
   //    nonexistent app: Do nothing
-  function launch(appId, fast) {
+  let launch = function (appId, fast) {
     if (appId == false) return;
     else if (appId == '#LAUNCHER') {
       Bangle.buzz();

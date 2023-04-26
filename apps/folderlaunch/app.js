@@ -4,7 +4,7 @@
     var FOLDER_ICON_1 = require("heatshrink").decompress(atob("mEwwMA///wAJCAoPAAongAonwAon4Aon8Aon+Aon/AooA/AH4A/AFgA="));
     var config_1 = loader_1.getConfig();
     var timeout_1;
-    function resetTimeout() {
+    var resetTimeout_1 = function () {
         if (timeout_1) {
             clearTimeout(timeout_1);
         }
@@ -13,9 +13,9 @@
                 Bangle.showClock();
             }, config_1.timeout);
         }
-    }
+    };
     var folderPath_1 = [];
-    function getFolder(folderPath) {
+    var getFolder_1 = function (folderPath) {
         var result = config_1.rootFolder;
         for (var _i = 0, folderPath_2 = folderPath; _i < folderPath_2.length; _i++) {
             var folderName = folderPath_2[_i];
@@ -23,9 +23,9 @@
         }
         nPages_1 = Math.ceil((result.apps.length + Object.keys(result.folders).length) / (config_1.display.rows * config_1.display.rows));
         return result;
-    }
-    var folder_1 = getFolder(folderPath_1);
-    function getFontSize(length, maxWidth, minSize, maxSize) {
+    };
+    var folder_1 = getFolder_1(folderPath_1);
+    var getFontSize_1 = function (length, maxWidth, minSize, maxSize) {
         var size = Math.floor(maxWidth / length);
         size *= (20 / 12);
         if (size < minSize)
@@ -34,7 +34,7 @@
             return maxSize;
         else
             return Math.floor(size);
-    }
+    };
     var grid_1 = [];
     for (var x = 0; x < config_1.display.rows; x++) {
         grid_1.push([]);
@@ -45,7 +45,7 @@
             });
         }
     }
-    function render() {
+    var render_1 = function () {
         var gridSize = config_1.display.rows * config_1.display.rows;
         var startIndex = page_1 * gridSize;
         for (var i = 0; i < gridSize; i++) {
@@ -100,7 +100,7 @@
                 if (config_1.display.icon && iconSize != 0)
                     g.drawImage(icon, posX + (squareSize - iconSize) / 2, posY, { scale: iconScale });
                 if (config_1.display.font)
-                    g.setFont('Vector', getFontSize(text.length, squareSize, 6, squareSize - iconSize))
+                    g.setFont('Vector', getFontSize_1(text.length, squareSize, 6, squareSize - iconSize))
                         .drawString(text, posX + (squareSize / 2), posY + iconSize);
             }
         }
@@ -111,8 +111,8 @@
             var barTop = 24 + (page_1 * barSize);
             g.fillRect(g.getWidth() - 8, barTop, g.getWidth() - 4, barTop + barSize);
         }
-    }
-    function onTouch(_button, xy) {
+    };
+    var onTouch = function (_button, xy) {
         var x = Math.round((xy.x - 12) / ((g.getWidth() - 24) / config_1.display.rows));
         if (x < 0)
             x = 0;
@@ -162,26 +162,26 @@
                 break;
             case "folder":
                 Bangle.buzz();
-                resetTimeout();
+                resetTimeout_1();
                 page_1 = 0;
                 folderPath_1.push(entry.id);
-                folder_1 = getFolder(folderPath_1);
-                render();
+                folder_1 = getFolder_1(folderPath_1);
+                render_1();
                 break;
             default:
-                resetTimeout();
+                resetTimeout_1();
                 break;
         }
-    }
+    };
     var page_1 = 0;
     var nPages_1;
-    function onSwipe(lr, ud) {
+    var onSwipe = function (lr, ud) {
         if (lr == 1 && ud == 0) {
-            onBackButton();
+            onBackButton_1();
             return;
         }
         else if (ud == 1) {
-            resetTimeout();
+            resetTimeout_1();
             if (page_1 == 0) {
                 Bangle.buzz(200);
                 return;
@@ -190,7 +190,7 @@
                 page_1--;
         }
         else if (ud == -1) {
-            resetTimeout();
+            resetTimeout_1();
             if (page_1 == nPages_1 - 1) {
                 Bangle.buzz(200);
                 return;
@@ -198,31 +198,31 @@
             else
                 page_1++;
         }
-        render();
-    }
-    function onBackButton() {
+        render_1();
+    };
+    var onBackButton_1 = function () {
         Bangle.buzz();
         if (folderPath_1.length == 0)
             Bangle.showClock();
         else {
             folderPath_1.pop();
-            folder_1 = getFolder(folderPath_1);
-            resetTimeout();
+            folder_1 = getFolder_1(folderPath_1);
+            resetTimeout_1();
             page_1 = 0;
-            render();
+            render_1();
         }
-    }
+    };
     Bangle.loadWidgets();
     Bangle.drawWidgets();
     Bangle.setUI({
         mode: 'custom',
-        back: onBackButton,
-        btn: onBackButton,
+        back: onBackButton_1,
+        btn: onBackButton_1,
         swipe: onSwipe,
         touch: onTouch,
         remove: function () { if (timeout_1)
             clearTimeout(timeout_1); }
     });
-    resetTimeout();
-    render();
+    resetTimeout_1();
+    render_1();
 }

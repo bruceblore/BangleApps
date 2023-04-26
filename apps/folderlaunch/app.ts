@@ -10,7 +10,7 @@
   /**
    * If a timeout to return to the clock is set, reset it.
    */
-  function resetTimeout() {
+  let resetTimeout = function () {
     if (timeout) {
       clearTimeout(timeout);
     }
@@ -29,7 +29,7 @@
    * @param folderPath a path for the desired folder
    * @return the folder that was found
    */
-  function getFolder(folderPath: Array<string>): Folder {
+  let getFolder = function (folderPath: Array<string>): Folder {
     let result: Folder = config.rootFolder;
     for (let folderName of folderPath)
       result = result.folders[folderName]!;
@@ -47,7 +47,7 @@
    * @param maxSize the maximum acceptable font size
    * @return the calculated font size
   */
-  function getFontSize(length: number, maxWidth: number, minSize: number, maxSize: number): number {
+  let getFontSize = function (length: number, maxWidth: number, minSize: number, maxSize: number): number {
     let size = Math.floor(maxWidth / length);  //Number of pixels of width available to character
     size *= (20 / 12);  //Convert to height, assuming 20 pixels of height for every 12 of width
 
@@ -68,7 +68,7 @@
       });
     }
   }
-  function render() {
+  let render = function () {
     let gridSize: number = config.display.rows * config.display.rows;
     let startIndex: number = page * gridSize; // Start at this position in the folders
 
@@ -163,7 +163,7 @@
    * @param _button 1 for left half, 2 for right half
    * @param xy postion on screen
    */
-  function onTouch(_button: number, xy: { x: number, y: number } | undefined) {
+  let onTouch = function (_button: number, xy: { x: number, y: number } | undefined) {
     // Determine which grid cell was tapped
     let x: number = Math.round((xy!.x - 12) / ((g.getWidth() - 24) / config.display.rows));
     if (x < 0) x = 0;
@@ -233,7 +233,7 @@
    * @param lr -1 if left, 0 if pure up/down, 1 if right
    * @param ud -1 if up, 0 if pure left/right, 1 if down
    */
-  function onSwipe(lr: -1 | 0 | 1 | undefined, ud: -1 | 0 | 1 | undefined) {
+  let onSwipe = function (lr: -1 | 0 | 1 | undefined, ud: -1 | 0 | 1 | undefined) {
     if (lr == 1 && ud == 0) {
       onBackButton();
       return;
@@ -258,7 +258,7 @@
   /**
    * Go back up a level. If already at the root folder, exit the launcher
    */
-  function onBackButton() {
+  let onBackButton = () => {
     Bangle.buzz();
     if (folderPath.length == 0)
       Bangle.showClock();
