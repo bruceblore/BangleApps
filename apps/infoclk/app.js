@@ -498,13 +498,9 @@
   // Show launcher when middle button pressed, and enable fast loading
   Bangle.setUI({
     mode: "clock", remove: () => {
-      console.log(/*LANG*/'Fast unloaded clock');
       if (drawTimeout !== undefined) {
-        console.log(/*LANG*/'Cleared draw timeout');
         clearTimeout(drawTimeout);
         drawTimeout = undefined;
-      } else {
-        console.log(/*LANG*/'WARNING: Didn\'t clear draw timeout!');
       }
       Bangle.removeListener('charging', onCharging);
       weather.removeListener('update', drawBottomRowOrClock);
