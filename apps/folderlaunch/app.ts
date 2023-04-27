@@ -154,7 +154,7 @@
     }
 
     // Draw a nice message if there is nothing to see, so the user doesn't think the app is broken
-    if (empty) E.showMessage(/*LANG*/'Folder is empty. Swipe left, back button, or BTN1 to go back.');
+    if (empty) E.showMessage(/*LANG*/'Folder is empty. Swipe from left, back button, or BTN1 to go back.');
 
     // Draw a scroll bar if necessary
     if (nPages > 1) { // Avoid divide-by-zero and pointless scroll bars
@@ -237,7 +237,7 @@
   /**
    * Handle a swipe
    *
-   * A left swipe is treated as the back button. Up and down swipes change pages
+   * A swipe from left is treated as the back button. Up and down swipes change pages
    *
    * @param lr -1 if left, 0 if pure up/down, 1 if right
    * @param ud -1 if up, 0 if pure left/right, 1 if down

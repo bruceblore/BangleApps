@@ -255,7 +255,7 @@
             },
             'Timeout': {
                 value: config.timeout,
-                format: value => `${value / 1000} sec`,
+                format: value => value ? `${value / 1000} sec` : 'None',
                 min: 0,
                 step: 1000,
                 onchange: value => {
