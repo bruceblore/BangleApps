@@ -36,5 +36,13 @@
     ],
     "dependencies": {
         "textinput": "type"
-    }
+    },
+    "screenshots": [
+        {
+            "url": "screenshot1.png"
+        },
+        {
+            "url": "screenshot2.png"
+        }
+    ]
 }
