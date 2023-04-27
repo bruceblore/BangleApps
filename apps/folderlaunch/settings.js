@@ -90,7 +90,7 @@
                         folder = folder.folders[folderName];
                     }
                     folder.apps = folder.apps.filter(function (item) { return item != appId; });
-                    config.apps[appId].folder = path;
+                    config.apps[appId].folder = path.slice();
                     folder = config.rootFolder;
                     for (var _b = 0, path_2 = path; _b < path_2.length; _b++) {
                         var folderName = path_2[_b];
@@ -101,34 +101,27 @@
                     showFolderMenu(path);
                 };
                 mover;
-                for (var _i = 0, _a = Object.keys(config.apps).filter(function (item) { return !folder.apps.includes(item); }); _i < _a.length; _i++) {
+                E.showMessage('Loading apps...');
+                for (var _i = 0, _a = Object.keys(config.apps)
+                    .filter(function (item) { return !folder.apps.includes(item); })
+                    .map(function (item) { return item + '.info'; })
+                    .sort(loader.infoFileSorter)
+                    .map(function (item) { return item.split('.info')[0]; }); _i < _a.length; _i++) {
                     var appId = _a[_i];
                     menu[getAppInfo(appId).name] = eval("() => { mover(\"".concat(appId, "\"); }"));
                 }
                 E.showMenu(menu);
             }
         };
-        if (Object.keys(folder.folders).length)
-            menu['View subfolder'] = function () {
-                var menu = {
-                    '': {
-                        'title': 'Subfolders',
-                        'back': function () {
-                            showFolderMenu(path);
-                        }
-                    }
-                };
-                var switchToFolder = function (subfolder) {
-                    path.push(subfolder);
-                    showFolderMenu(path);
-                };
-                switchToFolder;
-                for (var _i = 0, _a = Object.keys(folder.folders); _i < _a.length; _i++) {
-                    var subfolder = _a[_i];
-                    menu[subfolder] = eval("() => { switchToFolder(\"".concat(subfolder, "\") }"));
-                }
-                E.showMenu(menu);
-            };
+        var switchToFolder = function (subfolder) {
+            path.push(subfolder);
+            showFolderMenu(path);
+        };
+        switchToFolder;
+        for (var _b = 0, _c = Object.keys(folder.folders); _b < _c.length; _b++) {
+            var subfolder = _c[_b];
+            menu[subfolder] = eval("() => { switchToFolder(\"".concat(subfolder, "\") }"));
+        }
         if (folder.apps.length)
             menu['View apps'] = function () {
                 var menu = {
@@ -168,7 +161,7 @@
             };
         E.showMenu(menu);
     };
-    var exit = function () {
+    var save = function () {
         if (changed) {
             E.showMessage('Saving...');
             config.hash = 0;
@@ -176,22 +169,16 @@
             changed = false;
         }
         ;
-        back();
     };
-    E.on('kill', function () {
-        if (changed) {
-            E.showMessage('Saving...');
-            config.hash = 0;
-            loader.cleanAndSave(config);
-            changed = false;
-        }
-        ;
-    });
+    E.on('kill', save);
     var showMainMenu = function () {
         E.showMenu({
             '': {
                 'title': 'Folder launcher',
-                'back': exit
+                'back': function () {
+                    save();
+                    back();
+                }
             },
             'Show clocks': {
                 value: config.showClocks,
@@ -237,8 +224,6 @@
                         min: 0,
                         format: function (value) { return (value ? value : 'Icon only'); },
                         onchange: function (value) {
-                            if (value == 0)
-                                value = false;
                             config.display.font = value;
                             changed = true;
                         }

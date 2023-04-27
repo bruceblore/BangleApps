@@ -24,7 +24,7 @@
             "url": "configLoad.js"
         },
         {
-            "name": "dtlaunch.img",
+            "name": "folderlaunch.img",
             "url": "icon.js",
             "evaluate": true
         }

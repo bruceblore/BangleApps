@@ -94,8 +94,8 @@
                         folder = folder.folders[folderName]!;
                     folder.apps = folder.apps.filter((item: string) => item != appId);
 
-                    // Change folder in app info
-                    config.apps[appId]!.folder = path;
+                    // Change folder in app info, .slice is to force a copy rather than a reference
+                    config.apps[appId]!.folder = path.slice();
 
                     // Place app in new folder (here)
                     folder = config.rootFolder;
@@ -109,7 +109,14 @@
                 };
                 mover;
 
-                for (let appId of Object.keys(config.apps).filter(item => !folder.apps.includes(item))) {
+                E.showMessage(/*LANG*/'Loading apps...');
+                for (
+                    let appId of Object.keys(config.apps)               // All known apps
+                        .filter(item => !folder.apps.includes(item))    // Filter out ones already in this folder
+                        .map(item => item + '.info')                    // Convert to .info files
+                        .sort(loader.infoFileSorter)                    // Sort the info files using infoFileSorter
+                        .map(item => item.split('.info')[0])            // Back to app ids
+                ) {
                     menu[getAppInfo(appId).name] = eval(`() => { mover("${appId}"); }`);
                 }
 
@@ -117,27 +124,14 @@
             }
         };
 
-        if (Object.keys(folder.folders).length) menu[/*LANG*/'View subfolder'] = () => {
-            let menu: Menu = {
-                '': {
-                    'title': /*LANG*/'Subfolders',
-                    'back': () => {
-                        showFolderMenu(path);
-                    }
-                }
-            }
+        let switchToFolder = (subfolder: string) => {
+            path.push(subfolder);
+            showFolderMenu(path);
+        };
+        switchToFolder;
 
-            let switchToFolder = (subfolder: string) => {
-                path.push(subfolder);
-                showFolderMenu(path);
-            };
-            switchToFolder;
-
-            for (let subfolder of Object.keys(folder.folders)) {
-                menu[subfolder] = eval(`() => { switchToFolder("${subfolder}") }`);
-            }
-
-            E.showMenu(menu);
+        for (let subfolder of Object.keys(folder.folders)) {
+            menu[subfolder] = eval(`() => { switchToFolder("${subfolder}") }`);
         }
 
         if (folder.apps.length) menu[/*LANG*/'View apps'] = () => {
@@ -181,30 +175,25 @@
         E.showMenu(menu);
     };
 
-    let exit = () => {
+    let save = () => {
         if (changed) {
             E.showMessage(/*LANG*/'Saving...');
             config.hash = 0;    // Invalidate the cache so changes to hidden apps or folders actually get reflected
             loader.cleanAndSave(config);
             changed = false; // So we don't do it again on exit
         };
-        back();
     };
 
-    E.on('kill', () => {
-        if (changed) {
-            E.showMessage(/*LANG*/'Saving...');
-            config.hash = 0;    // Invalidate the cache so changes to hidden apps or folders actually get reflected
-            loader.cleanAndSave(config);
-            changed = false; // So we don't do it again on exit
-        };
-    })
+    E.on('kill', save);
 
     let showMainMenu = () => {
         E.showMenu({
             '': {
                 'title': 'Folder launcher',
-                'back': exit
+                'back': () => {
+                    save();
+                    back();
+                }
             },
             'Show clocks': {
                 value: config.showClocks,
@@ -250,7 +239,6 @@
                         min: 0,
                         format: (value: any) => (value ? value : 'Icon only'),
                         onchange: (value: any) => {
-                            if (value == 0) value = false;
                             config.display.font = value;
                             changed = true;
                         }

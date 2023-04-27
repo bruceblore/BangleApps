@@ -97,16 +97,11 @@
     }
 
     // Prepare to draw the grid
+    let squareSize: number = (g.getHeight() - 24) / config.display.rows;
+    if (!config.display.icon && !config.display.font) config.display.font = 12; // Fallback in case user disabled both icon and text
     g.clearRect(0, 24, g.getWidth(), g.getHeight())
       .reset()
       .setFontAlign(0, -1);
-    let squareSize: number = (g.getHeight() - 24) / config.display.rows;
-    let iconSize: number = config.display.icon ? squareSize : 0;
-    if (config.display.font) {
-      g.setFont('Vector', config.display.font);
-      iconSize = Math.max(0, iconSize - g.getFontHeight());
-    }
-    let iconScale: number = iconSize / 48;
 
     // Actually draw the grid
     let empty = true; // Set to empty upon drawing something, so we can know whether to draw a nice message rather than leaving the screen completely blank
@@ -115,30 +110,44 @@
         let entry: GridEntry = grid[x]![y]!;
         let icon: string | ArrayBuffer;
         let text: string;
+        let fontSize: number;
 
+        // Get the icon and text, skip if the space is empty. Always draw text for folders even if disabled
         switch (entry.type) {
           case 'app':
             let app: AppInfoFile = storage.readJSON(entry.id + '.info', false);
             icon = storage.read(app.icon)!;
             text = app.name;
             empty = false;
+            fontSize = config.display.font;
             break;
           case 'folder':
             icon = FOLDER_ICON;
             text = entry.id;
             empty = false;
+            fontSize = config.display.font ? config.display.font : 12;
             break;
           default:
             continue;
         }
 
+        // Calculate position and icon size
+        let iconSize = config.display.icon ? Math.max(0, squareSize - fontSize) : 0; // If icon is disabled, stay at zero. Otherwise, subtract font size from square
+        let iconScale: number = iconSize / 48;
         let posX = 12 + (x * squareSize);
         let posY = 24 + (y * squareSize);
 
+        // Draw the icon
         if (config.display.icon && iconSize != 0)
-          g.drawImage(icon, posX + (squareSize - iconSize) / 2, posY, { scale: iconScale });
+          try {
+            g.drawImage(icon, posX + (squareSize - iconSize) / 2, posY, { scale: iconScale });
+          } catch (error) {
+            console.log(`Failed to draw icon for ${text}: ${error}`);
+            console.log(icon);
+          }
 
-        if (config.display.font)
+        // Draw the text
+        if (fontSize)
           g.setFont('Vector', getFontSize(text.length, squareSize, 6, squareSize - iconSize))
             .drawString(text, posX + (squareSize / 2), posY + iconSize);
       }
@@ -165,10 +174,10 @@
    */
   let onTouch = function (_button: number, xy: { x: number, y: number } | undefined) {
     // Determine which grid cell was tapped
-    let x: number = Math.round((xy!.x - 12) / ((g.getWidth() - 24) / config.display.rows));
+    let x: number = Math.floor((xy!.x - 12) / ((g.getWidth() - 24) / config.display.rows));
     if (x < 0) x = 0;
     else if (x >= config.display.rows) x = config.display.rows - 1;
-    let y: number = Math.round((xy!.y - 24) / ((g.getHeight() - 24) / config.display.rows));
+    let y: number = Math.floor((xy!.y - 24) / ((g.getHeight() - 24) / config.display.rows));
     if (y < 0) y = 0;
     else if (y >= config.display.rows) y = config.display.rows - 1;
 

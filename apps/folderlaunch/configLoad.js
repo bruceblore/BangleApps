@@ -42,8 +42,21 @@ function cleanAndSave(config) {
     storage.writeJSON(SETTINGS_FILE, config);
     return config;
 }
+var infoFileSorter = function (a, b) {
+    var aJson = storage.readJSON(a, false);
+    var bJson = storage.readJSON(b, false);
+    var n = (0 | aJson.sortorder) - (0 | bJson.sortorder);
+    if (n)
+        return n;
+    if (aJson.name < bJson.name)
+        return -1;
+    if (aJson.name > bJson.name)
+        return 1;
+    return 0;
+};
 module.exports = {
     cleanAndSave: cleanAndSave,
+    infoFileSorter: infoFileSorter,
     getConfig: function () {
         var config = storage.readJSON(SETTINGS_FILE, true) || DEFAULT_CONFIG;
         if (config.hash == storage.hash(/\.info$/)) {
@@ -52,18 +65,7 @@ module.exports = {
         E.showMessage('Rebuilding cache...');
         config.rootFolder = clearFolder(config.rootFolder);
         var infoFiles = storage.list(/\.info$/);
-        infoFiles.sort(function (a, b) {
-            var aJson = storage.readJSON(a, false);
-            var bJson = storage.readJSON(b, false);
-            var n = (0 | aJson.sortorder) - (0 | bJson.sortorder);
-            if (n)
-                return n;
-            if (aJson.name < bJson.name)
-                return -1;
-            if (aJson.name > bJson.name)
-                return 1;
-            return 0;
-        });
+        infoFiles.sort(infoFileSorter);
         for (var _i = 0, infoFiles_2 = infoFiles; _i < infoFiles_2.length; _i++) {
             var infoFile = infoFiles_2[_i];
             var app_1 = storage.readJSON(infoFile, false);

@@ -64,42 +64,49 @@
             else
                 grid_1[x][y].type = 'empty';
         }
+        var squareSize = (g.getHeight() - 24) / config_1.display.rows;
+        if (!config_1.display.icon && !config_1.display.font)
+            config_1.display.font = 12;
         g.clearRect(0, 24, g.getWidth(), g.getHeight())
             .reset()
             .setFontAlign(0, -1);
-        var squareSize = (g.getHeight() - 24) / config_1.display.rows;
-        var iconSize = config_1.display.icon ? squareSize : 0;
-        if (config_1.display.font) {
-            g.setFont('Vector', config_1.display.font);
-            iconSize = Math.max(0, iconSize - g.getFontHeight());
-        }
-        var iconScale = iconSize / 48;
         var empty = true;
         for (var x = 0; x < config_1.display.rows; x++) {
             for (var y = 0; y < config_1.display.rows; y++) {
                 var entry = grid_1[x][y];
                 var icon = void 0;
                 var text = void 0;
+                var fontSize = void 0;
                 switch (entry.type) {
                     case 'app':
                         var app_1 = storage_1.readJSON(entry.id + '.info', false);
                         icon = storage_1.read(app_1.icon);
                         text = app_1.name;
                         empty = false;
+                        fontSize = config_1.display.font;
                         break;
                     case 'folder':
                         icon = FOLDER_ICON_1;
                         text = entry.id;
                         empty = false;
+                        fontSize = config_1.display.font ? config_1.display.font : 12;
                         break;
                     default:
                         continue;
                 }
+                var iconSize = config_1.display.icon ? Math.max(0, squareSize - fontSize) : 0;
+                var iconScale = iconSize / 48;
                 var posX = 12 + (x * squareSize);
                 var posY = 24 + (y * squareSize);
                 if (config_1.display.icon && iconSize != 0)
-                    g.drawImage(icon, posX + (squareSize - iconSize) / 2, posY, { scale: iconScale });
-                if (config_1.display.font)
+                    try {
+                        g.drawImage(icon, posX + (squareSize - iconSize) / 2, posY, { scale: iconScale });
+                    }
+                    catch (error) {
+                        console.log("Failed to draw icon for ".concat(text, ": ").concat(error));
+                        console.log(icon);
+                    }
+                if (fontSize)
                     g.setFont('Vector', getFontSize_1(text.length, squareSize, 6, squareSize - iconSize))
                         .drawString(text, posX + (squareSize / 2), posY + iconSize);
             }
@@ -113,12 +120,12 @@
         }
     };
     var onTouch = function (_button, xy) {
-        var x = Math.round((xy.x - 12) / ((g.getWidth() - 24) / config_1.display.rows));
+        var x = Math.floor((xy.x - 12) / ((g.getWidth() - 24) / config_1.display.rows));
         if (x < 0)
             x = 0;
         else if (x >= config_1.display.rows)
             x = config_1.display.rows - 1;
-        var y = Math.round((xy.y - 24) / ((g.getHeight() - 24) / config_1.display.rows));
+        var y = Math.floor((xy.y - 24) / ((g.getHeight() - 24) / config_1.display.rows));
         if (y < 0)
             y = 0;
         else if (y >= config_1.display.rows)

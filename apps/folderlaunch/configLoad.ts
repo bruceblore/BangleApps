@@ -69,8 +69,27 @@ function cleanAndSave(config: Config): Config {
     return config;
 }
 
+/**
+ * Comparator function to sort a list of app info files.
+ * Copied and slightly modified (mainly to port to Typescript) from dtlaunch.
+ *
+ * @param a the first
+ * @param b the second
+ * @return negative if a should go first, positive if b should go first, zero if equivalent.
+ */
+let infoFileSorter = (a: string, b: string): number => {
+    let aJson: AppInfoFile = storage.readJSON(a, false);
+    let bJson: AppInfoFile = storage.readJSON(b, false);
+    var n = (0 | aJson.sortorder!) - (0 | bJson.sortorder!);
+    if (n) return n; // do sortorder first
+    if (aJson.name < bJson.name) return -1;
+    if (aJson.name > bJson.name) return 1;
+    return 0;
+}
+
 export = {
     cleanAndSave: cleanAndSave,
+    infoFileSorter: infoFileSorter,
 
     /**
      * Get the configuration for the launcher. Perform a cleanup if any new apps were installed or any apps refer to nonexistent folders.
@@ -89,17 +108,7 @@ export = {
         E.showMessage(/*LANG*/'Rebuilding cache...')
         config.rootFolder = clearFolder(config.rootFolder);
         let infoFiles: Array<string> = storage.list(/\.info$/);
-
-        // Sorting code modified from dtlaunch
-        infoFiles.sort((a, b) => {
-            let aJson: AppInfoFile = storage.readJSON(a, false);
-            let bJson: AppInfoFile = storage.readJSON(b, false);
-            var n = (0 | aJson.sortorder!) - (0 | bJson.sortorder!);
-            if (n) return n; // do sortorder first
-            if (aJson.name < bJson.name) return -1;
-            if (aJson.name > bJson.name) return 1;
-            return 0;
-        });
+        infoFiles.sort(infoFileSorter);
 
         for (let infoFile of infoFiles) {
             let app: AppInfoFile = storage.readJSON(infoFile, false);

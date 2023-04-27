@@ -27,7 +27,7 @@ type Config = {
     display: {
         rows: number,               // Display an X by X grid of apps
         icon: boolean,              // Whether to show icons
-        font: number | false        // Which font to use for the name, or false to not show the name
+        font: number                // Which font to use for the name, or false to not show the name
     },
     fastNag: boolean,               // Ask whether new apps should be fast-loaded the first time they are launched
     timeout: number,                // How many ms before returning to the clock, or zero to never return
