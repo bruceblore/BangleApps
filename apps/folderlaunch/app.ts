@@ -115,8 +115,8 @@
         // Get the icon and text, skip if the space is empty. Always draw text for folders even if disabled
         switch (entry.type) {
           case 'app':
-            let app: AppInfoFile = storage.readJSON(entry.id + '.info', false);
-            icon = storage.read(app.icon)!;
+            let app: AppInfo = storage.readJSON(entry.id + '.info', false);
+            icon = storage.read(app.icon!)!;
             text = app.name;
             empty = false;
             fontSize = config.display.font;
@@ -186,36 +186,8 @@
     switch (entry.type) {
       case "app":
         Bangle.buzz();
-        let app = config.apps[entry.id]!;
         let infoFile = storage.readJSON(entry.id + '.info', false);
-        if (app.fast) Bangle.load(infoFile.src);
-        else if (config.fastNag && !app.nagged)
-          E.showPrompt(/*LANG*/ 'Would you like to fast load?', {
-            title: infoFile.name,
-            buttons: {
-              "Yes": 0,
-              "Not now": 1,
-              "Never": 2
-            }
-          }).then((value: number) => {
-            switch (value) {
-              case 0:
-                app.nagged = true;
-                app.fast = true;
-                loader.cleanAndSave(config);
-                Bangle.load(infoFile.src);
-                break;
-              case 1:
-                load(infoFile.src);
-                break;
-              default:
-                app.nagged = true;
-                loader.cleanAndSave(config);
-                load(infoFile.src);
-                break;
-            }
-          });
-        else load(infoFile.src);
+        load(infoFile.src);
         break;
       case "folder":
         Bangle.buzz();

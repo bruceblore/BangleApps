@@ -168,7 +168,6 @@
             loader.cleanAndSave(config);
             changed = false;
         }
-        ;
     };
     E.on('kill', save);
     var showMainMenu = function () {
@@ -230,17 +229,9 @@
                     }
                 });
             },
-            'Prompt for fast launch': {
-                value: config.fastNag,
-                format: function (value) { return (value ? 'Yes' : 'No'); },
-                onchange: function (value) {
-                    config.fastNag = value;
-                    changed = true;
-                }
-            },
             'Timeout': {
                 value: config.timeout,
-                format: function (value) { return "".concat(value / 1000, " sec"); },
+                format: function (value) { return value ? "".concat(value / 1000, " sec") : 'None'; },
                 min: 0,
                 step: 1000,
                 onchange: function (value) {

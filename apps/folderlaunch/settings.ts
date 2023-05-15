@@ -1,4 +1,4 @@
-(function (back: Function) {
+(function (back) {
     const loader = require('folderlaunch-configLoad.js');
     const storage = require('Storage');
     const textinput = require('textinput');
@@ -24,7 +24,7 @@
         onchange    // Do nothing, but stop typescript from yelling at me for this function being unused. It gets used by eval. I know eval is evil, but the menus are a bit limited.
 
         for (let app in config.apps) {
-            let appInfo: AppInfoFile = storage.readJSON(app + '.info', false);
+            let appInfo: AppInfo = storage.readJSON(app + '.info', false);
             menu[appInfo.name] = {
                 value: config.hidden.includes(app),
                 format: (value: boolean) => (value ? 'Yes' : 'No'),
@@ -35,7 +35,7 @@
         E.showMenu(menu);
     };
 
-    let getAppInfo = (id: string): AppInfoFile => {
+    let getAppInfo = (id: string): AppInfo => {
         return storage.readJSON(id + '.info', false);
     }
 
@@ -181,7 +181,7 @@
             config.hash = 0;    // Invalidate the cache so changes to hidden apps or folders actually get reflected
             loader.cleanAndSave(config);
             changed = false; // So we don't do it again on exit
-        };
+        }
     };
 
     E.on('kill', save);
@@ -245,14 +245,6 @@
                     }
                 });
             },
-            'Prompt for fast launch': {
-                value: config.fastNag,
-                format: value => (value ? 'Yes' : 'No'),
-                onchange: value => {
-                    config.fastNag = value;
-                    changed = true;
-                }
-            },
             'Timeout': {
                 value: config.timeout,
                 format: value => value ? `${value / 1000} sec` : 'None',
@@ -269,4 +261,4 @@
         });
     };
     showMainMenu();
-});
+} satisfies SettingsFunc);
