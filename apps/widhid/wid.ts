@@ -14,16 +14,16 @@
 	let waitForRelease = true;
 
 	const onSwipe = ((_lr, ud) => {
-		if((Bangle as BangleExt).CLKINFO_FOCUS) return;
-
-		if(!activeTimeout && ud! > 0){
+		// do these checks in order of cheapness
+		if(ud! > 0 && !activeTimeout && !(Bangle as BangleExt).CLKINFO_FOCUS){
 			listen();
 			Bangle.buzz(20);
 		}
 	}) satisfies SwipeCallback;
 
 	const onDrag = (e => {
-		if((Bangle as BangleExt).CLKINFO_FOCUS) return;
+		// Espruino/35c8cb9be11
+		E.stopEventPropagation && E.stopEventPropagation();
 
 		if(e.b === 0){
 			// released
@@ -81,9 +81,19 @@
 	const listen = () => {
 		const wasActive = !!activeTimeout;
 		if(!wasActive){
-			suspendOthers();
 			waitForRelease = true; // wait for first touch up before accepting gestures
+
 			Bangle.on("drag", onDrag);
+
+			// move our drag to the start of the event listener array
+			const dragHandlers = (Bangle as BangleEvents)["#ondrag"]
+
+			if(dragHandlers && typeof dragHandlers !== "function"){
+				(Bangle as BangleEvents)["#ondrag"] = [onDrag as undefined | typeof onDrag].concat(
+					dragHandlers.filter((f: unknown) => f !== onDrag)
+				);
+			}
+
 			redraw();
 		}
 
@@ -92,7 +102,6 @@
 			activeTimeout = undefined;
 
 			Bangle.removeListener("drag", onDrag);
-			resumeOthers();
 
 			redraw();
 		}, 3000);
@@ -136,10 +145,14 @@
 	//const DEBUG = true;
 	const sendHid = (code: number) => {
 		//if(DEBUG) return;
-		NRF.sendHIDReport(
-			[1, code],
-			() => NRF.sendHIDReport([1, 0]),
-		);
+		try{
+			NRF.sendHIDReport(
+				[1, code],
+				() => NRF.sendHIDReport([1, 0]),
+			);
+		}catch(e){
+			console.log("sendHIDReport:", e);
+		}
 	};
 
 	const next = () => /*DEBUG ? console.log("next") : */ sendHid(0x01);
@@ -147,53 +160,4 @@
 	const toggle = () => /*DEBUG ? console.log("toggle") : */ sendHid(0x10);
 	const up = () => /*DEBUG ? console.log("up") : */ sendHid(0x40);
 	const down = () => /*DEBUG ? console.log("down") : */ sendHid(0x80);
-
-	// similarly to the lightswitch app, we tangle with the listener arrays to
-	// disable event handlers
-	type Handler = () => void;
-	const touchEvents: {
-		[key: string]: null | Handler[]
-	} = {
-		tap: null,
-		gesture: null,
-		aiGesture: null,
-		swipe: null,
-		touch: null,
-		drag: null,
-		stroke: null,
-	};
-
-	const suspendOthers = () => {
-		for(const event in touchEvents){
-			const handlers: Handler[] | Handler | undefined
-				= (Bangle as any)[`#on${event}`];
-
-			if(!handlers) continue;
-
-			let newEvents;
-			if(handlers instanceof Array)
-				newEvents = handlers.slice();
-			else
-				newEvents = [handlers /* single fn */];
-
-			for(const handler of newEvents)
-				Bangle.removeListener(event, handler);
-
-			touchEvents[event] = newEvents;
-		}
-	};
-	const resumeOthers = () => {
-		for(const event in touchEvents){
-			const handlers = touchEvents[event];
-			touchEvents[event] = null;
-
-			if(handlers)
-				for(const handler of handlers)
-					try{
-						Bangle.on(event as any, handler);
-					}catch(e){
-						console.log(`couldn't restore "${event}" handler:`, e);
-					}
-		}
-	};
 })()

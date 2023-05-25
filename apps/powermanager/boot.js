@@ -42,10 +42,17 @@
 
 
     let logPower = (type, oldstate, state, app) => {
+<<<<<<< HEAD
       logFile.write("p," + type + ',' + (oldstate ? 1 : 0) + ',' + (state ? 1 : 0) + ',' + app + "\n");
     };
     let logDeferred = (type, duration, source) => {
       logFile.write(type + ',' + duration + ',' + source.replace(/\n/g, " ").replace(/,/g, "") + "\n");
+=======
+      logFile.write(Date.now() + ",p," + type + ',' + (oldstate?1:0) + ',' + (state?1:0) + ',' + app + "\n");
+    };
+    let logDeferred = (type, duration, source) => {
+      logFile.write(Date.now() + "," + type + ',' + duration + ',' + source.replace(/\n/g, " ").replace(/,/g,"") + "\n");
+>>>>>>> 855f196fd360a002b430523a36a6d7f4c8d2c3bd
     };
 
     let lastPowerOn = {};
@@ -155,8 +162,9 @@
 
   if (settings.autoCalibration) {
     let chargeStart;
+    if (Bangle.isCharging()) chargeStart = Date.now();
     Bangle.on("charging", (charging) => {
-      if (charging) chargeStart = Date.now();
+      if (!chargeStart && charging) chargeStart = Date.now();
       if (chargeStart && !charging && (Date.now() - chargeStart > 1000 * 60 * 60 * 3)) require("powermanager").setCalibration();
       if (!charging) chargeStart = undefined;
     });
