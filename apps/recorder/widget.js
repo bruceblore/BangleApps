@@ -231,6 +231,8 @@
   },getRecorders:getRecorders,reload:function() {
     reload();
     Bangle.drawWidgets(); // relayout all widgets
+  },isRecording:function() {
+    return !!writeInterval;
   },setRecording:function(isOn, options) {
     /* options = {
       force : [optional] "append"/"new"/"overwrite" - don't ask, just do what's requested
@@ -238,13 +240,17 @@
     var settings = loadSettings();
     options = options||{};
     if (isOn && !settings.recording) {
-      if (!settings.file) { // if no filename set
-        settings.file = "recorder.log0.csv";
-      } else if (require("Storage").list(settings.file).length){ // if file exists
+      var date=(new Date()).toISOString().substr(0,10).replace(/-/g,""), trackNo=10;
+      function getTrackFilename() { return "recorder.log" + date + trackNo.toString(36) + ".csv"; }
+      if (!settings.file || !settings.file.startsWith("recorder.log" + date)) {
+        // if no filename set or date different, set up a new filename
+        settings.file = getTrackFilename();
+      }
+      if (require("Storage").list(settings.file).length){ // if file exists
         if (!options.force) { // if not forced, ask the question
           g.reset(); // work around bug in 2v17 and earlier where bg color wasn't reset
           return E.showPrompt(
-                    /*LANG*/"Overwrite\nLog " + settings.file.match(/\d+/)[0] + "?",
+                    /*LANG*/"Overwrite\nLog " + settings.file.match(/^recorder\.log(.*)\.csv$/)[1] + "?",
                     { title:/*LANG*/"Recorder",
                       buttons:{/*LANG*/"Yes":"overwrite",/*LANG*/"No":"cancel",/*LANG*/"New":"new",/*LANG*/"Append":"append"}
                     }).then(selection=>{
@@ -260,11 +266,12 @@
           // wipe the file
           require("Storage").open(settings.file,"r").erase();
         } else if (options.force=="new") {
-          // new file - find the max log file number and add one
-          var maxNumber=0;
-          require("Storage").list(/recorder.log.*/).forEach( fn => maxNumber = Math.max(maxNumber, fn.match(/\d+/)[0]) );
-          var newFileName = "recorder.log" + (maxNumber + 1) + ".csv";
-          // FIXME: use date?
+          // new file - use the current date
+          var newFileName;
+          do { // while a file exists, add one to the letter after the date
+            newFileName = getTrackFilename();
+            trackNo++;
+          } while (require("Storage").list(newFileName).length);
           settings.file = newFileName;
         } else throw new Error("Unknown options.force, "+options.force);
       }

@@ -32,5 +32,8 @@
       "name": "torch.settings.js",
       "url": "settings.js"
     }
+  ],
+  "data": [
+    {"name":"torch.settings.json"}
   ]
 }
