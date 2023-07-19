@@ -1,79 +1,77 @@
 (function (back) {
-    const SETTINGS_FILE = "rgbvest.json";
-    const storage = require('Storage');
-    const keyboard = require('textinput');
-
-    let config: AppConfig = (storage.readJSON(SETTINGS_FILE) as AppConfig) || {
+    var SETTINGS_FILE = "rgbvest.json";
+    var storage = require('Storage');
+    var keyboard = require('textinput');
+    var config = storage.readJSON(SETTINGS_FILE) || {
         port: 8443,
         defaultURL: 'localhost',
         promptURL: true,
         saveURL: true,
         numTaps: 5
-    }
-
+    };
     function saveSettings() {
         storage.writeJSON(SETTINGS_FILE, config);
     }
-
     function showMainMenu() {
-        E.showMenu({
-            '': {
-                'title': 'RGB Vest',
-                'back': back
+        var _a;
+        E.showMenu((_a = {
+                '': {
+                    'title': 'RGB Vest',
+                    'back': back
+                }
             },
-            [`Port: ${config.port}`]: () => {
+            _a["Port: ".concat(config.port)] = function () {
                 E.showMenu();
-                let getText = () => {
-                    keyboard.input({ text: '' + config.port }).then((text: string) => {
-                        let int = Math.abs(parseInt(text));
+                var getText = function () {
+                    keyboard.input({ text: '' + config.port }).then(function (text) {
+                        var int = Math.abs(parseInt(text));
                         if ('' + int == text && 1 <= int && int <= 65535) {
                             config.port = int;
                             saveSettings();
                             showMainMenu();
-                        } else {
+                        }
+                        else {
                             E.showMessage('Invalid port!');
-                            setTimeout(() => { getText(); }, 500);
+                            setTimeout(function () { getText(); }, 500);
                         }
                     });
                 };
                 getText();
             },
-            [`Default URL: ${config.defaultURL}`]: () => {
+            _a["Default URL: ".concat(config.defaultURL)] = function () {
                 E.showMenu();
-                keyboard.input({ text: config.defaultURL }).then((text: string) => {
-                    //TODO add validation
+                keyboard.input({ text: config.defaultURL }).then(function (text) {
                     config.defaultURL = text;
                     saveSettings();
                     showMainMenu();
                 });
             },
-            'Prompt URL': {
+            _a['Prompt URL'] = {
                 value: config.promptURL,
-                format: promptURL => promptURL ? 'Yes' : 'No',
-                onchange: value => {
+                format: function (promptURL) { return promptURL ? 'Yes' : 'No'; },
+                onchange: function (value) {
                     config.promptURL = value;
                     saveSettings();
                 }
             },
-            'Save URL': {
+            _a['Save URL'] = {
                 value: config.promptURL,
-                format: promptURL => promptURL ? 'Yes' : 'No',
-                onchange: value => {
+                format: function (promptURL) { return promptURL ? 'Yes' : 'No'; },
+                onchange: function (value) {
                     config.saveURL = value;
                     saveSettings();
                 }
             },
-            'Number of taps': {
+            _a['Number of taps'] = {
                 value: config.numTaps,
                 min: 2,
                 step: 1,
-                onchange: value => {
+                onchange: function (value) {
                     config.numTaps = value;
                     saveSettings();
                 }
-            }
-        });
+            },
+            _a));
     }
-
     showMainMenu();
-} satisfies SettingsFunc);
+});

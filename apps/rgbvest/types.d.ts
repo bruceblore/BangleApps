@@ -10,11 +10,11 @@ type Query = {
     [key: string]: string
 }
 
+//TODO properly indicate that each color must be an int from 0 to 255
 type Color = [number, number, number]
 interface ColorSchemeColor {
     id: string;
     name: string;
-    //TODO properly indicate that each color must be an int from 0 to 255
     rgb: Color;
 }
 interface ColorScheme {
