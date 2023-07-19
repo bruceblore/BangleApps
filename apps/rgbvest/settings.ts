@@ -3,7 +3,7 @@
     const storage = require('Storage');
     const keyboard = require('textinput');
 
-    let config = storage.readJSON(SETTINGS_FILE) || {
+    let config: AppConfig = (storage.readJSON(SETTINGS_FILE) as AppConfig) || {
         port: 8080,
         defaultURL: 'localhost',
         promptURL: true,
@@ -24,7 +24,7 @@
             [`Port: ${config.port}`]: () => {
                 E.showMenu();
                 let getText = () => {
-                    keyboard.input({ text: '' + config.port }).then(text => {
+                    keyboard.input({ text: '' + config.port }).then((text: string) => {
                         let int = Math.abs(parseInt(text));
                         if ('' + int == text && 1 <= int && int <= 65535) {
                             config.port = int;
@@ -40,7 +40,7 @@
             },
             [`Default URL: ${config.defaultURL}`]: () => {
                 E.showMenu();
-                keyboard.input({ text: config.defaultURL }).then(text => {
+                keyboard.input({ text: config.defaultURL }).then((text: string) => {
                     //TODO add validation
                     config.defaultURL = text;
                     saveSettings();
@@ -76,4 +76,4 @@
     }
 
     showMainMenu();
-});
+} satisfies SettingsFunc);

@@ -55,14 +55,10 @@ type ListOption = Option & {
     }>;
 }
 type BoolOption = Option & {
-    name: string;
-    detail: string;
     type: "bool";
     value: boolean;
 }
 type ButtonOption = Option & {
-    name: string;
-    detail: string;
     type: "button";
     value: boolean;
 }
