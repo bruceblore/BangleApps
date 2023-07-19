@@ -54,12 +54,12 @@ type MenuOptions = {
 type Menu = {
   ""?: MenuOptions;
   [key: string]:
-    | MenuOptions
-    | (() => void)
-    | MenuBooleanItem
-    | MenuNumberItem
-    | { value: string; onchange?: () => void }
-    | undefined;
+  | MenuOptions
+  | (() => void)
+  | MenuBooleanItem
+  | MenuNumberItem
+  | { value: string; onchange?: () => void }
+  | undefined;
 };
 
 /**
@@ -194,19 +194,19 @@ type NRFFilters = {
 type NRFSecurityStatus = {
   advertising: boolean,
 } & (
-  {
-    connected: true,
-    encrypted: boolean,
-    mitm_protected: boolean,
-    bonded: boolean,
-    connected_addr?: string,
-  } | {
-    connected: false,
-    encrypted: false,
-    mitm_protected: false,
-    bonded: false,
-  }
-);
+    {
+      connected: true,
+      encrypted: boolean,
+      mitm_protected: boolean,
+      bonded: boolean,
+      connected_addr?: string,
+    } | {
+      connected: false,
+      encrypted: false,
+      mitm_protected: false,
+      bonded: false,
+    }
+  );
 
 type ImageObject = {
   width: number;
@@ -4421,6 +4421,19 @@ declare class Bangle {
 
   static CLOCK: ShortBoolean;
   static strokes: undefined | { [key: string]: Unistroke };
+
+  /**
+   * Make an HTTPS request to a URL and return a promise with the data. Requires the internet enabled Bangle.js Gadgetbridge app
+   *
+   * options can contain:
+   *  - `id` - a custom (string) ID
+   *  - `timeout` - a timeout for the request in milliseconds (default 30000ms)
+   *  - `xpath` an xPath query to run on the request (but right now the URL requested
+   * @param {string} url - The URL to make the request to
+   * @param {{ id?: string, timeout?: number, xpath?: string }} options - Other options
+   * @returns {Promise<string>} - A promise that will eventually get resolved with the data in the HTTP response
+   */
+  static http(url: string, options?: { id?: string, timeout?: number, xpath?: string }): Promise<string>
 }
 
 /**
@@ -7734,7 +7747,7 @@ declare class E {
    * @returns {any} A menu object with `draw()` and `drawItem(itemNo)` functions
    * @url http://www.espruino.com/Reference#l_E_showScroller
    */
-  static showScroller(options?: { h: number, c: number, draw: (idx: number, rect: { x: number, y: number, w: number, h: number }) => void, select: (idx: number, touch?: {x: number, y: number}) => void, back?: () => void, remove?: () => void }): { draw: () => void, drawItem: (itemNo: number) => void };
+  static showScroller(options?: { h: number, c: number, draw: (idx: number, rect: { x: number, y: number, w: number, h: number }) => void, select: (idx: number, touch?: { x: number, y: number }) => void, back?: () => void, remove?: () => void }): { draw: () => void, drawItem: (itemNo: number) => void };
   static showScroller(): void;
 
   /**
@@ -9250,8 +9263,8 @@ interface ArrayConstructor {
    * @url http://www.espruino.com/Reference#l_Array_Array
    */
   new(arrayLength?: number): any[];
-  new<T>(arrayLength: number): T[];
-  new<T>(...items: T[]): T[];
+  new <T>(arrayLength: number): T[];
+  new <T>(...items: T[]): T[];
   (arrayLength?: number): any[];
   <T>(arrayLength: number): T[];
   <T>(...items: T[]): T[];
@@ -9522,7 +9535,7 @@ interface JSONConstructor {
    * @returns {any} A JSON string
    * @url http://www.espruino.com/Reference#l_JSON_stringify
    */
-  stringify(data: any, replacer: any, space: any): any;
+  stringify(data: any, replacer?: any, space?: any): any;
 
   /**
    * Parse the given JSON string into a JavaScript object
@@ -9766,7 +9779,7 @@ interface PromiseConstructor {
    * @returns {any} A Promise
    * @url http://www.espruino.com/Reference#l_Promise_Promise
    */
-  new<T>(executor: (resolve: (value: T) => void, reject: (reason?: any) => void) => void): Promise<T>;
+  new <T>(executor: (resolve: (value: T) => void, reject: (reason?: any) => void) => void): Promise<T>;
 }
 
 interface Promise<T> {

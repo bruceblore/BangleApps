@@ -1,0 +1,36 @@
+{
+  "id": "rgbvest",
+  "name": "RGB Vest",
+  "version": "0.01",
+  "description": "Controls my RGB vest connected to a phone hotspot",
+  "icon": "icon.png",
+  "type": "app",
+  "tags": "tools",
+  "supports": [
+    "BANGLEJS2"
+  ],
+  "allow_emulator": true,
+  "storage": [
+    {
+      "name": "rgbvest.app.js",
+      "url": "app.js"
+    },
+    {
+      "name": "rgbvest.settings.js",
+      "url": "settings.js"
+    },
+    {
+      "name": "rgbvest.img",
+      "url": "icon.js",
+      "evaluate": true
+    }
+  ],
+  "data": [
+    {
+      "name": "rgbvest.json"
+    }
+  ],
+  "dependencies": {
+    "textinput": "type"
+  }
+}
