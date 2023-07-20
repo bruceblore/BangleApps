@@ -47,7 +47,7 @@
                     showMainMenu();
                 });
             },
-            'Prompt URL': {
+            'Prompt URL next time': {
                 value: config.promptURL,
                 format: promptURL => promptURL ? 'Yes' : 'No',
                 onchange: value => {
@@ -55,7 +55,7 @@
                     saveSettings();
                 }
             },
-            'Save URL': {
+            'Save URL, then don\'t prompt': {
                 value: config.promptURL,
                 format: promptURL => promptURL ? 'Yes' : 'No',
                 onchange: value => {

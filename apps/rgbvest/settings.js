@@ -46,7 +46,7 @@
                     showMainMenu();
                 });
             },
-            _a['Prompt URL'] = {
+            _a['Prompt URL next time'] = {
                 value: config.promptURL,
                 format: function (promptURL) { return promptURL ? 'Yes' : 'No'; },
                 onchange: function (value) {
@@ -54,7 +54,7 @@
                     saveSettings();
                 }
             },
-            _a['Save URL'] = {
+            _a['Save URL, then don\'t prompt'] = {
                 value: config.promptURL,
                 format: function (promptURL) { return promptURL ? 'Yes' : 'No'; },
                 onchange: function (value) {

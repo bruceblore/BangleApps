@@ -4431,9 +4431,9 @@ declare class Bangle {
    *  - `xpath` an xPath query to run on the request (but right now the URL requested
    * @param {string} url - The URL to make the request to
    * @param {{ id?: string, timeout?: number, xpath?: string }} options - Other options
-   * @returns {Promise<string>} - A promise that will eventually get resolved with the data in the HTTP response
+   * @returns {Promise<{t: string, id: string, resp: string}>} - A promise that will eventually get resolved with the data in the HTTP response
    */
-  static http(url: string, options?: { id?: string, timeout?: number, xpath?: string }): Promise<string>
+  static http(url: string, options?: { id?: string, timeout?: number, xpath?: string }): Promise<{ t: string, id: string, resp: string }>
 }
 
 /**
