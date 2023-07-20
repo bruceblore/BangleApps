@@ -268,7 +268,7 @@ var showMainMenu = function () {
                 value: Object.keys(colorSchemes).indexOf(colorScheme),
                 format: function (value) { return indexOfDict(colorSchemes, value).name; },
                 min: 0,
-                max: colorSchemes.length - 1,
+                max: Object.keys(colorSchemes).length - 1,
                 wrap: true,
                 onchange: function (value) {
                     colorScheme = Object.keys(colorSchemes)[value];
@@ -285,7 +285,7 @@ var showMainMenu = function () {
                 value: Object.keys(effects).indexOf(effect),
                 format: function (value) { return indexOfDict(effects, value).name; },
                 min: 0,
-                max: effects.length - 1,
+                max: Object.keys(effects).length - 1,
                 wrap: true,
                 onchange: function (value) {
                     effect = Object.keys(effects)[value];
@@ -302,7 +302,7 @@ var showMainMenu = function () {
                 value: Object.keys(interpolators).indexOf(interpolator),
                 format: function (value) { return indexOfDict(interpolators, value).name; },
                 min: 0,
-                max: interpolators.length - 1,
+                max: Object.keys(interpolators).length - 1,
                 wrap: true,
                 onchange: function (value) {
                     interpolator = Object.keys(interpolators)[value];
