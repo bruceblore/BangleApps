@@ -104,9 +104,23 @@ let showOptions = function (options: Options, title: string, url: string) {
   }
 
   let colorMenu = function (key: string) {
+    const HEXITS = [
+      '0', '1', '2', '3', '4', '5', '6', '7',
+      '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'
+    ];
+
     let red: number = (options[key]! as ColorOption).value[0];
     let green: number = (options[key]! as ColorOption).value[1];
     let blue: number = (options[key]! as ColorOption).value[2];
+
+    let red16: number = Math.floor(red / 16);
+    let green16: number = Math.floor(green / 16);
+    let blue16: number = Math.floor(blue / 16);
+
+    let red1: number = red % 16;
+    let green1: number = green % 16;
+    let blue1: number = blue % 16;
+
     E.showMenu({
       '': {
         'title': (options[key]! as ColorOption).name,
@@ -119,26 +133,71 @@ let showOptions = function (options: Options, title: string, url: string) {
           });
         }
       },
-      'Red': {
-        value: red,
+      'Red 16': {
+        value: red16,
         min: 0,
-        max: 255,
+        max: 15,
         step: 1,
-        onchange: value => red = value
+        format: (value: number) => HEXITS[value]!,
+        onchange: (value: number) => {
+          red16 = value;
+          red = 16 * red16 + red1;
+        }
       },
-      'Green': {
-        value: green,
+      'Red 1': {
+        value: red1,
         min: 0,
-        max: 255,
+        max: 15,
         step: 1,
-        onchange: value => green = value
+        format: (value: number) => HEXITS[value]!,
+        onchange: (value: number) => {
+          red1 = value;
+          red = 16 * red16 + red1;
+        }
       },
-      'Blue': {
-        value: blue,
+      'Green 16': {
+        value: green16,
         min: 0,
-        max: 255,
+        max: 15,
         step: 1,
-        onchange: value => blue = value
+        format: (value: number) => HEXITS[value]!,
+        onchange: (value: number) => {
+          green16 = value;
+          green = 16 * green16 + green1;
+        }
+      },
+      'Green 1': {
+        value: green1,
+        min: 0,
+        max: 15,
+        step: 1,
+        format: (value: number) => HEXITS[value]!,
+        onchange: (value: number) => {
+          green1 = value;
+          green = 16 * green16 + green1;
+        }
+      },
+      'Blue 16': {
+        value: blue16,
+        min: 0,
+        max: 15,
+        step: 1,
+        format: (value: number) => HEXITS[value]!,
+        onchange: (value: number) => {
+          blue16 = value;
+          blue = 16 * blue16 + blue1;
+        }
+      },
+      'Blue 1': {
+        value: blue1,
+        min: 0,
+        max: 15,
+        step: 1,
+        format: (value: number) => HEXITS[value]!,
+        onchange: (value: number) => {
+          blue1 = value;
+          blue = 16 * blue16 + blue1;
+        }
       },
     });
   }

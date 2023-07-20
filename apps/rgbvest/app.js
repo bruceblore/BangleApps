@@ -102,9 +102,19 @@ var showOptions = function (options, title, url) {
             _a));
     };
     var colorMenu = function (key) {
+        var HEXITS = [
+            '0', '1', '2', '3', '4', '5', '6', '7',
+            '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'
+        ];
         var red = options[key].value[0];
         var green = options[key].value[1];
         var blue = options[key].value[2];
+        var red16 = Math.floor(red / 16);
+        var green16 = Math.floor(green / 16);
+        var blue16 = Math.floor(blue / 16);
+        var red1 = red % 16;
+        var green1 = green % 16;
+        var blue1 = blue % 16;
         E.showMenu({
             '': {
                 'title': options[key].name,
@@ -117,26 +127,71 @@ var showOptions = function (options, title, url) {
                     });
                 }
             },
-            'Red': {
-                value: red,
+            'Red 16': {
+                value: red16,
                 min: 0,
-                max: 255,
+                max: 15,
                 step: 1,
-                onchange: function (value) { return red = value; }
+                format: function (value) { return HEXITS[value]; },
+                onchange: function (value) {
+                    red16 = value;
+                    red = 16 * red16 + red1;
+                }
             },
-            'Green': {
-                value: green,
+            'Red 1': {
+                value: red1,
                 min: 0,
-                max: 255,
+                max: 15,
                 step: 1,
-                onchange: function (value) { return green = value; }
+                format: function (value) { return HEXITS[value]; },
+                onchange: function (value) {
+                    red1 = value;
+                    red = 16 * red16 + red1;
+                }
             },
-            'Blue': {
-                value: blue,
+            'Green 16': {
+                value: green16,
                 min: 0,
-                max: 255,
+                max: 15,
                 step: 1,
-                onchange: function (value) { return blue = value; }
+                format: function (value) { return HEXITS[value]; },
+                onchange: function (value) {
+                    green16 = value;
+                    green = 16 * green16 + green1;
+                }
+            },
+            'Green 1': {
+                value: green1,
+                min: 0,
+                max: 15,
+                step: 1,
+                format: function (value) { return HEXITS[value]; },
+                onchange: function (value) {
+                    green1 = value;
+                    green = 16 * green16 + green1;
+                }
+            },
+            'Blue 16': {
+                value: blue16,
+                min: 0,
+                max: 15,
+                step: 1,
+                format: function (value) { return HEXITS[value]; },
+                onchange: function (value) {
+                    blue16 = value;
+                    blue = 16 * blue16 + blue1;
+                }
+            },
+            'Blue 1': {
+                value: blue1,
+                min: 0,
+                max: 15,
+                step: 1,
+                format: function (value) { return HEXITS[value]; },
+                onchange: function (value) {
+                    blue1 = value;
+                    blue = 16 * blue16 + blue1;
+                }
             },
         });
     };
