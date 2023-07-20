@@ -223,9 +223,6 @@ let indexOfDict = function (dict: { [key: string]: any }, index: number) {
 
 // Display the main menu
 let showMainMenu = function () {
-  baseURL = `https://${baseURL}:${config.port}/api?`;
-  console.log(`Base URL is ${baseURL}`);
-
   let colorScheme: string;
   let effect: string;
   let interpolator: string;
@@ -345,9 +342,11 @@ if (config.promptURL) {
       config.promptURL = false;
       storage.writeJSON(SETTINGS_FILE, config);
     }
+    baseURL = `https://${baseURL}:${config.port}/api?`;
     showMainMenu();
   });
 } else {
+  baseURL = `https://${baseURL}:${config.port}/api?`;
   showMainMenu();
 }
 // }

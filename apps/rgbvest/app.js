@@ -222,8 +222,6 @@ var indexOfDict = function (dict, index) {
     return dict[Object.keys(dict)[index]];
 };
 var showMainMenu = function () {
-    baseURL = "https://".concat(baseURL, ":").concat(config.port, "/api?");
-    console.log("Base URL is ".concat(baseURL));
     var colorScheme;
     var effect;
     var interpolator;
@@ -336,9 +334,11 @@ if (config.promptURL) {
             config.promptURL = false;
             storage.writeJSON(SETTINGS_FILE, config);
         }
+        baseURL = "https://".concat(baseURL, ":").concat(config.port, "/api?");
         showMainMenu();
     });
 }
 else {
+    baseURL = "https://".concat(baseURL, ":").concat(config.port, "/api?");
     showMainMenu();
 }
