@@ -213,6 +213,8 @@ let showOptions = function (options: Options, title: string, url: string) {
       console.log(`Warning! Unsupported option type ${jsonOption.type}`);
     }
   }
+
+  E.showMenu(menu);
 }
 
 let indexOfDict = function (dict: { [key: string]: any }, index: number) {
@@ -281,7 +283,7 @@ let showMainMenu = function () {
       'Color scheme options': () => {
         let url = getQueryUrl(baseURL, { op: 'colorScheme-options' });
         Bangle.http(url).then(data => {
-          showOptions(JSON.parse(data), 'Color scheme options', url);
+          showOptions(JSON.parse(data.resp), 'Color scheme options', url);
         });
       },
       'Effect': {
@@ -298,7 +300,7 @@ let showMainMenu = function () {
       'Effect options': () => {
         let url = getQueryUrl(baseURL, { op: 'effect-options' });
         Bangle.http(url).then(data => {
-          showOptions(JSON.parse(data), 'Effect options', url);
+          showOptions(JSON.parse(data.resp), 'Effect options', url);
         });
       },
       'Interpolator': {
@@ -315,13 +317,13 @@ let showMainMenu = function () {
       'Interpolator options': () => {
         let url = getQueryUrl(baseURL, { op: 'interpolator-options' });
         Bangle.http(url).then(data => {
-          showOptions(JSON.parse(data), 'Interpolator options', url);
+          showOptions(JSON.parse(data.resp), 'Interpolator options', url);
         });
       },
       'General options': () => {
         let url = getQueryUrl(baseURL, { op: 'options' });
         Bangle.http(url).then(data => {
-          showOptions(JSON.parse(data), 'General options', url);
+          showOptions(JSON.parse(data.resp), 'General options', url);
         });
       }
     });

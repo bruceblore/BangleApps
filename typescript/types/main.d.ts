@@ -9546,7 +9546,7 @@ interface JSONConstructor {
    * @returns {any} The JavaScript object created by parsing the data string
    * @url http://www.espruino.com/Reference#l_JSON_parse
    */
-  parse(string: any): any;
+  parse(string: string): any;
 }
 
 interface JSON {

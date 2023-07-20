@@ -216,6 +216,7 @@ var showOptions = function (options, title, url) {
     for (var key in options) {
         _loop_1(key);
     }
+    E.showMenu(menu);
 };
 var indexOfDict = function (dict, index) {
     return dict[Object.keys(dict)[index]];
@@ -278,7 +279,7 @@ var showMainMenu = function () {
             'Color scheme options': function () {
                 var url = getQueryUrl(baseURL, { op: 'colorScheme-options' });
                 Bangle.http(url).then(function (data) {
-                    showOptions(JSON.parse(data), 'Color scheme options', url);
+                    showOptions(JSON.parse(data.resp), 'Color scheme options', url);
                 });
             },
             'Effect': {
@@ -295,7 +296,7 @@ var showMainMenu = function () {
             'Effect options': function () {
                 var url = getQueryUrl(baseURL, { op: 'effect-options' });
                 Bangle.http(url).then(function (data) {
-                    showOptions(JSON.parse(data), 'Effect options', url);
+                    showOptions(JSON.parse(data.resp), 'Effect options', url);
                 });
             },
             'Interpolator': {
@@ -312,13 +313,13 @@ var showMainMenu = function () {
             'Interpolator options': function () {
                 var url = getQueryUrl(baseURL, { op: 'interpolator-options' });
                 Bangle.http(url).then(function (data) {
-                    showOptions(JSON.parse(data), 'Interpolator options', url);
+                    showOptions(JSON.parse(data.resp), 'Interpolator options', url);
                 });
             },
             'General options': function () {
                 var url = getQueryUrl(baseURL, { op: 'options' });
                 Bangle.http(url).then(function (data) {
-                    showOptions(JSON.parse(data), 'General options', url);
+                    showOptions(JSON.parse(data.resp), 'General options', url);
                 });
             }
         });
