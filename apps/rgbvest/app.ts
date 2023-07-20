@@ -104,41 +104,41 @@ let showOptions = function (options: Options, title: string, url: string) {
   }
 
   let colorMenu = function (key: string) {
-    let r: number = (options[key]! as ColorOption).value[0];
-    let g: number = (options[key]! as ColorOption).value[1];
-    let b: number = (options[key]! as ColorOption).value[2];
+    let red: number = (options[key]! as ColorOption).value[0];
+    let green: number = (options[key]! as ColorOption).value[1];
+    let blue: number = (options[key]! as ColorOption).value[2];
     E.showMenu({
       '': {
         'title': (options[key]! as ColorOption).name,
         'back': () => {
-          (options[key]! as ColorOption).value[0] = r;
-          (options[key]! as ColorOption).value[1] = g;
-          (options[key]! as ColorOption).value[2] = b;
+          (options[key]! as ColorOption).value[0] = red;
+          (options[key]! as ColorOption).value[1] = green;
+          (options[key]! as ColorOption).value[2] = blue;
           Bangle.http(getQueryUrl(url, { body: JSON.stringify(options) })).then(() => {
             showOptions(options, title, url);
           });
         }
       },
       'Red': {
-        value: r,
+        value: red,
         min: 0,
         max: 255,
         step: 1,
-        onchange: value => r = value
+        onchange: value => red = value
       },
       'Green': {
-        value: g,
+        value: green,
         min: 0,
         max: 255,
         step: 1,
-        onchange: value => g = value
+        onchange: value => green = value
       },
       'Blue': {
-        value: b,
+        value: blue,
         min: 0,
         max: 255,
         step: 1,
-        onchange: value => b = value
+        onchange: value => blue = value
       },
     });
   }

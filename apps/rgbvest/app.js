@@ -102,41 +102,41 @@ var showOptions = function (options, title, url) {
             _a));
     };
     var colorMenu = function (key) {
-        var r = options[key].value[0];
-        var g = options[key].value[1];
-        var b = options[key].value[2];
+        var red = options[key].value[0];
+        var green = options[key].value[1];
+        var blue = options[key].value[2];
         E.showMenu({
             '': {
                 'title': options[key].name,
                 'back': function () {
-                    options[key].value[0] = r;
-                    options[key].value[1] = g;
-                    options[key].value[2] = b;
+                    options[key].value[0] = red;
+                    options[key].value[1] = green;
+                    options[key].value[2] = blue;
                     Bangle.http(getQueryUrl(url, { body: JSON.stringify(options) })).then(function () {
                         showOptions(options, title, url);
                     });
                 }
             },
             'Red': {
-                value: r,
+                value: red,
                 min: 0,
                 max: 255,
                 step: 1,
-                onchange: function (value) { return r = value; }
+                onchange: function (value) { return red = value; }
             },
             'Green': {
-                value: g,
+                value: green,
                 min: 0,
                 max: 255,
                 step: 1,
-                onchange: function (value) { return g = value; }
+                onchange: function (value) { return green = value; }
             },
             'Blue': {
-                value: b,
+                value: blue,
                 min: 0,
                 max: 255,
                 step: 1,
-                onchange: function (value) { return b = value; }
+                onchange: function (value) { return blue = value; }
             },
         });
     };
