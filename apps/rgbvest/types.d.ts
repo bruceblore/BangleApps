@@ -73,3 +73,53 @@ type NameDescriptionList = {
         description: string
     }
 }
+
+type CyclingOptions = {
+    '': 'cycling',
+    frontAndBack: {
+        name: 'Front and back lights',
+        detail: 'Front will be white, back will be a dim red',
+        type: 'bool',
+        value: boolean,
+    },
+    brake: {
+        name: 'Brake light',
+        detail: 'Back lights up bright red. Recommended to use with automation.',
+        type: 'bool',
+        value: boolean
+    },
+    signal: {
+        name: 'Signal',
+        detail: 'Turn signals and hazards',
+        type: 'list',
+        value: 'off' | 'left' | 'right' | 'hazards',
+        choices: [
+            {
+                id: 'off',
+                name: 'Off',
+                detail: ''
+            },
+            {
+                id: 'left',
+                name: 'Left',
+                detail: ''
+            },
+            {
+                id: 'right',
+                name: 'Right',
+                detail: ''
+            },
+            {
+                id: 'hazards',
+                name: 'Hazards',
+                detail: ''
+            }
+        ]
+    },
+    redSignal: {
+        name: 'Red signal',
+        detail: 'Rear signals are red rather than orange. That side\'s brake light is disabled while signaling.',
+        type: 'bool',
+        value: boolean
+    }
+}
