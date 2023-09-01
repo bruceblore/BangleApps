@@ -33,13 +33,16 @@
   let handlerOptions: Options;
   let handlerUrl: string;
   let showCyclingMenu = function (options: Options, _title: string, url: string) {
+    E.showMenu();
+    setUI();
+
     handlerOptions = options;
     handlerUrl = url;
     handlerMode = 'cycling';
 
-    g.setColor(WHITE).drawRect(0, WIDGET_BOTTOM, g.getWidth(), WHITE_AREA_BOTTOM)
-      .setColor(ORANGE).drawRect(0, WHITE_AREA_BOTTOM, HAZARD_AREA_LEFT, BRAKE_AREA_TOP).drawRect(HAZARD_AREA_RIGHT, WHITE_AREA_BOTTOM, g.getWidth(), BRAKE_AREA_TOP)
-      .setColor(RED).drawRect(HAZARD_AREA_LEFT, WHITE_AREA_BOTTOM, HAZARD_AREA_RIGHT, BRAKE_AREA_TOP).drawRect(0, BRAKE_AREA_TOP, g.getWidth(), g.getHeight());
+    g.setColor(WHITE).fillRect(0, WIDGET_BOTTOM, g.getWidth(), WHITE_AREA_BOTTOM)
+      .setColor(ORANGE).fillRect(0, WHITE_AREA_BOTTOM, HAZARD_AREA_LEFT, BRAKE_AREA_TOP).fillRect(HAZARD_AREA_RIGHT, WHITE_AREA_BOTTOM, g.getWidth(), BRAKE_AREA_TOP)
+      .setColor(RED).fillRect(HAZARD_AREA_LEFT, WHITE_AREA_BOTTOM, HAZARD_AREA_RIGHT, BRAKE_AREA_TOP).fillRect(0, BRAKE_AREA_TOP, g.getWidth(), g.getHeight());
   }
 
   let byPeriod: boolean = false;
@@ -51,7 +54,8 @@
       let menu: Menu = {
         '': {
           'title': title,
-          'back': showMainMenu
+          'back': showMainMenu,
+          'remove': setUI
         }
       };
 
@@ -83,7 +87,8 @@
               Bangle.http(getQueryUrl(url, { body: JSON.stringify(options) })).then(() => {
                 showOptions(options, title, url);
               });
-            }
+            },
+            'remove': setUI
           },
           'Showing': {
             value: byPeriod,
@@ -156,7 +161,8 @@
               Bangle.http(getQueryUrl(url, { body: JSON.stringify(options) })).then(() => {
                 showOptions(options, title, url);
               });
-            }
+            },
+            'remove': setUI
           },
           'Red 16': {
             value: red16,
@@ -350,7 +356,8 @@
     }).then(function () {
       E.showMenu({
         '': {
-          'title': 'RGB vest control'
+          'title': 'RGB vest control',
+          'remove': setUI
         },
         'Color scheme': {
           value: Object.keys(colorSchemes).indexOf(colorScheme),
@@ -416,50 +423,54 @@
   // Fast loading support
   Bangle.loadWidgets();
   Bangle.drawWidgets();
-  Bangle.setUI({
-    mode: 'custom',
-    touch: function (_button, xy) {
-      if (handlerMode == 'cycling') {
-        if (xy!.y < WHITE_AREA_BOTTOM) {
-          (handlerOptions as CyclingOptions).frontAndBack.value = !(handlerOptions as CyclingOptions).frontAndBack.value;
-        } else if (xy!.y < BRAKE_AREA_TOP) {
-          if (xy!.x < HAZARD_AREA_LEFT) {
-            if ((handlerOptions as CyclingOptions).signal.value == 'left') (handlerOptions as CyclingOptions).signal.value = 'off';
-            else (handlerOptions as CyclingOptions).signal.value = 'left';
-          } else if (xy!.x < HAZARD_AREA_RIGHT) {
-            if ((handlerOptions as CyclingOptions).signal.value == 'hazards') (handlerOptions as CyclingOptions).signal.value = 'off';
-            else (handlerOptions as CyclingOptions).signal.value = 'hazards';
+  let setUI = function (): void {
+    Bangle.setUI({
+      mode: 'custom',
+      touch: function (_button, xy) {
+        console.log('touch')
+        if (handlerMode == 'cycling') {
+          if (xy!.y < WHITE_AREA_BOTTOM) {
+            (handlerOptions as CyclingOptions).frontAndBack.value = !(handlerOptions as CyclingOptions).frontAndBack.value;
+          } else if (xy!.y < BRAKE_AREA_TOP) {
+            if (xy!.x < HAZARD_AREA_LEFT) {
+              if ((handlerOptions as CyclingOptions).signal.value == 'left') (handlerOptions as CyclingOptions).signal.value = 'off';
+              else (handlerOptions as CyclingOptions).signal.value = 'left';
+            } else if (xy!.x < HAZARD_AREA_RIGHT) {
+              if ((handlerOptions as CyclingOptions).signal.value == 'hazards') (handlerOptions as CyclingOptions).signal.value = 'off';
+              else (handlerOptions as CyclingOptions).signal.value = 'hazards';
+            } else {
+              if ((handlerOptions as CyclingOptions).signal.value == 'right') (handlerOptions as CyclingOptions).signal.value = 'off';
+              else (handlerOptions as CyclingOptions).signal.value = 'right';
+            }
           } else {
-            if ((handlerOptions as CyclingOptions).signal.value == 'right') (handlerOptions as CyclingOptions).signal.value = 'off';
-            else (handlerOptions as CyclingOptions).signal.value = 'right';
+            (handlerOptions as CyclingOptions).brake.value = !(handlerOptions as CyclingOptions).brake.value;
           }
-        } else {
-          (handlerOptions as CyclingOptions).brake.value = !(handlerOptions as CyclingOptions).brake.value;
-        }
 
-        Bangle.http(getQueryUrl(handlerUrl, { body: JSON.stringify(handlerOptions) })).then(() => {
-          Bangle.buzz();
-        });
-      }
-    },
-    swipe: function (_lr, ud) {
-      if (handlerMode == 'cycling') {
-        if (ud == 1) {
-          (handlerOptions as CyclingOptions).redSignal.value = !(handlerOptions as CyclingOptions).redSignal.value;
           Bangle.http(getQueryUrl(handlerUrl, { body: JSON.stringify(handlerOptions) })).then(() => {
             Bangle.buzz();
           });
         }
-      }
-    },
-    btn: function (_n) {
-      if (handlerMode == 'cycling') {
-        handlerMode = '';
-        showMainMenu();
-      }
-    },
-    remove: () => { },
-  });
+      },
+      swipe: function (_lr, ud) {
+        if (handlerMode == 'cycling') {
+          if (ud == 1) {
+            (handlerOptions as CyclingOptions).redSignal.value = !(handlerOptions as CyclingOptions).redSignal.value;
+            Bangle.http(getQueryUrl(handlerUrl, { body: JSON.stringify(handlerOptions) })).then(() => {
+              Bangle.buzz();
+            });
+          }
+        }
+      },
+      btn: function (_n) {
+        if (handlerMode == 'cycling') {
+          handlerMode = '';
+          showMainMenu();
+        }
+      },
+      remove: () => { },
+    });
+  }
+  setUI();
 
   // Get and save the URL from the user if necessary, then launch the main menu
   let baseURL: string = config.defaultURL;

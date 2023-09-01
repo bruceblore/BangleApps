@@ -28,12 +28,14 @@
     var handlerOptions_1;
     var handlerUrl_1;
     var showCyclingMenu_1 = function (options, _title, url) {
+        E.showMenu();
+        setUI_1();
         handlerOptions_1 = options;
         handlerUrl_1 = url;
         handlerMode_1 = 'cycling';
-        g.setColor(WHITE_1).drawRect(0, WIDGET_BOTTOM_1, g.getWidth(), WHITE_AREA_BOTTOM_1)
-            .setColor(ORANGE_1).drawRect(0, WHITE_AREA_BOTTOM_1, HAZARD_AREA_LEFT_1, BRAKE_AREA_TOP_1).drawRect(HAZARD_AREA_RIGHT_1, WHITE_AREA_BOTTOM_1, g.getWidth(), BRAKE_AREA_TOP_1)
-            .setColor(RED_1).drawRect(HAZARD_AREA_LEFT_1, WHITE_AREA_BOTTOM_1, HAZARD_AREA_RIGHT_1, BRAKE_AREA_TOP_1).drawRect(0, BRAKE_AREA_TOP_1, g.getWidth(), g.getHeight());
+        g.setColor(WHITE_1).fillRect(0, WIDGET_BOTTOM_1, g.getWidth(), WHITE_AREA_BOTTOM_1)
+            .setColor(ORANGE_1).fillRect(0, WHITE_AREA_BOTTOM_1, HAZARD_AREA_LEFT_1, BRAKE_AREA_TOP_1).fillRect(HAZARD_AREA_RIGHT_1, WHITE_AREA_BOTTOM_1, g.getWidth(), BRAKE_AREA_TOP_1)
+            .setColor(RED_1).fillRect(HAZARD_AREA_LEFT_1, WHITE_AREA_BOTTOM_1, HAZARD_AREA_RIGHT_1, BRAKE_AREA_TOP_1).fillRect(0, BRAKE_AREA_TOP_1, g.getWidth(), g.getHeight());
     };
     var byPeriod_1 = false;
     var useMinutes_1 = false;
@@ -45,7 +47,8 @@
             var menu = {
                 '': {
                     'title': title,
-                    'back': showMainMenu_1
+                    'back': showMainMenu_1,
+                    'remove': setUI_1
                 }
             };
             var createMenuClosure = function (func, key) {
@@ -79,7 +82,8 @@
                                 Bangle.http(getQueryUrl_1(url, { body: JSON.stringify(options) })).then(function () {
                                     showOptions_1(options, title, url);
                                 });
-                            }
+                            },
+                            'remove': setUI_1
                         },
                         'Showing': {
                             value: byPeriod_1,
@@ -148,7 +152,8 @@
                             Bangle.http(getQueryUrl_1(url, { body: JSON.stringify(options) })).then(function () {
                                 showOptions_1(options, title, url);
                             });
-                        }
+                        },
+                        'remove': setUI_1
                     },
                     'Red 16': {
                         value: red16,
@@ -341,7 +346,8 @@
         }).then(function () {
             E.showMenu({
                 '': {
-                    'title': 'RGB vest control'
+                    'title': 'RGB vest control',
+                    'remove': setUI_1
                 },
                 'Color scheme': {
                     value: Object.keys(colorSchemes).indexOf(colorScheme),
@@ -405,59 +411,63 @@
     };
     Bangle.loadWidgets();
     Bangle.drawWidgets();
-    Bangle.setUI({
-        mode: 'custom',
-        touch: function (_button, xy) {
-            if (handlerMode_1 == 'cycling') {
-                if (xy.y < WHITE_AREA_BOTTOM_1) {
-                    handlerOptions_1.frontAndBack.value = !handlerOptions_1.frontAndBack.value;
-                }
-                else if (xy.y < BRAKE_AREA_TOP_1) {
-                    if (xy.x < HAZARD_AREA_LEFT_1) {
-                        if (handlerOptions_1.signal.value == 'left')
-                            handlerOptions_1.signal.value = 'off';
-                        else
-                            handlerOptions_1.signal.value = 'left';
+    var setUI_1 = function () {
+        Bangle.setUI({
+            mode: 'custom',
+            touch: function (_button, xy) {
+                console.log('touch');
+                if (handlerMode_1 == 'cycling') {
+                    if (xy.y < WHITE_AREA_BOTTOM_1) {
+                        handlerOptions_1.frontAndBack.value = !handlerOptions_1.frontAndBack.value;
                     }
-                    else if (xy.x < HAZARD_AREA_RIGHT_1) {
-                        if (handlerOptions_1.signal.value == 'hazards')
-                            handlerOptions_1.signal.value = 'off';
-                        else
-                            handlerOptions_1.signal.value = 'hazards';
+                    else if (xy.y < BRAKE_AREA_TOP_1) {
+                        if (xy.x < HAZARD_AREA_LEFT_1) {
+                            if (handlerOptions_1.signal.value == 'left')
+                                handlerOptions_1.signal.value = 'off';
+                            else
+                                handlerOptions_1.signal.value = 'left';
+                        }
+                        else if (xy.x < HAZARD_AREA_RIGHT_1) {
+                            if (handlerOptions_1.signal.value == 'hazards')
+                                handlerOptions_1.signal.value = 'off';
+                            else
+                                handlerOptions_1.signal.value = 'hazards';
+                        }
+                        else {
+                            if (handlerOptions_1.signal.value == 'right')
+                                handlerOptions_1.signal.value = 'off';
+                            else
+                                handlerOptions_1.signal.value = 'right';
+                        }
                     }
                     else {
-                        if (handlerOptions_1.signal.value == 'right')
-                            handlerOptions_1.signal.value = 'off';
-                        else
-                            handlerOptions_1.signal.value = 'right';
+                        handlerOptions_1.brake.value = !handlerOptions_1.brake.value;
                     }
-                }
-                else {
-                    handlerOptions_1.brake.value = !handlerOptions_1.brake.value;
-                }
-                Bangle.http(getQueryUrl_1(handlerUrl_1, { body: JSON.stringify(handlerOptions_1) })).then(function () {
-                    Bangle.buzz();
-                });
-            }
-        },
-        swipe: function (_lr, ud) {
-            if (handlerMode_1 == 'cycling') {
-                if (ud == 1) {
-                    handlerOptions_1.redSignal.value = !handlerOptions_1.redSignal.value;
                     Bangle.http(getQueryUrl_1(handlerUrl_1, { body: JSON.stringify(handlerOptions_1) })).then(function () {
                         Bangle.buzz();
                     });
                 }
-            }
-        },
-        btn: function (_n) {
-            if (handlerMode_1 == 'cycling') {
-                handlerMode_1 = '';
-                showMainMenu_1();
-            }
-        },
-        remove: function () { },
-    });
+            },
+            swipe: function (_lr, ud) {
+                if (handlerMode_1 == 'cycling') {
+                    if (ud == 1) {
+                        handlerOptions_1.redSignal.value = !handlerOptions_1.redSignal.value;
+                        Bangle.http(getQueryUrl_1(handlerUrl_1, { body: JSON.stringify(handlerOptions_1) })).then(function () {
+                            Bangle.buzz();
+                        });
+                    }
+                }
+            },
+            btn: function (_n) {
+                if (handlerMode_1 == 'cycling') {
+                    handlerMode_1 = '';
+                    showMainMenu_1();
+                }
+            },
+            remove: function () { },
+        });
+    };
+    setUI_1();
     var baseURL_1 = config_1.defaultURL;
     if (config_1.promptURL) {
         keyboard.input({ text: config_1.defaultURL }).then(function (text) {

@@ -33,6 +33,7 @@ type MenuNumberItem = {
 type MenuOptions = {
   title?: string;
   back?: () => void;
+  remove?: () => void;
   selected?: number;
   fontHeight?: number;
   scroll?: number;
