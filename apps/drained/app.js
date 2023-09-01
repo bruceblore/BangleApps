@@ -101,11 +101,11 @@ Bangle.on("charging", function (charging) {
         checkCharge();
 });
 if (!keepStartup) {
-    var storage_1 = require("Storage");
+    var storage = require("Storage");
     for (var _i = 0, exceptions_1 = exceptions; _i < exceptions_1.length; _i++) {
         var boot = exceptions_1[_i];
         try {
-            var js = storage_1.read("".concat(boot, ".boot.js"));
+            var js = storage.read("".concat(boot, ".boot.js"));
             if (js)
                 eval(js);
         }
