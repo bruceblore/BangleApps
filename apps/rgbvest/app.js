@@ -113,7 +113,10 @@
                     _a['Tap to set frequency'] = function () {
                         tapTimes_1.push((new Date()).getTime());
                         if (tapTimes_1.length == config_1.numTaps) {
-                            var average = tapTimes_1.reduce(function (acc, item) { return acc += item; }) / tapTimes_1.length;
+                            var timeDeltas = [];
+                            for (var i = 0; i < tapTimes_1.length - 1; i++)
+                                timeDeltas.push(tapTimes_1[i + 1] - tapTimes_1[i]);
+                            var average = timeDeltas.reduce(function (acc, item) { return acc += item; }) / timeDeltas.length;
                             options[key].value = 1 / (average / 1000);
                             Bangle.http(getQueryUrl_1(url, { body: JSON.stringify(options) })).then(function () {
                                 Bangle.buzz(200);
@@ -415,7 +418,6 @@
         Bangle.setUI({
             mode: 'custom',
             touch: function (_button, xy) {
-                console.log('touch');
                 if (handlerMode_1 == 'cycling') {
                     if (xy.y < WHITE_AREA_BOTTOM_1) {
                         handlerOptions_1.frontAndBack.value = !handlerOptions_1.frontAndBack.value;
