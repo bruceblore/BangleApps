@@ -371,7 +371,7 @@ function buttonPress(val) {
       }
       hasPressedNumber = false;
       break;
-    default:
+    default: {
       specials.R.val = 'C';
       if (!swipeEnabled) drawKey('R', specials.R);
       const is0Negative = (currNumber === 0 && 1 / currNumber === -Infinity);
@@ -387,6 +387,7 @@ function buttonPress(val) {
       hasPressedNumber = currNumber;
       displayOutput(currNumber);
       break;
+    }
   }
 }
 
