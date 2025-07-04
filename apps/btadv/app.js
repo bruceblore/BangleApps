@@ -414,12 +414,12 @@
         if (connected === void 0) { connected = NRF.getSecurityStatus().connected; }
         changeInterval(redrawInterval_1, locked ? 15000 : 5000);
         if (connected) {
-            var interval = btnsShown_1 ? 5000 : 1000;
+            var interval_1 = btnsShown_1 ? 5000 : 1000;
             if (bleInterval_1) {
-                changeInterval(bleInterval_1, interval);
+                changeInterval(bleInterval_1, interval_1);
             }
             else {
-                bleInterval_1 = setInterval(updateServices_1, interval);
+                bleInterval_1 = setInterval(updateServices_1, interval_1);
             }
         }
         else if (bleInterval_1) {

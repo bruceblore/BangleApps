@@ -14,8 +14,8 @@
   const HAZARD_AREA_RIGHT = g.getWidth() * 5 / 8;
 
   let config: AppConfig = (storage.readJSON(SETTINGS_FILE) || {
-    port: 8443,
-    defaultURL: 'localhost',
+    port: 8080,
+    defaultURL: '192.168.1.1',
     promptURL: true,
     saveURL: true,
     numTaps: 5
@@ -119,7 +119,7 @@
             if (tapTimes.length == config.numTaps) {
               let timeDeltas: Array<number> = [];
               for (let i = 0; i < tapTimes.length - 1; i++) timeDeltas.push(tapTimes[i + 1]! - tapTimes[i]!);
-              let average = timeDeltas.reduce((acc, item) => { return acc += item }) / timeDeltas.length;
+              let average = timeDeltas.reduce((acc, item) => { return acc += item }, 0) / timeDeltas.length;
               (options[key] as FrequencyOption).value = 1 / (average / 1000);
               Bangle.http(getQueryUrl(url, { body: JSON.stringify(options) })).then(() => {
                 Bangle.buzz(200);
@@ -473,6 +473,22 @@
   }
   setUI();
 
+  // Ping the server. If successful, show the menu. If failed, prompt for the URL again
+  let testURL = function () {
+    Bangle.http(getQueryUrl(baseURL, { op: 'ping' })).then(() => { showMainMenu() }).catch(() => {
+      keyboard.input({ text: config.defaultURL }).then((text: string) => {
+        baseURL = text;
+        if (config.saveURL) {
+          config.defaultURL = text;
+          config.promptURL = false;
+          storage.writeJSON(SETTINGS_FILE, config);
+        }
+        baseURL = `http://${baseURL}:${config.port}/api?`;
+        testURL();
+      });
+    })
+  }
+
   // Get and save the URL from the user if necessary, then launch the main menu
   let baseURL: string = config.defaultURL;
   if (config.promptURL) {
@@ -483,11 +499,11 @@
         config.promptURL = false;
         storage.writeJSON(SETTINGS_FILE, config);
       }
-      baseURL = `https://${baseURL}:${config.port}/api?`;
-      showMainMenu();
+      baseURL = `http://${baseURL}:${config.port}/api?`;
+      testURL();
     });
   } else {
-    baseURL = `https://${baseURL}:${config.port}/api?`;
-    showMainMenu();
+    baseURL = `http://${baseURL}:${config.port}/api?`;
+    testURL();
   }
 }

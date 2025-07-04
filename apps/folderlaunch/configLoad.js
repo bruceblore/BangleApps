@@ -1,3 +1,4 @@
+"use strict";
 var storage = require("Storage");
 var SETTINGS_FILE = "folderlaunch.json";
 var DEFAULT_CONFIG = {

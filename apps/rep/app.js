@@ -15,16 +15,16 @@ var _a, _b, _c;
             : r.dur;
         return r2;
     });
-    var settings = (require("Storage").readJSON("rep.setting.json", true) || {});
-    (_a = settings.record) !== null && _a !== void 0 ? _a : (settings.record = false);
-    (_b = settings.recordStopOnExit) !== null && _b !== void 0 ? _b : (settings.recordStopOnExit = false);
-    (_c = settings.stepMs) !== null && _c !== void 0 ? _c : (settings.stepMs = 5 * 1000);
+    var settings_1 = (require("Storage").readJSON("rep.setting.json", true) || {});
+    (_a = settings_1.record) !== null && _a !== void 0 ? _a : (settings_1.record = false);
+    (_b = settings_1.recordStopOnExit) !== null && _b !== void 0 ? _b : (settings_1.recordStopOnExit = false);
+    (_c = settings_1.stepMs) !== null && _c !== void 0 ? _c : (settings_1.stepMs = 5 * 1000);
     var fontSzMain = 54;
     var fontScaleRep = 2;
     var fontSzRep = 20;
     var fontSzRepDesc = 12;
     var blue_1 = "#205af7";
-    var ffStep_1 = settings.stepMs;
+    var ffStep_1 = settings_1.stepMs;
     var state_1;
     var drawInterval_1;
     var lastRepIndex_1 = null;
@@ -257,11 +257,11 @@ var _a, _b, _c;
         Bangle.drawWidgets();
     };
     Bangle.loadWidgets();
-    if (settings.record && WIDGETS["recorder"]) {
+    if (settings_1.record && WIDGETS["recorder"]) {
         WIDGETS["recorder"]
             .setRecording(true)
             .then(init);
-        if (settings.recordStopOnExit)
+        if (settings_1.recordStopOnExit)
             E.on('kill', function () { return WIDGETS["recorder"].setRecording(false); });
     }
     else {

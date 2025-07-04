@@ -1,6 +1,6 @@
 {
     var storage_1 = require("Storage");
-    var keyboard = require("textinput");
+    var keyboard_1 = require("textinput");
     var SETTINGS_FILE_1 = "rgbvest.json";
     var WHITE_1 = '#fff';
     var RED_1 = '#f00';
@@ -11,8 +11,8 @@
     var HAZARD_AREA_LEFT_1 = g.getWidth() * 3 / 8;
     var HAZARD_AREA_RIGHT_1 = g.getWidth() * 5 / 8;
     var config_1 = (storage_1.readJSON(SETTINGS_FILE_1) || {
-        port: 8443,
-        defaultURL: 'localhost',
+        port: 8080,
+        defaultURL: '192.168.1.1',
         promptURL: true,
         saveURL: true,
         numTaps: 5
@@ -116,7 +116,7 @@
                             var timeDeltas = [];
                             for (var i = 0; i < tapTimes_1.length - 1; i++)
                                 timeDeltas.push(tapTimes_1[i + 1] - tapTimes_1[i]);
-                            var average = timeDeltas.reduce(function (acc, item) { return acc += item; }) / timeDeltas.length;
+                            var average = timeDeltas.reduce(function (acc, item) { return acc += item; }, 0) / timeDeltas.length;
                             options[key].value = 1 / (average / 1000);
                             Bangle.http(getQueryUrl_1(url, { body: JSON.stringify(options) })).then(function () {
                                 Bangle.buzz(200);
@@ -470,21 +470,35 @@
         });
     };
     setUI_1();
+    var testURL_1 = function () {
+        Bangle.http(getQueryUrl_1(baseURL_1, { op: 'ping' })).then(function () { showMainMenu_1(); }).catch(function () {
+            keyboard_1.input({ text: config_1.defaultURL }).then(function (text) {
+                baseURL_1 = text;
+                if (config_1.saveURL) {
+                    config_1.defaultURL = text;
+                    config_1.promptURL = false;
+                    storage_1.writeJSON(SETTINGS_FILE_1, config_1);
+                }
+                baseURL_1 = "http://".concat(baseURL_1, ":").concat(config_1.port, "/api?");
+                testURL_1();
+            });
+        });
+    };
     var baseURL_1 = config_1.defaultURL;
     if (config_1.promptURL) {
-        keyboard.input({ text: config_1.defaultURL }).then(function (text) {
+        keyboard_1.input({ text: config_1.defaultURL }).then(function (text) {
             baseURL_1 = text;
             if (config_1.saveURL) {
                 config_1.defaultURL = text;
                 config_1.promptURL = false;
                 storage_1.writeJSON(SETTINGS_FILE_1, config_1);
             }
-            baseURL_1 = "https://".concat(baseURL_1, ":").concat(config_1.port, "/api?");
-            showMainMenu_1();
+            baseURL_1 = "http://".concat(baseURL_1, ":").concat(config_1.port, "/api?");
+            testURL_1();
         });
     }
     else {
-        baseURL_1 = "https://".concat(baseURL_1, ":").concat(config_1.port, "/api?");
-        showMainMenu_1();
+        baseURL_1 = "http://".concat(baseURL_1, ":").concat(config_1.port, "/api?");
+        testURL_1();
     }
 }

@@ -60,12 +60,12 @@ type MenuOptions = {
 type Menu = {
   ""?: MenuOptions;
   [key: string]:
-    | MenuOptions
-    | ((e?: TouchCallbackXY) => void)
-    | MenuBooleanItem
-    | MenuNumberItem
-    | { value: string; onchange?: (value: unknown, evt?: TouchCallbackXY) => void }
-    | undefined;
+  | MenuOptions
+  | ((e?: TouchCallbackXY) => void)
+  | MenuBooleanItem
+  | MenuNumberItem
+  | { value: string; onchange?: (value: unknown, evt?: TouchCallbackXY) => void }
+  | undefined;
 };
 
 /**
@@ -217,19 +217,19 @@ type NRFSecurityStatus = {
     addr_cycle_s: number,
   },
 } & (
-  {
-    connected: true,
-    encrypted: boolean,
-    mitm_protected: boolean,
-    bonded: boolean,
-    connected_addr?: string,
-  } | {
-    connected: false,
-    encrypted: false,
-    mitm_protected: false,
-    bonded: false,
-  }
-);
+    {
+      connected: true,
+      encrypted: boolean,
+      mitm_protected: boolean,
+      bonded: boolean,
+      connected_addr?: string,
+    } | {
+      connected: false,
+      encrypted: false,
+      mitm_protected: false,
+      bonded: false,
+    }
+  );
 
 type ImageObject = {
   width: number;
@@ -331,45 +331,45 @@ type VariableSizeInformation = {
 };
 
 type PowerUsage = {
-    total: number,
-    device: {
-        CPU?: number,
-        UART?: number,
-        PWM?: number,
-        LED1?: number,
-        LED2?: number,
-        LED3?: number,
+  total: number,
+  device: {
+    CPU?: number,
+    UART?: number,
+    PWM?: number,
+    LED1?: number,
+    LED2?: number,
+    LED3?: number,
 
-        // bangle
-        LCD?: number,
-        LCD_backlight?: number,
-        LCD_touch?: number,
-        HRM?: number,
-        GPS?: number,
-        compass?: number,
-        baro?: number,
+    // bangle
+    LCD?: number,
+    LCD_backlight?: number,
+    LCD_touch?: number,
+    HRM?: number,
+    GPS?: number,
+    compass?: number,
+    baro?: number,
 
-        // nrf
-        BLE_periph?: number,
-        BLE_central?: number,
-        BLE_advertise?: number,
-        BLE_scan?: number,
+    // nrf
+    BLE_periph?: number,
+    BLE_central?: number,
+    BLE_advertise?: number,
+    BLE_scan?: number,
 
-        // pixljs
-        //LCD?: number, // (see above)
+    // pixljs
+    //LCD?: number, // (see above)
 
-        // puck
-        mag?: number,
-        accel?: number,
+    // puck
+    mag?: number,
+    accel?: number,
 
-        // jolt
-        driver0?: number,
-        driver1?: number,
-        pin0_internal_resistance?: number,
-        pin2_internal_resistance?: number,
-        pin4_internal_resistance?: number,
-        pin6_internal_resistance?: number,
-    },
+    // jolt
+    driver0?: number,
+    driver1?: number,
+    pin0_internal_resistance?: number,
+    pin2_internal_resistance?: number,
+    pin4_internal_resistance?: number,
+    pin6_internal_resistance?: number,
+  },
 };
 
 type PipeOptions = {
@@ -2178,12 +2178,29 @@ declare class Jolt {
 
 }
 
+type HttpOptions = {
+  id: string,
+  timeout: number,
+  xpath: string,
+  return: string,
+  method: string,
+  body: string
+  headers: { [key: string]: string }
+}
+
+type HttpResponse = {
+  t: "http",
+  id: string,
+  resp: string
+}
+
 /**
  * Class containing utility functions for the [Bangle.js Smart
  * Watch](http://www.espruino.com/Bangle.js)
  * @url http://www.espruino.com/Reference#Bangle
  */
 declare class Bangle {
+  static http(url: string, options?: HttpOptions): Promise<HttpResponse>
   /**
    * Accelerometer data available with `{x,y,z,diff,mag}` object as a parameter.
    * * `x` is X axis (left-right) in `g`
@@ -2649,8 +2666,8 @@ declare class Bangle {
    */
   static setLCDOverlay(img: any, x: number, y: number): void;
   static setLCDOverlay(): void;
-  static setLCDOverlay(img: any, x: number, y: number, options: { id : string, remove: () => void }): void;
-  static setLCDOverlay(img: any, options: { id : string }): void;
+  static setLCDOverlay(img: any, x: number, y: number, options: { id: string, remove: () => void }): void;
+  static setLCDOverlay(img: any, options: { id: string }): void;
 
   /**
    * This function can be used to turn Bangle.js's LCD power saving on or off.
@@ -5808,7 +5825,7 @@ declare class Graphics<IsBuffer extends boolean = boolean> {
    * @returns {any} An object containing `{width,height,etc}` for the string - see below
    * @url http://www.espruino.com/Reference#l_Graphics_stringMetrics
    */
-  stringMetrics(str: string): { width: number, height: number, unrenderableChars: boolean, imageCount : number, maxImageHeight : number };
+  stringMetrics(str: string): { width: number, height: number, unrenderableChars: boolean, imageCount: number, maxImageHeight: number };
 
   /**
    * Wrap a string to the given pixel width using the current font, and return the
@@ -8265,7 +8282,7 @@ declare class E {
    * @returns {any} A menu object with `draw()` and `drawItem(itemNo)` functions
    * @url http://www.espruino.com/Reference#l_E_showScroller
    */
-  static showScroller(options?: { h: number, c: number, draw: (idx: number, rect: { x: number, y: number, w: number, h: number }) => void, select: (idx: number, touch?: {x: number, y: number}) => void, back?: () => void, remove?: () => void }): { draw: () => void, drawItem: (itemNo: number) => void };
+  static showScroller(options?: { h: number, c: number, draw: (idx: number, rect: { x: number, y: number, w: number, h: number }) => void, select: (idx: number, touch?: { x: number, y: number }) => void, back?: () => void, remove?: () => void }): { draw: () => void, drawItem: (itemNo: number) => void };
   static showScroller(): void;
 
   /**
@@ -9966,8 +9983,8 @@ interface ArrayConstructor {
    * @url http://www.espruino.com/Reference#l_Array_Array
    */
   new(arrayLength?: number): any[];
-  new<T>(arrayLength: number): T[];
-  new<T>(...items: T[]): T[];
+  new <T>(arrayLength: number): T[];
+  new <T>(...items: T[]): T[];
   (arrayLength?: number): any[];
   <T>(arrayLength: number): T[];
   <T>(...items: T[]): T[];
@@ -10517,7 +10534,7 @@ interface PromiseConstructor {
    * @returns {any} A Promise
    * @url http://www.espruino.com/Reference#l_Promise_Promise
    */
-  new<T>(executor: (resolve: (value: T) => void, reject: (reason?: any) => void) => void): Promise<T>;
+  new <T>(executor: (resolve: (value: T) => void, reject: (reason?: any) => void) => void): Promise<T>;
 }
 
 interface Promise<T> {

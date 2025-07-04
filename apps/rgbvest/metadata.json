@@ -1,7 +1,7 @@
 {
   "id": "rgbvest",
   "name": "RGB Vest",
-  "version": "0.01",
+  "version": "0.02",
   "description": "Controls my RGB vest connected to a phone hotspot",
   "icon": "icon.png",
   "type": "app",
