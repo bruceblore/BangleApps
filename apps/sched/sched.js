@@ -35,7 +35,10 @@ function showAlarm(alarm) {
       if (alarm.ot === undefined) {
         alarm.ot = alarm.t;
       }
-      alarm.t += settings.defaultSnoozeMillis;
+      let time = new Date();
+      let currentTime = (time.getHours()*3600000)+(time.getMinutes()*60000)+(time.getSeconds()*1000);
+      alarm.t = currentTime + settings.defaultSnoozeMillis;
+      alarm.t %= 86400000;
       Bangle.emit("alarmSnooze", alarm);
     } else {
       let del = alarm.del === undefined ? settings.defaultDeleteExpiredTimers : alarm.del;
@@ -71,9 +74,8 @@ function showAlarm(alarm) {
 
     const pattern = alarm.vibrate || (alarm.timer ? settings.defaultTimerPattern : settings.defaultAlarmPattern);
     require("buzz").pattern(pattern).then(() => {
-      if (buzzCount != 0) {
+      if (buzzCount == null || buzzCount--) {
         setTimeout(buzz, settings.buzzIntervalMillis);
-        buzzCount -= 1;
       } else if (alarm.as) { // auto-snooze
         buzzCount = settings.buzzCount;
         setTimeout(buzz, settings.defaultSnoozeMillis);

@@ -30,3 +30,12 @@
 0.27: Fix typo in daily summary graph code causing graph not to load
       Fix daily summaries for 31st of the month
 0.28: Calculate distance from steps if myprofile is installed and stride length is set
+0.29: Minor code improvements
+0.30: Minor code improvements
+0.31: Add support for new health format (storing more data)
+      Added graphs for Temperature and Battery
+0.32: If getting HRM every 3/10 minutes, don't turn it on if the Bangle is charging or hasn't moved and is face down/up
+0.33: Ensure readAllRecordsSince always includes the current day
+      Speed improvements (put temporary functions in RAM where possible)
+0.34: Fix readFullDatabase (was skipping first month of data)
+0.35: Update boot/lib.min.js

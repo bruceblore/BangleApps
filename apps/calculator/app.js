@@ -7,14 +7,12 @@
  * Contributors: thyttan https://github.com/thyttan
  */
 
-//TODO Fix touch areas
-
 g.clear();
 require("Font7x11Numeric7Seg").add(Graphics);
 
-var DEFAULT_SELECTION_NUMBERS = '5', DEFAULT_SELECTION_OPERATORS = '=', DEFAULT_SELECTION_SPECIALS = 'R';
-var RIGHT_MARGIN = 20;
+var DEFAULT_SELECTION_NUMBERS = '5';
 var RESULT_HEIGHT = 40;
+var RESULT_MAX_LEN = Math.floor((g.getWidth() - 20) / 14);
 var COLORS = {
   // [normal, selected]
   DEFAULT: ['#7F8183', '#A6A6A7'],
@@ -30,38 +28,38 @@ var swipeEnabled;
 
 var numbersGrid = [3, 4];
 var numbers = {
-  '0': { grid: [1, 3], globalGrid: [1, 4], trbl: '2.00' },
-  '.': { grid: [2, 3], globalGrid: [2, 4], trbl: '3=.0' },
-  '1': { grid: [0, 2], globalGrid: [0, 3], trbl: '4201' },
-  '2': { grid: [1, 2], globalGrid: [1, 3], trbl: '5301' },
-  '3': { grid: [2, 2], globalGrid: [2, 3], trbl: '6+.2' },
-  '4': { grid: [0, 1], globalGrid: [0, 2], trbl: '7514' },
-  '5': { grid: [1, 1], globalGrid: [1, 2], trbl: '8624' },
-  '6': { grid: [2, 1], globalGrid: [2, 2], trbl: '9-35' },
-  '7': { grid: [0, 0], globalGrid: [0, 1], trbl: 'R847' },
-  '8': { grid: [1, 0], globalGrid: [1, 1], trbl: 'N957' },
-  '9': { grid: [2, 0], globalGrid: [2, 1], trbl: '%*68' },
+  '0': {grid: [1, 3], globalGrid: [1, 4], trbl: '2.00'},
+  '.': {grid: [2, 3], globalGrid: [2, 4], trbl: '3=.0'},
+  '1': {grid: [0, 2], globalGrid: [0, 3], trbl: '4201'},
+  '2': {grid: [1, 2], globalGrid: [1, 3], trbl: '5301'},
+  '3': {grid: [2, 2], globalGrid: [2, 3], trbl: '6+.2'},
+  '4': {grid: [0, 1], globalGrid: [0, 2], trbl: '7514'},
+  '5': {grid: [1, 1], globalGrid: [1, 2], trbl: '8624'},
+  '6': {grid: [2, 1], globalGrid: [2, 2], trbl: '9-35'},
+  '7': {grid: [0, 0], globalGrid: [0, 1], trbl: 'R847'},
+  '8': {grid: [1, 0], globalGrid: [1, 1], trbl: 'N957'},
+  '9': {grid: [2, 0], globalGrid: [2, 1], trbl: '%*68'},
 };
 
 var operatorsGrid = [2, 3];
 var operators = {
-  '+': { grid: [0, 0], globalGrid: [3, 3], trbl: '-+=3' },
-  '-': { grid: [1, 0], globalGrid: [3, 2], trbl: '*-+6' },
-  '*': { grid: [0, 1], globalGrid: [3, 1], trbl: '/*-9' },
-  '/': { grid: [1, 1], globalGrid: [3, 0], trbl: '//*%' },
-  '=': { grid: [1, 2], globalGrid: [3, 4], trbl: '+==.' },
+  '+': {grid: [0, 0], globalGrid: [3, 3], trbl: '-+=3'},
+  '-': {grid: [1, 0], globalGrid: [3, 2], trbl: '*-+6'},
+  '*': {grid: [0, 1], globalGrid: [3, 1], trbl: '/*-9'},
+  '/': {grid: [1, 1], globalGrid: [3, 0], trbl: '//*%'},
+  '=': {grid: [1, 2], globalGrid: [3, 4], trbl: '+==.'},
 };
 
 var specialsGrid = [2, 2];
 var specials = {
-  'R': { grid: [0, 0], globalGrid: [0, 0], trbl: 'RN7R', val: 'AC' },
-  'N': { grid: [1, 0], globalGrid: [1, 0], trbl: 'N%8R', val: '+/-' },
-  '%': { grid: [0, 1], globalGrid: [2, 0], trbl: '%/9N' },
+  'R': {grid: [0, 0], globalGrid: [0, 0], trbl: 'RN7R', val: 'AC'},
+  'N': {grid: [1, 0], globalGrid: [1, 0], trbl: 'N%8R', val: '+/-'},
+  '%': {grid: [0, 1], globalGrid: [2, 0], trbl: '%/9N'},
 };
 
 var selected = DEFAULT_SELECTION_NUMBERS;
 var prevSelected = DEFAULT_SELECTION_NUMBERS;
-var prevNumber = null;
+var prevNumber  = null;
 var currNumber = null;
 var operator = null;
 var results = null;
@@ -73,46 +71,29 @@ function prepareScreen(screen, grid, defaultColor) {
     if (screen.hasOwnProperty(k)) {
       screen[k].color = screen[k].color || defaultColor;
       var position = [];
-      var xGrid = (KEY_AREA[2] - KEY_AREA[0]) / grid[0];
-      var yGrid = (KEY_AREA[3] - KEY_AREA[1]) / grid[1];
+      var xGrid = (KEY_AREA[2]-KEY_AREA[0])/grid[0];
+      var yGrid = (KEY_AREA[3]-KEY_AREA[1])/grid[1];
       if (swipeEnabled) {
-        position[0] = KEY_AREA[0] + xGrid * screen[k].grid[0];
-        position[1] = KEY_AREA[1] + yGrid * screen[k].grid[1];
+        position[0] = KEY_AREA[0]+xGrid*screen[k].grid[0];
+        position[1] = KEY_AREA[1]+yGrid*screen[k].grid[1];
       } else {
-        position[0] = KEY_AREA[0] + xGrid * screen[k].globalGrid[0];
-        position[1] = KEY_AREA[1] + yGrid * screen[k].globalGrid[1];
+        position[0] = KEY_AREA[0]+xGrid*screen[k].globalGrid[0];
+        position[1] = KEY_AREA[1]+yGrid*screen[k].globalGrid[1];
       }
-      position[2] = position[0] + xGrid - 1;
-      position[3] = position[1] + yGrid - 1;
+      position[2] = position[0]+xGrid-1;
+      position[3] = position[1]+yGrid-1;
       screen[k].xy = position;
     }
   }
 }
 
 function drawKey(name, k, selected) {
-  var rMargin = 0;
-  var bMargin = 0;
   var color = k.color || COLORS.DEFAULT;
   g.setColor(color[selected ? 1 : 0]);
-  g.setFont('Vector', 20).setFontAlign(0, 0);
+  g.setFont('Vector', 20).setFontAlign(0,0);
   g.fillRect(k.xy[0], k.xy[1], k.xy[2], k.xy[3]);
   g.setColor(-1);
-  // correct margins to center the texts
-  if (name == '0') {
-    rMargin = (RIGHT_MARGIN * 2) - 7;
-  } else if (name === '/') {
-    rMargin = 5;
-  } else if (name === '*') {
-    bMargin = 5;
-    rMargin = 3;
-  } else if (name === '-') {
-    rMargin = 3;
-  } else if (name === 'R' || name === 'N') {
-    rMargin = k.val === 'C' ? 0 : -9;
-  } else if (name === '%') {
-    rMargin = -3;
-  }
-  g.drawString(k.val || name, (k.xy[0] + k.xy[2]) / 2, (k.xy[1] + k.xy[3]) / 2);
+  g.drawString(k.val || name, (k.xy[0] + k.xy[2])/2, (k.xy[1] + k.xy[3])/2);
 }
 
 function drawKeys() {
@@ -140,29 +121,21 @@ function drawGlobal() {
     screen[k] = specials[k];
   }
   drawKeys();
-  var selected = DEFAULT_SELECTION_NUMBERS;
-  var prevSelected = DEFAULT_SELECTION_NUMBERS;
 }
 function drawNumbers() {
   screen = numbers;
   screenColor = COLORS.DEFAULT;
   drawKeys();
-  var selected = DEFAULT_SELECTION_NUMBERS;
-  var prevSelected = DEFAULT_SELECTION_NUMBERS;
 }
 function drawOperators() {
   screen = operators;
-  screenColor = COLORS.OPERATOR;
+  screenColor =COLORS.OPERATOR;
   drawKeys();
-  var selected = DEFAULT_SELECTION_OPERATORS;
-  var prevSelected = DEFAULT_SELECTION_OPERATORS;
 }
 function drawSpecials() {
   screen = specials;
   screenColor = COLORS.SPECIAL;
   drawKeys();
-  var selected = DEFAULT_SELECTION_SPECIALS;
-  var prevSelected = DEFAULT_SELECTION_SPECIALS;
 }
 
 function getIntWithPrecision(x) {
@@ -220,9 +193,7 @@ function doMath(x, y, operator) {
 }
 
 function displayOutput(num) {
-  var len;
-  var minusMarge = 0;
-  g.setBgColor(0).clearRect(0, 0, g.getWidth(), RESULT_HEIGHT - 1);
+  g.setBgColor(0).clearRect(0, 0, g.getWidth(), RESULT_HEIGHT-1);
   g.setColor(-1);
   if (num === Infinity || num === -Infinity || isNaN(num)) {
     // handle division by 0
@@ -232,9 +203,7 @@ function displayOutput(num) {
       num = '-INFINITY';
     } else {
       num = 'NOT A NUMBER';
-      minusMarge = -25;
     }
-    len = (num + '').length;
     currNumber = null;
     results = null;
     isDecimal = false;
@@ -261,14 +230,17 @@ function displayOutput(num) {
       }
     }
     num = num.toString();
-    num = num.replace("-", "- "); // fix padding for '-'
+    num = num.replace("-","- "); // fix padding for '-'
     g.setFont('7x11Numeric7Seg', 2);
+    if (num.length > RESULT_MAX_LEN) {
+      num = num.substr(0, RESULT_MAX_LEN - 1)+'...';
+    }
   }
-  g.setFontAlign(1, 0);
-  g.drawString(num, g.getWidth() - 20, RESULT_HEIGHT / 2);
+  g.setFontAlign(1,0);
+  g.drawString(num, g.getWidth()-20, RESULT_HEIGHT/2);
   if (operator) {
-    g.setFont('Vector', 22).setFontAlign(1, 0);
-    g.drawString(operator, g.getWidth() - 1, RESULT_HEIGHT / 2);
+    g.setFont('Vector', 22).setFontAlign(1,0);
+    g.drawString(operator, g.getWidth()-1, RESULT_HEIGHT/2);
   }
 }
 var wasPressedEquals = false;
@@ -374,7 +346,7 @@ function buttonPress(val) {
     default: {
       specials.R.val = 'C';
       if (!swipeEnabled) drawKey('R', specials.R);
-      const is0Negative = (currNumber === 0 && 1 / currNumber === -Infinity);
+      const is0Negative = (currNumber === 0 && 1/currNumber === -Infinity);
       if (isDecimal) {
         currNumber = currNumber == null || hasPressedEquals === 1 ? 0 + '.' + val : currNumber + '.' + val;
         isDecimal = false;
@@ -398,12 +370,12 @@ function moveDirection(d) {
   drawKey(selected, screen[selected], true);
 }
 
-if (process.env.HWVERSION == 1) {
-  setWatch(_ => moveDirection(0), BTN1, { repeat: true, debounce: 100 });
-  setWatch(_ => moveDirection(2), BTN3, { repeat: true, debounce: 100 });
-  setWatch(_ => moveDirection(3), BTN4, { repeat: true, debounce: 100 });
-  setWatch(_ => moveDirection(1), BTN5, { repeat: true, debounce: 100 });
-  setWatch(_ => buttonPress(selected), BTN2, { repeat: true, debounce: 100 });
+if (process.env.HWVERSION==1) {
+  setWatch(_ => moveDirection(0), BTN1, {repeat: true, debounce: 100});
+  setWatch(_ => moveDirection(2), BTN3, {repeat: true, debounce: 100});
+  setWatch(_ => moveDirection(3), BTN4, {repeat: true, debounce: 100});
+  setWatch(_ => moveDirection(1), BTN5, {repeat: true, debounce: 100});
+  setWatch(_ => buttonPress(selected), BTN2, {repeat: true, debounce: 100});
   swipeEnabled = false;
   drawGlobal();
 } else { // touchscreen?
@@ -413,16 +385,6 @@ if (process.env.HWVERSION == 1) {
   prepareScreen(operators, operatorsGrid, COLORS.OPERATOR);
   prepareScreen(specials, specialsGrid, COLORS.SPECIAL);
   drawNumbers();
-<<<<<<< HEAD
-  Bangle.on('touch', (n, e) => {
-    for (var key in screen) {
-      if (typeof screen[key] == "undefined") break;
-      var r = screen[key].xy;
-      if (e.x >= r[0] && e.y >= r[1] &&
-        e.x < r[2] && e.y < r[3]) {
-        //print("Press "+key);
-        buttonPress("" + key);
-=======
 
   Bangle.setUI({ 
     mode : 'custom',
@@ -435,7 +397,6 @@ if (process.env.HWVERSION == 1) {
           //print("Press "+key);
           buttonPress(""+key);
         }
->>>>>>> 487742f037f926f5a2e84fb5df0184b835e0b4a5
       }
     },
     swipe : (LR, UD) => {

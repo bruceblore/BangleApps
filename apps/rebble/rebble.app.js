@@ -219,6 +219,8 @@ Graphics.prototype.setFontKdamThmor = function(scale) {
   }  
   
   let drawSideBar2Alt=function() {
+    setTextColor();
+    
     // steps
     g.drawImage(boot_img, 113, 59, { scale: 1 });
     setSmallFont();
@@ -313,8 +315,8 @@ Graphics.prototype.setFontKdamThmor = function(scale) {
     if( Bangle.isCharging() )
     {
       g.setBgColor(settings.bg);
-      image = ()=> { return require("heatshrink").decompress(atob("j8OwMB/4AD94DC44DCwP//n/gH//EOgE/+AdBh/gAYMH4EAvkDAYP/+/AFAX+FgfzGAnAA=="));}
-      g.drawImage(image(),x+3,y+4);
+      const image = require("heatshrink").decompress(atob("j8OwMB/4AD94DC44DCwP//n/gH//EOgE/+AdBh/gAYMH4EAvkDAYP/+/AFAX+FgfzGAnAA=="));
+      g.drawImage(image,x+3,y+4);
     }
 
   }

@@ -5,6 +5,8 @@ My modifications to the [Bangle.js apps](https://github.com/espruino/BangleApps)
 
 You can use my [app loader](https://bruceblore.org/banglejs) to install these onto your watch.
 
+The release version is manually refreshed with regular intervals while the development version is continuously updated as new code is committed to this repository.
+
 **All software (including apps) in this repository is MIT Licensed - see [LICENSE](LICENSE)** By
 submitting code to this repository you confirm that you are happy with it being MIT licensed,
 and that it is not licensed in another way that would make this impossible.
@@ -12,24 +14,26 @@ and that it is not licensed in another way that would make this impossible.
 ## My modifications
 
 ### New apps
+(Note: All also available in upstream except rgbvest)
 * pomoplus: pomodoro timer
 * rpnsci: RPN scientific calculator
 * stlap: Stopwatch with laps and gesture mode that runs in the background
 * stlapview: View data recorded by stlap
-* bgtimer: A timer with a keyboard that runs in the background
+* keytimer: A timer with a keyboard that runs in the background
 * random: Coin flip, dice roll, card draw, number choice
 * infoclk: Clock with information and shortcuts
 * gallery: Image viewer
+* rgbvest: RGB vest control
 
 ### Other modifications
 * Changed the default apps to be the list of apps that I have installed. (Mainly for my own convenience.)
-* torch: Max brightness on open
+* ~~torch: Max brightness on open~~ (Now done in upstream)
 * powermanager
   * low battery alerts
   * Alerts now use or-equal to enable a warning at 100%
   * Monotonic percentage is rounded for better compatibility
 * 2047pp: Save state on close
-* sched and alarm: Added support for infinite buzzes in case 15 is not enough to wake up
+* ~~sched and alarm: Added support for infinite buzzes in case 15 is not enough to wake up~~ (Done better in upstream)
 
 ## The rest of the README is unmodified
 
@@ -254,7 +258,7 @@ and which gives information about the app for the Launcher.
      // if it's 'clock' then it'll be loaded by default at boot time
      // if this is 'bootloader' then it's code that is run at boot time, but is not in a menu
      // see 'type' in 'metadata.json format' below for more options/info
-  "version":"1.23",
+  "version":"0.01",
      // added by BangleApps loader on upload based on metadata.json
   "files:"file1,file2,file3",
      // added by BangleApps loader on upload - lists all files
@@ -273,7 +277,7 @@ and which gives information about the app for the Launcher.
 { "id": "appid",              // 7 character app id
   "name": "Readable name",    // readable name
   "shortName": "Short name",  // short name for launcher
-  "version": "0v01",          // the version of this app
+  "version": "0.01",          // the version of this app
   "description": "...",       // long description (can contain markdown)
   "icon": "icon.png",         // icon in apps/
   "screenshots" : [ { "url":"screenshot.png" } ], // optional screenshot for app
@@ -294,7 +298,8 @@ and which gives information about the app for the Launcher.
                               //   'notify' - provides 'notify' library for showing notifications
                               //   'locale' - provides 'locale' library for language-specific date/distance/etc
                               //              (a version of 'locale' is included in the firmware)
-  "tags": "",                 // comma separated tag list for searching
+                              //   'defaultconfig' - a set of apps that will can be installed and will wipe out all previously installed apps
+  "tags": "",                 // comma separated tag list for searching (don't include uppercase or spaces)
                               // common types are:
                               //   'clock' - it's a clock
                               //   'widget' - it is (or provides) a widget
@@ -313,6 +318,7 @@ and which gives information about the app for the Launcher.
   "dependencies" : { "message":"widget" } // optional, depend on a specific type of widget - see provides_widgets
   "provides_modules" : ["messageicons"] // optional, this app provides a module that can be used with 'require'
   "provides_widgets" : ["battery"] // optional, this app provides a type of widget - 'alarm/battery/bluetooth/pedometer/message'
+  "provides_features" : ["welcome"] // optional, this app provides some feature, used to ensure two aren't installed at once. Currently just 'welcome'
   "default" : true,           // set if an app is the default implementer of something (a widget/module/etc)
   "readme": "README.md",      // if supplied, a link to a markdown-style text file
                               // that contains more information about this app (usage, etc)
@@ -429,7 +435,7 @@ in an iframe.
     <link rel="stylesheet" href="../../css/spectre.min.css">
   </head>
   <body>
-    <script src="../../lib/interface.js"></script>
+    <script src="../../core/lib/interface.js"></script>
     <div id="t">Loading...</div>
     <script>
       function onInit() {
@@ -579,6 +585,30 @@ You can use `g.setColor(r,g,b)` OR `g.setColor(16bitnumber)` - some common 16 bi
 | Orange | 0xFD20 |
 | GreenYellow | 0xAFE5 |
 | Pink | 0xF81F |
+
+## Fonts
+
+A recent addition to Bangle.js is the ability to use extra fonts with support for more characters.
+For example [all regions](https://banglejs.com/apps/?id=fontall) or [extended](https://banglejs.com/apps/?id=fontext) fonts.
+
+Once installed, these apps cause a new font, `Intl` to be added to `Graphics`, which can be used with just `g.setFont("Intl")`.
+
+There is also a `font` library - this is not implemented yet, but more information about the planned implementation
+is available at https://github.com/espruino/BangleApps/issues/3109
+
+For now, to make your app work with the international font, you can check if `Graphics.prototype.setFontIntl` exists,
+and if so you can change the font you plan on using:
+
+```JS
+myFont = "6x8:2";
+if (Graphics.prototype.setFontIntl)
+  myFont = "Intl";
+```
+
+Any new Font library must contain the metadata `"icon": "app.png", "tags": "font", "type": "module", "provides_modules" : ["fonts"],`
+and should provide a `font` library, as well as a `boot.js` that adds `Graphics.prototype.setFontIntl`. If you plan on
+making a new library it's best to just copy one of the existing ones for now.
+
 
 ## API Reference
 

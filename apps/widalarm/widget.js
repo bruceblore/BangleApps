@@ -7,3 +7,9 @@ WIDGETS["alarm"] = {
   }
 };
 WIDGETS["alarm"].reload();
+Bangle.on("alarmReload", () => {
+  if (WIDGETS["alarm"]) {
+    WIDGETS["alarm"].reload();
+    Bangle.drawWidgets();
+  }
+});

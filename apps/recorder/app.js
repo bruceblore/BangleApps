@@ -26,12 +26,10 @@ loadSettings();
 
 function updateSettings() {
   require("Storage").writeJSON("recorder.json", settings);
-  if (WIDGETS["recorder"])
-    WIDGETS["recorder"].reload();
+  require("recorder").reload();
 }
 
 function getTrackNumber(filename) {
-  var trackNum = 0;
   var matches = filename.match(/^recorder\.log(.*)\.csv$/);
   if (matches) return matches[1];
   return 0;
@@ -57,7 +55,7 @@ function showMainMenu() {
       onchange: v => {
         setTimeout(function() {
           E.showMenu();
-          WIDGETS["recorder"].setRecording(v).then(function() {
+          require("recorder").setRecording(v).then(function() {
             //print("Record start Complete");
             loadSettings();
             //print("Recording: "+settings.recording);
@@ -81,7 +79,7 @@ function showMainMenu() {
       }
     }
   };
-  var recorders = WIDGETS["recorder"].getRecorders();
+  var recorders = require("recorder").getRecorders();
   Object.keys(recorders).forEach(id=>{
     mainmenu[/*LANG*/"Log "+recorders[id]().name] = menuRecord(id);
   });
@@ -96,7 +94,7 @@ function viewTracks() {
     '': { 'title': /*LANG*/'Tracks' }
   };
   var found = false;
-  require("Storage").list(/^recorder\.log.*\.csv$/,{sf:true}).forEach(filename=>{
+  require("Storage").list(/^recorder\.log.*\.csv$/,{sf:true}).reverse().forEach(filename=>{
     found = true;
     menu[/*LANG*/getTrackNumber(filename)] = ()=>viewTrack(filename,false);
   });
@@ -173,7 +171,7 @@ function viewTrack(filename, info) {
     '': { 'title': /*LANG*/'Track '+info.fn }
   };
   if (info.time)
-    menu[info.time.toISOString().substr(0,16).replace("T"," ")] = {};
+    menu[info.time.toISOString().substr(0,16).replace("T"," ")] = {value:""};
   menu["Duration"] = { value : asTime(info.duration)};
   menu["Records"] = { value : ""+info.records };
   if (info.fields.includes("Latitude"))
@@ -198,6 +196,14 @@ function viewTrack(filename, info) {
   if (info.fields.includes("Heartrate"))
     menu[/*LANG*/'Plot HRM'] = function() {
       plotGraph(info, "Heartrate");
+    };
+  if (info.fields.includes("Steps"))
+    menu[/*LANG*/'Plot Steps'] = function() {
+      plotGraph(info, "Steps");
+    };
+  if (info.fields.includes("Battery Percentage"))
+    menu[/*LANG*/'Plot Battery'] = function() {
+      plotGraph(info, "Battery");
     };
   // TODO: steps, heart rate?
   menu[/*LANG*/'Erase'] = function() {
@@ -244,7 +250,6 @@ function plotTrack(info) { "ram"
   E.showMessage(/*LANG*/"Drawing...",/*LANG*/"Track "+info.fn);
   g.flip(); // on buffered screens, draw a not saying we're busy
   g.clear(1);
-  var s = require("Storage");
   var G = g;
   var W = g.getWidth();
   var H = g.getHeight();
@@ -313,7 +318,7 @@ function plotTrack(info) { "ram"
   g.drawString(/*LANG*/"Back",g.getWidth() - 10, isBTN3 ? (g.getHeight() - 40) : (g.getHeight()/2));
   setWatch(function() {
     viewTrack(info.fn, info);
-  }, isBTN3?BTN3:BTN1);
+  }, isBTN3?BTN3:BTN1, {edge:"falling"});
   Bangle.drawWidgets();
   g.flip();
 }
@@ -326,24 +331,25 @@ function plotGraph(info, style) { "ram"
   var infc = new Uint16Array(80);
   var title;
   var lt = 0; // last time
-  var tn = 0; // count for each time period
+  //var tn = 0; // count for each time period
   var strt, dur = info.duration;
+  if (dur<1) dur=1;
   var f = require("Storage").open(filename,"r");
   if (f===undefined) return;
   var l = f.readLine(f);
   l = f.readLine(f); // skip headers
-  var nl = 0, c, i;
+  var c, i;
   var factor = 1; // multiplier used for values when graphing
   var timeIdx = info.fields.indexOf("Time");
   if (l!==undefined) {
-    c = l.split(",");
+    c = l.trim().split(",");
     strt = c[timeIdx];
   }
   if (style=="Heartrate") {
     title = /*LANG*/"Heartrate (bpm)";
     var hrmIdx = info.fields.indexOf("Heartrate");
     while(l!==undefined) {
-      ++nl;c=l.split(",");l = f.readLine(f);
+      c=l.trim().split(",");l = f.readLine(f);
       if (c[hrmIdx]=="") continue;
       i = Math.round(80*(c[timeIdx] - strt)/dur);
       infn[i]+=+c[hrmIdx];
@@ -354,10 +360,33 @@ function plotGraph(info, style) { "ram"
     var altIdx = info.fields.indexOf("Barometer Altitude");
     if (altIdx<0) altIdx = info.fields.indexOf("Altitude");
     while(l!==undefined) {
-      ++nl;c=l.split(",");l = f.readLine(f);
+      c=l.trim().split(",");l = f.readLine(f);
       if (c[altIdx]=="") continue;
       i = Math.round(80*(c[timeIdx] - strt)/dur);
       infn[i]+=+c[altIdx];
+      infc[i]++;
+    }
+  } else if (style=="Steps") {
+    title = /*LANG*/"Steps/min";
+    var stpIdx = info.fields.indexOf("Steps");
+    var t,lt = c[timeIdx];
+    while(l!==undefined) {
+      c=l.trim().split(",");l = f.readLine(f);
+      if (c[stpIdx]=="") continue;
+      t = c[timeIdx];
+      i = Math.round(80*(t - strt)/dur);
+      infn[i]+=60*c[stpIdx];
+      infc[i]+=t-lt;
+      lt = t;
+    }
+  } else if (style=="Battery") {
+    title = /*LANG*/"Battery %";
+    var batIdx = info.fields.indexOf("Battery Percentage");
+    while(l!==undefined) {
+      c=l.trim().split(",");l = f.readLine(f);
+      if (c[batIdx]=="") continue;
+      i = Math.round(80*(c[timeIdx] - strt)/dur);
+      infn[i]+=+c[batIdx];
       infc[i]++;
     }
   } else if (style=="Speed") {
@@ -365,34 +394,29 @@ function plotGraph(info, style) { "ram"
     var localeStr = require("locale").speed(1,5); // get what 1kph equates to
     let units = localeStr.replace(/[0-9.]*/,"");
     factor = parseFloat(localeStr)*3.6; // m/sec to whatever out units are
-    // title
     title = /*LANG*/"Speed"+` (${units})`;
     var latIdx = info.fields.indexOf("Latitude");
     var lonIdx = info.fields.indexOf("Longitude");
     // skip until we find our first data
     while(l!==undefined && c[latIdx]=="") {
-      c = l.split(",");
+      c = l.trim().split(",");
       l = f.readLine(f);
     }
     // now iterate
-    var p,lp = Bangle.project({lat:c[1],lon:c[2]});
+    var p,lp = Bangle.project({lat:c[latIdx],lon:c[lonIdx]});
     var t,dx,dy,d,lt = c[timeIdx];
     while(l!==undefined) {
-      ++nl;c=l.split(",");
+      c=l.trim().split(",");
       l = f.readLine(f);
-      if (c[latIdx] == "") {
-        continue;
-      }
+      if (c[latIdx] == "") continue;
       t = c[timeIdx];
       i = Math.round(80*(t - strt)/dur);
       p = Bangle.project({lat:c[latIdx],lon:c[lonIdx]});
       dx = p.x-lp.x;
       dy = p.y-lp.y;
       d = Math.sqrt(dx*dx+dy*dy);
-      if (t!=lt) {
-        infn[i]+=d / (t-lt); // speed
-        infc[i]++;
-      }
+      infn[i]+=d; // speed
+      infc[i]+=t-lt;
       lp = p;
       lt = t;
     }
@@ -408,6 +432,7 @@ function plotGraph(info, style) { "ram"
     if (n>max) max=n;
     if (n<min) min=n;
   }
+  if (style=="Battery") {min=0;max=100;}
   // work out a nice grid value
   var heightDiff = max-min;
   var grid = 1;
@@ -416,7 +441,7 @@ function plotGraph(info, style) { "ram"
   }
   // draw
   g.clear(1).setFont("6x8",1);
-  var r = require("graph").drawLine(g, infn, {
+  require("graph").drawLine(g, infn, {
     x:4,y:24,
     width: g.getWidth()-24,
     height: g.getHeight()-(24+8),
@@ -434,7 +459,7 @@ function plotGraph(info, style) { "ram"
   g.drawString(/*LANG*/"Back",g.getWidth() - 10, isBTN3 ? (g.getHeight() - 40) : (g.getHeight()/2));
   setWatch(function() {
     viewTrack(info.filename, info);
-  }, isBTN3?BTN3:BTN1);
+  }, isBTN3?BTN3:BTN1, {edge:"falling"});
   g.flip();
 }
 
